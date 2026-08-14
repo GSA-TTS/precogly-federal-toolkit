@@ -8,26 +8,45 @@ on:
   workflow_dispatch: {}
 
 jobs:
-  validate:
+  redaction-gate:
+    name: Redaction gate — no private markers
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          version: "latest"
-
-      - name: Install PyYAML
-        run: uv pip install --system pyyaml
-
-      - name: Redaction gate — packs
+      - name: Check for forbidden private markers
         run: |
-          python scripts/validate.py packs/gsa-fedramp/gsa-fedramp.cdx.json
-          python scripts/validate.py packs/cloudgov-paas/cloudgov-paas.cdx.json
+          python3 - <<'EOF'
+          import re, pathlib, sys
+
+          # These strings must never appear in the public OSS toolkit
+          FORBIDDEN = [
+              (re.compile(r'\bfpdf\b', re.IGNORECASE), 'FPDF system name'),
+              (re.compile(r'\bdatabricks\b', re.IGNORECASE), 'Databricks name'),
+              (re.compile(r'\bmcaas\b', re.IGNORECASE), 'MCaaS name'),
+              (re.compile(r'gsaext_fpdf_uat|gsaext-fpdf-uat', re.IGNORECASE), 'UAT share recipient'),
+              (re.compile(r'dbdde48f|58339e26'), 'service-principal id'),
+          ]
+          EXTS = {'.py', '.yaml', '.yml', '.json', '.md'}
+          SKIP = {'.git', '__pycache__', 'node_modules'}
+
+          root = pathlib.Path('.')
+          hits = []
+          for f in root.rglob('*'):
+              if any(p in f.parts for p in SKIP):
+                  continue
+              if f.is_file() and f.suffix in EXTS:
+                  text = f.read_text(errors='replace')
+                  for pat, label in FORBIDDEN:
+                      if pat.search(text):
+                          hits.append(f'{f}: contains {label}')
+                          break
+
+          if hits:
+              print('FAIL: private markers found in OSS toolkit:')
+              for h in hits:
+                  print(f'  {h}')
+              sys.exit(1)
+          print(f'OK: scanned {sum(1 for f in root.rglob("*") if f.is_file() and f.suffix in EXTS)} files — no private markers')
+          EOF
