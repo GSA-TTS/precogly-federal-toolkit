@@ -1,0 +1,33 @@
+pack:
+  schema_version: 1
+  slug: cloudgov-paas
+  name: Cloud.gov PaaS Service Tiers
+  description: |
+    Components representing the Cloud.gov Platform as a Service (PaaS) and its
+    service tiers. Cloud.gov is a GSA-operated FedRAMP High authorized PaaS built
+    on Cloud Foundry running on AWS GovCloud, providing managed application hosting
+    to federal agencies.
+
+    Components modeled:
+    - Cloud.gov Platform (core PaaS runtime)
+    - Cloud.gov Applications (tenant app instances)
+    - Cloud.gov Managed Services (RDS, Redis, S3, Elasticsearch)
+    - Cloud.gov CDN / External Domain Service
+    - GSA Pages (static site hosting built on Cloud.gov)
+
+    Tenant systems inherit FedRAMP High controls through the Cloud.gov boundary.
+    Tenant responsibilities are documented in the Cloud.gov PaaS CRM/CIS.
+  version: 1.0.0
+  author: GSA/TTS
+  pack_type: technology
+  tags:
+    - gsa
+    - cloudgov
+    - paas
+    - cloud-foundry
+    - fedramp
+    - govcloud
+    - federal
+    - all
+  repository_url: https://github.com/cloud-gov/cg-site
+  documentation_url: https://cloud.gov/docs/

@@ -1,0 +1,53 @@
+threats:
+  # ── Cross-cutting GSA approval threats ───────────────────────────────────────
+  - id: gsa-unapproved-service
+    name: Use of GSA-Denied or Unapproved AWS Service
+    description: |
+      System incorporates an AWS service that GSA OCISO has explicitly denied,
+      placed pending review, or not yet authorized. Operating a denied service
+      within a GSA system boundary violates GSA IT security policy and may
+      result in an ATO deficiency or plan of action and milestones (POA&M) finding.
+
+  - id: gsa-condition-violated
+    name: Approved AWS Service Used Outside GSA Conditions
+    description: |
+      An OCISO-approved AWS service is deployed without satisfying its documented
+      use conditions (e.g., running in East/West instead of GovCloud-only, enabling
+      SPICE in QuickSight, missing encryption at rest, omitting required sandbox tags,
+      or permitting public exposure). Condition violations invalidate the approval.
+
+  # ── Service-specific condition threats ───────────────────────────────────────
+  - id: aws-quicksight-spice-violation
+    name: QuickSight SPICE Storage Enabled (Prohibited)
+    description: |
+      SPICE in-memory storage is explicitly PROHIBITED by GSA OCISO for QuickSight.
+      Only Direct SQL Query mode is approved. Enabling SPICE stores federal data
+      inside QuickSight infrastructure outside the approved boundary.
+
+  - id: aws-govcloud-scope-violation
+    name: GovCloud-Only Service Deployed in Commercial Region
+    description: |
+      A service approved only for AWS GovCloud (e.g., RDS/Aurora OCISO conditional
+      approval, KMS GovCloud approval) is deployed in an East/West commercial region,
+      bypassing GovCloud's additional FedRAMP controls.
+
+  - id: aws-missing-sandbox-tags
+    name: Required GSA Sandbox Tags Absent
+    description: |
+      GSA sandbox policy requires all resources to carry: Project, Owner, TTLExpiry,
+      CostCenter, Cloud, Environment tags. Missing tags prevent cost attribution,
+      automated cleanup, and compliance enforcement.
+
+  - id: aws-encryption-condition-unmet
+    name: Encryption Condition Not Met on Approved Service
+    description: |
+      An approved service (RDS, Aurora, EFS, ElastiCache, S3, KMS-backed resources)
+      is deployed without encryption at rest or in transit, violating the baseline
+      condition common to all GSA AWS service approvals.
+
+  - id: aws-public-exposure-violation
+    name: Public Exposure Without Compensating Controls
+    description: |
+      A resource is publicly exposed without explicit OCISO approval and compensating
+      controls. GSA baseline prohibits public exposure unless explicitly authorized
+      with documented compensating controls.

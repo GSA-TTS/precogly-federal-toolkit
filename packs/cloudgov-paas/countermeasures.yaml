@@ -1,0 +1,74 @@
+countermeasures:
+  - id: cloudgov-credhub-secrets
+    name: Use CredHub for Application Secrets
+    description: |
+      Bind all application secrets through Cloud.gov CredHub service or
+      cf set-env injection from CI/CD vault. Never commit credentials to
+      manifest.yml, application source, or CF environment directly.
+    control_type: preventive
+    cost: low
+
+  - id: cloudgov-internal-routes
+    name: Use Internal Routes for Non-Public Services
+    description: |
+      Expose backend services only on Cloud Foundry internal routes
+      (apps.internal) rather than public routes. Only CDN-fronted or
+      explicitly public apps should have external routes.
+    control_type: preventive
+    cost: low
+
+  - id: cloudgov-per-app-service-binding
+    name: One Service Instance per Application (Least Privilege)
+    description: |
+      Create a separate Cloud.gov managed service instance for each application
+      that requires it. Do not share a single RDS/S3/Redis binding across
+      multiple apps.
+    control_type: preventive
+    cost: low
+
+  - id: cloudgov-buildpack-currency
+    name: Keep Buildpacks and Dependencies Current
+    description: |
+      Use Cloud Foundry's platform buildpack update mechanism. Pin
+      buildpack versions in manifest.yml and run regular cf restage cycles
+      after platform buildpack updates. Scan application dependencies with
+      Dependabot or equivalent.
+    control_type: preventive
+    cost: low
+
+  - id: cloudgov-space-roles
+    name: Enforce Least-Privilege CF Space Roles
+    description: |
+      Assign Cloud Foundry roles at the narrowest scope needed. Use
+      SpaceDeveloper only for deploy-time automation; use SpaceAuditor for
+      read-only monitoring. Review space membership at least quarterly.
+    control_type: preventive
+    cost: low
+
+  - id: cloudgov-crm-review
+    name: Cloud.gov CRM/CIS Tenant Responsibility Review
+    description: |
+      Review the Cloud.gov PaaS CRM/CIS during SSPP authoring. Document
+      implementation for all controls where tenant bears responsibility or
+      shared responsibility. Verify "can_be_inherited" flags before claiming
+      inheritance in the SSPP.
+    control_type: preventive
+    cost: low
+
+  - id: cloudgov-pages-branch-protection
+    name: GSA Pages Branch Protection and Required Reviews
+    description: |
+      Enforce branch protection on the GSA Pages publication branch:
+      require at least one approving review, require status checks to pass,
+      and disable force pushes. Pin GitHub Actions to commit SHA.
+    control_type: preventive
+    cost: low
+
+  - id: cloudgov-log-drain
+    name: Configure Cloud.gov Log Draining to SIEM
+    description: |
+      Set up Cloud.gov log draining to forward application and platform logs
+      to GSA's SIEM or a centralized log aggregation service for audit
+      trail retention and alerting.
+    control_type: detective
+    cost: low

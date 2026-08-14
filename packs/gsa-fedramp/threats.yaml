@@ -1,0 +1,140 @@
+threats:
+  # ── Cloud.gov ────────────────────────────────────────────────────────────────
+  - id: cloudgov-misconfigured-app
+    name: Misconfigured Cloud.gov Application
+    description: |
+      Application deployed to Cloud.gov with insecure environment variables,
+      open security groups, or publicly exposed internal routes, leading to
+      unauthorized data access or lateral movement within the PaaS.
+
+  - id: cloudgov-shared-tenant-escape
+    name: Multi-tenant Isolation Failure
+    description: |
+      Exploit or misconfiguration causes an application in one Cloud.gov org/space
+      to access resources or data belonging to another tenant.
+
+  - id: cloudgov-secret-exposure
+    name: Credentials Exposed in CF Manifest
+    description: |
+      Sensitive credentials (API keys, passwords) committed to a CF manifest or
+      application environment instead of CredHub, accessible via cf env or logs.
+
+  # ── GSA Pages ────────────────────────────────────────────────────────────────
+  - id: pages-supply-chain
+    name: Build Pipeline Supply Chain Attack
+    description: |
+      Malicious dependency or GitHub Action injected into the GSA Pages build
+      pipeline, leading to backdoored static assets served to end users.
+
+  - id: pages-content-injection
+    name: Static Content Injection
+    description: |
+      Unauthorized push to the source repository results in malicious content
+      being published to the public site (defacement, phishing, or credential
+      harvesting via injected scripts).
+
+  # ── Login.gov ────────────────────────────────────────────────────────────────
+  - id: logingov-account-takeover
+    name: Account Takeover via Credential Stuffing
+    description: |
+      Automated credential stuffing or brute-force attack against Login.gov
+      accounts, bypassing weak or absent MFA to impersonate federal users.
+
+  - id: logingov-oidc-misconfiguration
+    name: OIDC/SAML Misconfiguration
+    description: |
+      Incorrect redirect_uri, audience, or signature validation in the relying
+      party integration allows token replay or open-redirect attacks.
+
+  - id: logingov-proofing-bypass
+    name: Identity Proofing Bypass
+    description: |
+      Fraudulent identity documents or synthetic identities used to complete
+      IAL2 proofing, granting unauthorized access to benefit or data systems.
+
+  # ── GitHub Enterprise ────────────────────────────────────────────────────────
+  - id: github-actions-pwn
+    name: Compromised GitHub Actions Workflow
+    description: |
+      Malicious pull-request or workflow injection executes arbitrary code in
+      CI runners with access to repository secrets, deployment keys, or cloud
+      credentials.
+
+  - id: github-secret-leak
+    name: Secret Committed to Repository
+    description: |
+      API keys, tokens, or credentials accidentally committed to a GitHub repo
+      (public or private), discovered via automated scanning or manual search.
+
+  - id: github-branch-protection-bypass
+    name: Branch Protection Bypass
+    description: |
+      Inadequate branch protection rules allow direct pushes to main/default
+      branches, bypassing peer review and policy controls.
+
+  # ── FCS data platform ───────────────────────────────────────────────────────────
+  - id: data-platform-data-exfiltration
+    name: data platform Data Exfiltration
+    description: |
+      Overprivileged notebook or job reads and exports sensitive data from Delta
+      tables outside the authorized system boundary.
+
+  - id: data-platform-notebook-injection
+    name: Notebook Code Injection
+    description: |
+      Malicious code embedded in a shared notebook or widget executes in another
+      user's session, escalating privileges or exfiltrating tokens.
+
+  - id: data-platform-cluster-misconfiguration
+    name: data platform Cluster Misconfiguration
+    description: |
+      Cluster configured without table ACLs, IP access lists, or credential
+      passthrough, allowing users to access data beyond their authorization.
+
+  # ── GSA Common Controls ──────────────────────────────────────────────────────
+  - id: common-controls-gap
+    name: Inherited Control Not Implemented
+    description: |
+      Tenant system relies on a common or hybrid control that has not been
+      properly implemented or accepted by the provider, creating a compliance
+      gap in the system boundary.
+
+  # ── GFE Endpoint ─────────────────────────────────────────────────────────────
+  - id: gfe-malware
+    name: GFE Endpoint Malware / Compromise
+    description: |
+      Developer or operator GFE compromised via phishing, drive-by download, or
+      unpatched vulnerability, enabling keylogging, credential theft, or
+      lateral movement into government systems.
+
+  - id: gfe-removable-media
+    name: Unauthorized Removable Media on GFE
+    description: |
+      Sensitive data transferred to unauthorized removable media (USB) from a
+      GFE, bypassing DLP controls.
+
+  # ── SFTP / Transfer Family ───────────────────────────────────────────────────
+  - id: sftp-brute-force
+    name: SFTP Credential Brute Force
+    description: |
+      Automated brute-force or credential stuffing against the SFTP endpoint,
+      potentially gaining access to sensitive file exchange data.
+
+  - id: sftp-path-traversal
+    name: SFTP Path Traversal
+    description: |
+      Malformed file paths used to read or overwrite files outside the intended
+      directory scope on the SFTP server.
+
+  # ── Cross-cutting dataflow threats ───────────────────────────────────────────
+  - id: dataflow-unencrypted
+    name: Data in Transit Unencrypted
+    description: |
+      Data transmitted between components without TLS/mTLS, exposing it to
+      eavesdropping or manipulation in transit.
+
+  - id: dataflow-unauthorized-access
+    name: Unauthorized Dataflow Access
+    description: |
+      An actor or process accesses a data flow without proper authorization,
+      either by misconfigured network policy or broken access control.

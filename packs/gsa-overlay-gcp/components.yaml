@@ -1,0 +1,98 @@
+components:
+  # ── Approved GCP services missing from community pack ────────────────────────
+
+  - id: gcp-cloud-composer
+    name: GCP Cloud Composer
+    category: process
+    type: Managed Airflow
+    provider: gcp
+    description: |
+      [GSA: Approved FedRAMP Moderate]
+      Managed Apache Airflow workflow orchestration. FedRAMP Authorized Moderate.
+
+  - id: gcp-data-fusion
+    name: GCP Cloud Data Fusion
+    category: process
+    type: Data Integration
+    provider: gcp
+    description: |
+      [GSA: Approved FedRAMP Moderate]
+      Managed ETL/ELT data pipeline platform. FedRAMP Authorized Moderate.
+
+  - id: gcp-bq-transfer
+    name: GCP BigQuery Data Transfer Service
+    category: process
+    type: Data Transfer
+    provider: gcp
+    description: |
+      [GSA: Approved FedRAMP Moderate]
+      Automated data transfer from SaaS apps and external sources into BigQuery.
+      FedRAMP Authorized Moderate.
+
+  - id: gcp-cloud-healthcare
+    name: GCP Cloud Healthcare API
+    category: process
+    type: Healthcare Data Platform
+    provider: gcp
+    description: |
+      [GSA: Approved FedRAMP Moderate]
+      FHIR, HL7v2, and DICOM data ingestion and processing. FedRAMP Authorized
+      Moderate.
+
+  - id: gcp-cloud-source-repos
+    name: GCP Cloud Source Repositories
+    category: process
+    type: Source Control
+    provider: gcp
+    description: |
+      [GSA: Approved FedRAMP Moderate]
+      Managed private Git repositories on GCP. FedRAMP Authorized Moderate.
+
+  - id: gcp-dialogflow-cx
+    name: GCP Dialogflow CX
+    category: process
+    type: Conversational AI
+    provider: gcp
+    description: |
+      [GSA: Approved FedRAMP Moderate | Conditions: use-caveats-required]
+      Advanced conversational AI agent platform. Approved with conditions per
+      GSA OCISO documentation.
+
+  - id: gcp-automl
+    name: GCP AutoML (Natural Language / Vision / Tables / Translation / Video)
+    category: process
+    type: AutoML Platform
+    provider: gcp
+    description: |
+      [GSA: Approved FedRAMP Moderate | Conditions: use-caveats-required for NL]
+      AutoML suite for training custom ML models. FedRAMP Authorized Moderate.
+      AutoML Natural Language has additional use caveats.
+
+  - id: gcp-talent-solution
+    name: GCP Talent Solution
+    category: process
+    type: Job Search AI
+    provider: gcp
+    description: |
+      [GSA: Approved FedRAMP Moderate]
+      AI-powered job search and talent matching APIs. FedRAMP Authorized Moderate.
+
+  - id: gcp-vpc-service-controls
+    name: GCP VPC Service Controls
+    category: process
+    type: Security Perimeter
+    provider: gcp
+    description: |
+      [GSA: Approved FedRAMP Moderate | Conditions: ancillary support service]
+      Managed security perimeters for GCP APIs to prevent data exfiltration.
+      Ancillary support service; security provided by GCP environment.
+
+  - id: gcp-dlp
+    name: GCP Cloud Data Loss Prevention
+    category: process
+    type: Data Classification / DLP
+    provider: gcp
+    description: |
+      [GSA: Approved FedRAMP Moderate]
+      Managed sensitive data discovery, classification, and de-identification.
+      FedRAMP Authorized Moderate.

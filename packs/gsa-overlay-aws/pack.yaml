@@ -1,0 +1,23 @@
+pack:
+  schema_version: 1
+  slug: gsa-overlay-aws
+  name: GSA AWS Approval Overlay
+  description: |
+    GSA/OCISO approval status overlay for AWS services. Supplements the community
+    AWS pack with: (1) approved services missing from the base pack (RDS, Aurora,
+    ElastiCache, KMS, ECS/Fargate, EFS, SageMaker, Kinesis Firehose, QuickSight,
+    SSM Incident Manager, Firewall Manager, Glacier), (2) GSA-specific threats for
+    condition violations and use of denied/pending services, and (3) countermeasures
+    derived from OCISO-approved use caveats.
+  version: 1.0.0
+  author: GSA/TTS
+  pack_type: technology
+  tags:
+    - gsa
+    - aws
+    - fedramp
+    - govcloud
+    - approval
+    - overlay
+    - all
+  repository_url: https://github.com/GSA/cloud-sandbox

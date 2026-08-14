@@ -1,0 +1,55 @@
+mappings:
+  - component: fcs-core
+    threats:
+      - threat: managed-cloud-service-multi-tenant-isolation
+        applies_to: component
+
+  - component: managed-cloud-service-platform
+    threats:
+      - threat: managed-cloud-service-tenant-crm-gap
+        applies_to: component
+      - threat: managed-cloud-service-inheritance-misclaim
+        applies_to: component
+      - threat: managed-cloud-service-multi-tenant-isolation
+        applies_to: component
+      - threat: managed-cloud-service-secret-in-env
+        applies_to: component
+
+  - component: managed-cloud-service-caas
+    threats:
+      - threat: managed-cloud-service-tenant-crm-gap
+        applies_to: component
+      - threat: managed-cloud-service-multi-tenant-isolation
+        applies_to: component
+      - threat: managed-cloud-service-secret-in-env
+        applies_to: component
+
+  - component: managed-cloud-service-vpcaas
+    threats:
+      - threat: vpcaas-unmanaged-controls
+        applies_to: component
+      - threat: managed-cloud-service-multi-tenant-isolation
+        applies_to: component
+
+  - component: managed-cloud-service-data
+    threats:
+      - threat: managed-cloud-service-tenant-crm-gap
+        applies_to: component
+      - threat: managed-cloud-service-inheritance-misclaim
+        applies_to: component
+
+  - component: managed-cloud-service-ebta
+    threats:
+      - threat: managed-cloud-service-tenant-crm-gap
+        applies_to: component
+      - threat: managed-cloud-service-ebta-novel-risk
+        applies_to: component
+
+  - component: managed-cloud-service-data-platform
+    threats:
+      - threat: managed-cloud-service-data-platform-overprivilege
+        applies_to: component
+      - threat: managed-cloud-service-tenant-crm-gap
+        applies_to: component
+      - threat: managed-cloud-service-secret-in-env
+        applies_to: component

@@ -1,0 +1,1014 @@
+framework: nist-800-53-r5
+mappings:
+  - countermeasure: crm-fulfill-ac-1-on-gsa-common-controls-component-definition
+    requirements:
+      - AC-1
+    sufficiency: full
+  - countermeasure: crm-fulfill-ac-2-5-on-gsa-common-controls-component-definition
+    requirements:
+      - AC-2(5)
+    sufficiency: full
+  - countermeasure: crm-fulfill-ac-2-on-cloud-gov-lato-crm
+    requirements:
+      - AC-2
+    sufficiency: full
+  - countermeasure: crm-fulfill-ac-2-on-gsa-pages-component-definition
+    requirements:
+      - AC-2
+    sufficiency: full
+  - countermeasure: crm-fulfill-ac-20-1-on-gsa-common-controls-component-definition
+    requirements:
+      - AC-20(1)
+    sufficiency: full
+  - countermeasure: crm-fulfill-ac-20-2-on-gsa-common-controls-component-definition
+    requirements:
+      - AC-20(2)
+    sufficiency: full
+  - countermeasure: crm-fulfill-ac-20-on-gsa-common-controls-component-definition
+    requirements:
+      - AC-20
+    sufficiency: full
+  - countermeasure: crm-fulfill-ac-3-on-cloud-gov-lato-crm
+    requirements:
+      - AC-3
+    sufficiency: full
+  - countermeasure: crm-fulfill-ac-3-on-gsa-pages-component-definition
+    requirements:
+      - AC-3
+    sufficiency: full
+  - countermeasure: crm-fulfill-ac-6-5-on-cloud-gov-lato-crm
+    requirements:
+      - AC-6(5)
+    sufficiency: full
+  - countermeasure: crm-fulfill-ac-6-5-on-gsa-pages-component-definition
+    requirements:
+      - AC-6(5)
+    sufficiency: full
+  - countermeasure: crm-fulfill-ac-6-9-on-cloud-gov-lato-crm
+    requirements:
+      - AC-6(9)
+    sufficiency: full
+  - countermeasure: crm-fulfill-at-1-on-gsa-common-controls-component-definition
+    requirements:
+      - AT-1
+    sufficiency: full
+  - countermeasure: crm-fulfill-at-2-2-on-gsa-common-controls-component-definition
+    requirements:
+      - AT-2(2)
+    sufficiency: full
+  - countermeasure: crm-fulfill-at-2-3-on-gsa-common-controls-component-definition
+    requirements:
+      - AT-2(3)
+    sufficiency: full
+  - countermeasure: crm-fulfill-at-2-on-gsa-common-controls-component-definition
+    requirements:
+      - AT-2
+    sufficiency: full
+  - countermeasure: crm-fulfill-at-3-5-on-gsa-common-controls-component-definition
+    requirements:
+      - AT-3(5)
+    sufficiency: full
+  - countermeasure: crm-fulfill-at-3-on-gsa-common-controls-component-definition
+    requirements:
+      - AT-3
+    sufficiency: full
+  - countermeasure: crm-fulfill-at-4-on-gsa-common-controls-component-definition
+    requirements:
+      - AT-4
+    sufficiency: full
+  - countermeasure: crm-fulfill-au-1-on-gsa-common-controls-component-definition
+    requirements:
+      - AU-1
+    sufficiency: full
+  - countermeasure: crm-fulfill-au-11-on-gsa-pages-component-definition
+    requirements:
+      - AU-11
+    sufficiency: full
+  - countermeasure: crm-fulfill-au-12-on-gsa-pages-component-definition
+    requirements:
+      - AU-12
+    sufficiency: full
+  - countermeasure: crm-fulfill-au-2-on-cloud-gov-lato-crm
+    requirements:
+      - AU-2
+    sufficiency: full
+  - countermeasure: crm-fulfill-au-2-on-gsa-pages-component-definition
+    requirements:
+      - AU-2
+    sufficiency: full
+  - countermeasure: crm-fulfill-au-3-on-gsa-pages-component-definition
+    requirements:
+      - AU-3
+    sufficiency: full
+  - countermeasure: crm-fulfill-au-4-on-gsa-pages-component-definition
+    requirements:
+      - AU-4
+    sufficiency: full
+  - countermeasure: crm-fulfill-au-5-on-gsa-pages-component-definition
+    requirements:
+      - AU-5
+    sufficiency: full
+  - countermeasure: crm-fulfill-au-6-on-gsa-pages-component-definition
+    requirements:
+      - AU-6
+    sufficiency: full
+  - countermeasure: crm-fulfill-au-8-on-gsa-pages-component-definition
+    requirements:
+      - AU-8
+    sufficiency: full
+  - countermeasure: crm-fulfill-au-9-on-gsa-pages-component-definition
+    requirements:
+      - AU-9
+    sufficiency: full
+  - countermeasure: crm-fulfill-ca-1-on-gsa-common-controls-component-definition
+    requirements:
+      - CA-1
+    sufficiency: full
+  - countermeasure: crm-fulfill-ca-2-on-gsa-pages-component-definition
+    requirements:
+      - CA-2
+    sufficiency: full
+  - countermeasure: crm-fulfill-ca-3-on-gsa-pages-component-definition
+    requirements:
+      - CA-3
+    sufficiency: full
+  - countermeasure: crm-fulfill-ca-5-on-gsa-pages-component-definition
+    requirements:
+      - CA-5
+    sufficiency: full
+  - countermeasure: crm-fulfill-ca-6-on-gsa-common-controls-component-definition
+    requirements:
+      - CA-6
+    sufficiency: full
+  - countermeasure: crm-fulfill-ca-6-on-gsa-pages-component-definition
+    requirements:
+      - CA-6
+    sufficiency: full
+  - countermeasure: crm-fulfill-ca-7-1-on-gsa-common-controls-component-definition
+    requirements:
+      - CA-7(1)
+    sufficiency: full
+  - countermeasure: crm-fulfill-ca-7-4-on-gsa-common-controls-component-definition
+    requirements:
+      - CA-7(4)
+    sufficiency: full
+  - countermeasure: crm-fulfill-ca-7-4-on-gsa-pages-component-definition
+    requirements:
+      - CA-7(4)
+    sufficiency: full
+  - countermeasure: crm-fulfill-ca-7-on-cloud-gov-lato-crm
+    requirements:
+      - CA-7
+    sufficiency: full
+  - countermeasure: crm-fulfill-ca-7-on-gsa-common-controls-component-definition
+    requirements:
+      - CA-7
+    sufficiency: full
+  - countermeasure: crm-fulfill-ca-7-on-gsa-pages-component-definition
+    requirements:
+      - CA-7
+    sufficiency: full
+  - countermeasure: crm-fulfill-ca-8-1-on-gsa-common-controls-component-definition
+    requirements:
+      - CA-8(1)
+    sufficiency: full
+  - countermeasure: crm-fulfill-ca-8-on-gsa-common-controls-component-definition
+    requirements:
+      - CA-8
+    sufficiency: full
+  - countermeasure: crm-fulfill-ca-8-on-gsa-pages-component-definition
+    requirements:
+      - CA-8
+    sufficiency: full
+  - countermeasure: crm-fulfill-ca-9-on-gsa-pages-component-definition
+    requirements:
+      - CA-9
+    sufficiency: full
+  - countermeasure: crm-fulfill-cm-1-on-gsa-common-controls-component-definition
+    requirements:
+      - CM-1
+    sufficiency: full
+  - countermeasure: crm-fulfill-cm-10-on-gsa-pages-component-definition
+    requirements:
+      - CM-10
+    sufficiency: full
+  - countermeasure: crm-fulfill-cm-11-on-gsa-pages-component-definition
+    requirements:
+      - CM-11
+    sufficiency: full
+  - countermeasure: crm-fulfill-cm-2-2-on-cloud-gov-lato-crm
+    requirements:
+      - CM-2(2)
+    sufficiency: full
+  - countermeasure: crm-fulfill-cm-2-2-on-gsa-pages-component-definition
+    requirements:
+      - CM-2(2)
+    sufficiency: full
+  - countermeasure: crm-fulfill-cm-2-on-gsa-pages-component-definition
+    requirements:
+      - CM-2
+    sufficiency: full
+  - countermeasure: crm-fulfill-cm-3-1-on-gsa-pages-component-definition
+    requirements:
+      - CM-3(1)
+    sufficiency: full
+  - countermeasure: crm-fulfill-cm-4-on-gsa-pages-component-definition
+    requirements:
+      - CM-4
+    sufficiency: full
+  - countermeasure: crm-fulfill-cm-5-on-gsa-pages-component-definition
+    requirements:
+      - CM-5
+    sufficiency: full
+  - countermeasure: crm-fulfill-cm-6-1-on-cloud-gov-lato-crm
+    requirements:
+      - CM-6(1)
+    sufficiency: full
+  - countermeasure: crm-fulfill-cm-6-1-on-gsa-pages-component-definition
+    requirements:
+      - CM-6(1)
+    sufficiency: full
+  - countermeasure: crm-fulfill-cm-6-on-gsa-pages-component-definition
+    requirements:
+      - CM-6
+    sufficiency: full
+  - countermeasure: crm-fulfill-cm-7-5-on-gsa-pages-component-definition
+    requirements:
+      - CM-7(5)
+    sufficiency: full
+  - countermeasure: crm-fulfill-cm-7-on-gsa-pages-component-definition
+    requirements:
+      - CM-7
+    sufficiency: full
+  - countermeasure: crm-fulfill-cm-8-on-gsa-pages-component-definition
+    requirements:
+      - CM-8
+    sufficiency: full
+  - countermeasure: crm-fulfill-cp-1-on-gsa-common-controls-component-definition
+    requirements:
+      - CP-1
+    sufficiency: full
+  - countermeasure: crm-fulfill-cp-10-on-gsa-pages-component-definition
+    requirements:
+      - CP-10
+    sufficiency: full
+  - countermeasure: crm-fulfill-cp-2-on-gsa-pages-component-definition
+    requirements:
+      - CP-2
+    sufficiency: full
+  - countermeasure: crm-fulfill-cp-3-on-gsa-pages-component-definition
+    requirements:
+      - CP-3
+    sufficiency: full
+  - countermeasure: crm-fulfill-cp-4-on-gsa-pages-component-definition
+    requirements:
+      - CP-4
+    sufficiency: full
+  - countermeasure: crm-fulfill-cp-7-1-on-cloud-gov-lato-crm
+    requirements:
+      - CP-7(1)
+    sufficiency: full
+  - countermeasure: crm-fulfill-cp-7-1-on-gsa-pages-component-definition
+    requirements:
+      - CP-7(1)
+    sufficiency: full
+  - countermeasure: crm-fulfill-cp-7-on-gsa-pages-component-definition
+    requirements:
+      - CP-7
+    sufficiency: full
+  - countermeasure: crm-fulfill-cp-9-on-gsa-pages-component-definition
+    requirements:
+      - CP-9
+    sufficiency: full
+  - countermeasure: crm-fulfill-ia-1-on-gsa-common-controls-component-definition
+    requirements:
+      - IA-1
+    sufficiency: full
+  - countermeasure: crm-fulfill-ia-11-on-gsa-pages-component-definition
+    requirements:
+      - IA-11
+    sufficiency: full
+  - countermeasure: crm-fulfill-ia-2-1-on-cloud-gov-lato-crm
+    requirements:
+      - IA-2(1)
+    sufficiency: full
+  - countermeasure: crm-fulfill-ia-2-1-on-gsa-pages-component-definition
+    requirements:
+      - IA-2(1)
+    sufficiency: full
+  - countermeasure: crm-fulfill-ia-2-12-on-gsa-pages-component-definition
+    requirements:
+      - IA-2(12)
+    sufficiency: full
+  - countermeasure: crm-fulfill-ia-2-2-on-cloud-gov-lato-crm
+    requirements:
+      - IA-2(2)
+    sufficiency: full
+  - countermeasure: crm-fulfill-ia-2-2-on-gsa-pages-component-definition
+    requirements:
+      - IA-2(2)
+    sufficiency: full
+  - countermeasure: crm-fulfill-ia-2-8-on-gsa-pages-component-definition
+    requirements:
+      - IA-2(8)
+    sufficiency: full
+  - countermeasure: crm-fulfill-ia-2-on-cloud-gov-lato-crm
+    requirements:
+      - IA-2
+    sufficiency: full
+  - countermeasure: crm-fulfill-ia-2-on-gsa-pages-component-definition
+    requirements:
+      - IA-2
+    sufficiency: full
+  - countermeasure: crm-fulfill-ia-4-on-gsa-pages-component-definition
+    requirements:
+      - IA-4
+    sufficiency: full
+  - countermeasure: crm-fulfill-ia-5-1-on-gsa-pages-component-definition
+    requirements:
+      - IA-5(1)
+    sufficiency: full
+  - countermeasure: crm-fulfill-ia-5-on-gsa-pages-component-definition
+    requirements:
+      - IA-5
+    sufficiency: full
+  - countermeasure: crm-fulfill-ir-1-on-gsa-common-controls-component-definition
+    requirements:
+      - IR-1
+    sufficiency: full
+  - countermeasure: crm-fulfill-ir-2-3-on-gsa-common-controls-component-definition
+    requirements:
+      - IR-2(3)
+    sufficiency: full
+  - countermeasure: crm-fulfill-ir-2-on-gsa-common-controls-component-definition
+    requirements:
+      - IR-2
+    sufficiency: full
+  - countermeasure: crm-fulfill-ir-3-2-on-gsa-common-controls-component-definition
+    requirements:
+      - IR-3(2)
+    sufficiency: full
+  - countermeasure: crm-fulfill-ir-3-on-gsa-common-controls-component-definition
+    requirements:
+      - IR-3
+    sufficiency: full
+  - countermeasure: crm-fulfill-ir-3-on-gsa-pages-component-definition
+    requirements:
+      - IR-3
+    sufficiency: full
+  - countermeasure: crm-fulfill-ir-4-1-on-gsa-common-controls-component-definition
+    requirements:
+      - IR-4(1)
+    sufficiency: full
+  - countermeasure: crm-fulfill-ir-4-on-gsa-common-controls-component-definition
+    requirements:
+      - IR-4
+    sufficiency: full
+  - countermeasure: crm-fulfill-ir-5-on-gsa-common-controls-component-definition
+    requirements:
+      - IR-5
+    sufficiency: full
+  - countermeasure: crm-fulfill-ir-6-1-on-gsa-common-controls-component-definition
+    requirements:
+      - IR-6(1)
+    sufficiency: full
+  - countermeasure: crm-fulfill-ir-6-3-on-gsa-common-controls-component-definition
+    requirements:
+      - IR-6(3)
+    sufficiency: full
+  - countermeasure: crm-fulfill-ir-6-on-gsa-common-controls-component-definition
+    requirements:
+      - IR-6
+    sufficiency: full
+  - countermeasure: crm-fulfill-ir-7-1-on-gsa-common-controls-component-definition
+    requirements:
+      - IR-7(1)
+    sufficiency: full
+  - countermeasure: crm-fulfill-ir-7-on-gsa-common-controls-component-definition
+    requirements:
+      - IR-7
+    sufficiency: full
+  - countermeasure: crm-fulfill-ir-8-1-on-gsa-common-controls-component-definition
+    requirements:
+      - IR-8(1)
+    sufficiency: full
+  - countermeasure: crm-fulfill-ir-8-on-gsa-common-controls-component-definition
+    requirements:
+      - IR-8
+    sufficiency: full
+  - countermeasure: crm-fulfill-ma-1-on-gsa-common-controls-component-definition
+    requirements:
+      - MA-1
+    sufficiency: full
+  - countermeasure: crm-fulfill-ma-2-on-gsa-pages-component-definition
+    requirements:
+      - MA-2
+    sufficiency: full
+  - countermeasure: crm-fulfill-ma-4-on-gsa-pages-component-definition
+    requirements:
+      - MA-4
+    sufficiency: full
+  - countermeasure: crm-fulfill-ma-5-on-gsa-pages-component-definition
+    requirements:
+      - MA-5
+    sufficiency: full
+  - countermeasure: crm-fulfill-mp-1-on-gsa-common-controls-component-definition
+    requirements:
+      - MP-1
+    sufficiency: full
+  - countermeasure: crm-fulfill-mp-2-on-gsa-pages-component-definition
+    requirements:
+      - MP-2
+    sufficiency: full
+  - countermeasure: crm-fulfill-mp-6-on-gsa-pages-component-definition
+    requirements:
+      - MP-6
+    sufficiency: full
+  - countermeasure: crm-fulfill-mp-7-on-gsa-common-controls-component-definition
+    requirements:
+      - MP-7
+    sufficiency: full
+  - countermeasure: crm-fulfill-pe-1-on-gsa-common-controls-component-definition
+    requirements:
+      - PE-1
+    sufficiency: full
+  - countermeasure: crm-fulfill-pe-12-on-gsa-pages-component-definition
+    requirements:
+      - PE-12
+    sufficiency: full
+  - countermeasure: crm-fulfill-pe-13-on-gsa-pages-component-definition
+    requirements:
+      - PE-13
+    sufficiency: full
+  - countermeasure: crm-fulfill-pe-14-on-gsa-pages-component-definition
+    requirements:
+      - PE-14
+    sufficiency: full
+  - countermeasure: crm-fulfill-pe-16-on-gsa-pages-component-definition
+    requirements:
+      - PE-16
+    sufficiency: full
+  - countermeasure: crm-fulfill-pe-2-on-gsa-pages-component-definition
+    requirements:
+      - PE-2
+    sufficiency: full
+  - countermeasure: crm-fulfill-pe-3-on-gsa-pages-component-definition
+    requirements:
+      - PE-3
+    sufficiency: full
+  - countermeasure: crm-fulfill-pe-6-on-gsa-pages-component-definition
+    requirements:
+      - PE-6
+    sufficiency: full
+  - countermeasure: crm-fulfill-pe-8-on-gsa-pages-component-definition
+    requirements:
+      - PE-8
+    sufficiency: full
+  - countermeasure: crm-fulfill-pl-1-on-gsa-common-controls-component-definition
+    requirements:
+      - PL-1
+    sufficiency: full
+  - countermeasure: crm-fulfill-pl-10-on-gsa-common-controls-component-definition
+    requirements:
+      - PL-10
+    sufficiency: full
+  - countermeasure: crm-fulfill-pl-10-on-gsa-pages-component-definition
+    requirements:
+      - PL-10
+    sufficiency: full
+  - countermeasure: crm-fulfill-pl-11-on-gsa-common-controls-component-definition
+    requirements:
+      - PL-11
+    sufficiency: full
+  - countermeasure: crm-fulfill-pl-11-on-gsa-pages-component-definition
+    requirements:
+      - PL-11
+    sufficiency: full
+  - countermeasure: crm-fulfill-pl-2-on-gsa-pages-component-definition
+    requirements:
+      - PL-2
+    sufficiency: full
+  - countermeasure: crm-fulfill-pl-4-1-on-gsa-common-controls-component-definition
+    requirements:
+      - PL-4(1)
+    sufficiency: full
+  - countermeasure: crm-fulfill-pl-4-on-gsa-common-controls-component-definition
+    requirements:
+      - PL-4
+    sufficiency: full
+  - countermeasure: crm-fulfill-pl-8-on-gsa-common-controls-component-definition
+    requirements:
+      - PL-8
+    sufficiency: full
+  - countermeasure: crm-fulfill-pl-8-on-gsa-pages-component-definition
+    requirements:
+      - PL-8
+    sufficiency: full
+  - countermeasure: crm-fulfill-pl-9-on-gsa-common-controls-component-definition
+    requirements:
+      - PL-9
+    sufficiency: full
+  - countermeasure: crm-fulfill-pl-9-on-gsa-pages-component-definition
+    requirements:
+      - PL-9
+    sufficiency: full
+  - countermeasure: crm-fulfill-pm-1-on-gsa-common-controls-component-definition
+    requirements:
+      - PM-1
+    sufficiency: full
+  - countermeasure: crm-fulfill-pm-10-on-gsa-common-controls-component-definition
+    requirements:
+      - PM-10
+    sufficiency: full
+  - countermeasure: crm-fulfill-pm-11-on-gsa-common-controls-component-definition
+    requirements:
+      - PM-11
+    sufficiency: full
+  - countermeasure: crm-fulfill-pm-12-on-gsa-common-controls-component-definition
+    requirements:
+      - PM-12
+    sufficiency: full
+  - countermeasure: crm-fulfill-pm-13-on-gsa-common-controls-component-definition
+    requirements:
+      - PM-13
+    sufficiency: full
+  - countermeasure: crm-fulfill-pm-14-on-gsa-common-controls-component-definition
+    requirements:
+      - PM-14
+    sufficiency: full
+  - countermeasure: crm-fulfill-pm-15-on-gsa-common-controls-component-definition
+    requirements:
+      - PM-15
+    sufficiency: full
+  - countermeasure: crm-fulfill-pm-16-1-on-gsa-common-controls-component-definition
+    requirements:
+      - PM-16(1)
+    sufficiency: full
+  - countermeasure: crm-fulfill-pm-16-on-gsa-common-controls-component-definition
+    requirements:
+      - PM-16
+    sufficiency: full
+  - countermeasure: crm-fulfill-pm-17-on-gsa-common-controls-component-definition
+    requirements:
+      - PM-17
+    sufficiency: full
+  - countermeasure: crm-fulfill-pm-18-on-gsa-common-controls-component-definition
+    requirements:
+      - PM-18
+    sufficiency: full
+  - countermeasure: crm-fulfill-pm-19-on-gsa-common-controls-component-definition
+    requirements:
+      - PM-19
+    sufficiency: full
+  - countermeasure: crm-fulfill-pm-2-on-gsa-common-controls-component-definition
+    requirements:
+      - PM-2
+    sufficiency: full
+  - countermeasure: crm-fulfill-pm-20-1-on-gsa-common-controls-component-definition
+    requirements:
+      - PM-20(1)
+    sufficiency: full
+  - countermeasure: crm-fulfill-pm-20-on-gsa-common-controls-component-definition
+    requirements:
+      - PM-20
+    sufficiency: full
+  - countermeasure: crm-fulfill-pm-21-on-gsa-common-controls-component-definition
+    requirements:
+      - PM-21
+    sufficiency: full
+  - countermeasure: crm-fulfill-pm-22-on-gsa-common-controls-component-definition
+    requirements:
+      - PM-22
+    sufficiency: full
+  - countermeasure: crm-fulfill-pm-23-on-gsa-common-controls-component-definition
+    requirements:
+      - PM-23
+    sufficiency: full
+  - countermeasure: crm-fulfill-pm-24-on-gsa-common-controls-component-definition
+    requirements:
+      - PM-24
+    sufficiency: full
+  - countermeasure: crm-fulfill-pm-25-on-gsa-common-controls-component-definition
+    requirements:
+      - PM-25
+    sufficiency: full
+  - countermeasure: crm-fulfill-pm-26-on-gsa-common-controls-component-definition
+    requirements:
+      - PM-26
+    sufficiency: full
+  - countermeasure: crm-fulfill-pm-27-on-gsa-common-controls-component-definition
+    requirements:
+      - PM-27
+    sufficiency: full
+  - countermeasure: crm-fulfill-pm-28-on-gsa-common-controls-component-definition
+    requirements:
+      - PM-28
+    sufficiency: full
+  - countermeasure: crm-fulfill-pm-29-on-gsa-common-controls-component-definition
+    requirements:
+      - PM-29
+    sufficiency: full
+  - countermeasure: crm-fulfill-pm-3-on-gsa-common-controls-component-definition
+    requirements:
+      - PM-3
+    sufficiency: full
+  - countermeasure: crm-fulfill-pm-30-1-on-gsa-common-controls-component-definition
+    requirements:
+      - PM-30(1)
+    sufficiency: full
+  - countermeasure: crm-fulfill-pm-30-on-gsa-common-controls-component-definition
+    requirements:
+      - PM-30
+    sufficiency: full
+  - countermeasure: crm-fulfill-pm-31-on-gsa-common-controls-component-definition
+    requirements:
+      - PM-31
+    sufficiency: full
+  - countermeasure: crm-fulfill-pm-32-on-gsa-common-controls-component-definition
+    requirements:
+      - PM-32
+    sufficiency: full
+  - countermeasure: crm-fulfill-pm-4-on-gsa-common-controls-component-definition
+    requirements:
+      - PM-4
+    sufficiency: full
+  - countermeasure: crm-fulfill-pm-5-1-on-gsa-common-controls-component-definition
+    requirements:
+      - PM-5(1)
+    sufficiency: full
+  - countermeasure: crm-fulfill-pm-5-on-gsa-common-controls-component-definition
+    requirements:
+      - PM-5
+    sufficiency: full
+  - countermeasure: crm-fulfill-pm-6-on-gsa-common-controls-component-definition
+    requirements:
+      - PM-6
+    sufficiency: full
+  - countermeasure: crm-fulfill-pm-7-1-on-gsa-common-controls-component-definition
+    requirements:
+      - PM-7(1)
+    sufficiency: full
+  - countermeasure: crm-fulfill-pm-7-on-gsa-common-controls-component-definition
+    requirements:
+      - PM-7
+    sufficiency: full
+  - countermeasure: crm-fulfill-pm-8-on-gsa-common-controls-component-definition
+    requirements:
+      - PM-8
+    sufficiency: full
+  - countermeasure: crm-fulfill-pm-9-on-gsa-common-controls-component-definition
+    requirements:
+      - PM-9
+    sufficiency: full
+  - countermeasure: crm-fulfill-ps-1-on-gsa-common-controls-component-definition
+    requirements:
+      - PS-1
+    sufficiency: full
+  - countermeasure: crm-fulfill-ps-2-on-gsa-common-controls-component-definition
+    requirements:
+      - PS-2
+    sufficiency: full
+  - countermeasure: crm-fulfill-ps-3-on-gsa-common-controls-component-definition
+    requirements:
+      - PS-3
+    sufficiency: full
+  - countermeasure: crm-fulfill-ps-4-on-gsa-common-controls-component-definition
+    requirements:
+      - PS-4
+    sufficiency: full
+  - countermeasure: crm-fulfill-ps-5-on-gsa-common-controls-component-definition
+    requirements:
+      - PS-5
+    sufficiency: full
+  - countermeasure: crm-fulfill-ps-6-on-gsa-common-controls-component-definition
+    requirements:
+      - PS-6
+    sufficiency: full
+  - countermeasure: crm-fulfill-ps-7-on-gsa-common-controls-component-definition
+    requirements:
+      - PS-7
+    sufficiency: full
+  - countermeasure: crm-fulfill-ps-8-on-gsa-common-controls-component-definition
+    requirements:
+      - PS-8
+    sufficiency: full
+  - countermeasure: crm-fulfill-ps-9-on-gsa-common-controls-component-definition
+    requirements:
+      - PS-9
+    sufficiency: full
+  - countermeasure: crm-fulfill-pt-1-on-gsa-common-controls-component-definition
+    requirements:
+      - PT-1
+    sufficiency: full
+  - countermeasure: crm-fulfill-pt-2-on-gsa-common-controls-component-definition
+    requirements:
+      - PT-2
+    sufficiency: full
+  - countermeasure: crm-fulfill-pt-3-on-gsa-common-controls-component-definition
+    requirements:
+      - PT-3
+    sufficiency: full
+  - countermeasure: crm-fulfill-pt-4-on-gsa-common-controls-component-definition
+    requirements:
+      - PT-4
+    sufficiency: full
+  - countermeasure: crm-fulfill-pt-5-2-on-gsa-common-controls-component-definition
+    requirements:
+      - PT-5(2)
+    sufficiency: full
+  - countermeasure: crm-fulfill-pt-5-on-gsa-common-controls-component-definition
+    requirements:
+      - PT-5
+    sufficiency: full
+  - countermeasure: crm-fulfill-pt-6-1-on-gsa-common-controls-component-definition
+    requirements:
+      - PT-6(1)
+    sufficiency: full
+  - countermeasure: crm-fulfill-pt-6-2-on-gsa-common-controls-component-definition
+    requirements:
+      - PT-6(2)
+    sufficiency: full
+  - countermeasure: crm-fulfill-pt-6-on-gsa-common-controls-component-definition
+    requirements:
+      - PT-6
+    sufficiency: full
+  - countermeasure: crm-fulfill-pt-7-1-on-gsa-common-controls-component-definition
+    requirements:
+      - PT-7(1)
+    sufficiency: full
+  - countermeasure: crm-fulfill-pt-7-2-on-gsa-common-controls-component-definition
+    requirements:
+      - PT-7(2)
+    sufficiency: full
+  - countermeasure: crm-fulfill-pt-8-on-gsa-common-controls-component-definition
+    requirements:
+      - PT-8
+    sufficiency: full
+  - countermeasure: crm-fulfill-ra-1-on-gsa-common-controls-component-definition
+    requirements:
+      - RA-1
+    sufficiency: full
+  - countermeasure: crm-fulfill-ra-2-on-gsa-pages-component-definition
+    requirements:
+      - RA-2
+    sufficiency: full
+  - countermeasure: crm-fulfill-ra-3-on-gsa-common-controls-component-definition
+    requirements:
+      - RA-3
+    sufficiency: full
+  - countermeasure: crm-fulfill-ra-5-11-on-gsa-pages-component-definition
+    requirements:
+      - RA-5(11)
+    sufficiency: full
+  - countermeasure: crm-fulfill-ra-5-2-on-gsa-pages-component-definition
+    requirements:
+      - RA-5(2)
+    sufficiency: full
+  - countermeasure: crm-fulfill-ra-5-on-gsa-pages-component-definition
+    requirements:
+      - RA-5
+    sufficiency: full
+  - countermeasure: crm-fulfill-ra-7-on-gsa-pages-component-definition
+    requirements:
+      - RA-7
+    sufficiency: full
+  - countermeasure: crm-fulfill-ra-8-on-gsa-pages-component-definition
+    requirements:
+      - RA-8
+    sufficiency: full
+  - countermeasure: crm-fulfill-sa-1-on-gsa-common-controls-component-definition
+    requirements:
+      - SA-1
+    sufficiency: full
+  - countermeasure: crm-fulfill-sa-11-on-gsa-pages-component-definition
+    requirements:
+      - SA-11
+    sufficiency: full
+  - countermeasure: crm-fulfill-sa-2-on-gsa-pages-component-definition
+    requirements:
+      - SA-2
+    sufficiency: full
+  - countermeasure: crm-fulfill-sa-22-on-gsa-pages-component-definition
+    requirements:
+      - SA-22
+    sufficiency: full
+  - countermeasure: crm-fulfill-sa-3-2-on-gsa-pages-component-definition
+    requirements:
+      - SA-3(2)
+    sufficiency: full
+  - countermeasure: crm-fulfill-sa-3-on-gsa-pages-component-definition
+    requirements:
+      - SA-3
+    sufficiency: full
+  - countermeasure: crm-fulfill-sa-4-10-on-gsa-common-controls-component-definition
+    requirements:
+      - SA-4(10)
+    sufficiency: full
+  - countermeasure: crm-fulfill-sa-4-on-gsa-common-controls-component-definition
+    requirements:
+      - SA-4
+    sufficiency: full
+  - countermeasure: crm-fulfill-sa-4-on-gsa-pages-component-definition
+    requirements:
+      - SA-4
+    sufficiency: full
+  - countermeasure: crm-fulfill-sa-5-on-gsa-pages-component-definition
+    requirements:
+      - SA-5
+    sufficiency: full
+  - countermeasure: crm-fulfill-sa-8-on-gsa-common-controls-component-definition
+    requirements:
+      - SA-8
+    sufficiency: full
+  - countermeasure: crm-fulfill-sa-8-on-gsa-pages-component-definition
+    requirements:
+      - SA-8
+    sufficiency: full
+  - countermeasure: crm-fulfill-sa-9-on-gsa-common-controls-component-definition
+    requirements:
+      - SA-9
+    sufficiency: full
+  - countermeasure: crm-fulfill-sa-9-on-gsa-pages-component-definition
+    requirements:
+      - SA-9
+    sufficiency: full
+  - countermeasure: crm-fulfill-sc-1-on-gsa-common-controls-component-definition
+    requirements:
+      - SC-1
+    sufficiency: full
+  - countermeasure: crm-fulfill-sc-12-on-gsa-pages-component-definition
+    requirements:
+      - SC-12
+    sufficiency: full
+  - countermeasure: crm-fulfill-sc-13-on-gsa-pages-component-definition
+    requirements:
+      - SC-13
+    sufficiency: full
+  - countermeasure: crm-fulfill-sc-15-on-gsa-pages-component-definition
+    requirements:
+      - SC-15
+    sufficiency: full
+  - countermeasure: crm-fulfill-sc-18-on-gsa-common-controls-component-definition
+    requirements:
+      - SC-18
+    sufficiency: full
+  - countermeasure: crm-fulfill-sc-20-on-gsa-pages-component-definition
+    requirements:
+      - SC-20
+    sufficiency: full
+  - countermeasure: crm-fulfill-sc-20-on-gsa-pages-component-definition
+    requirements:
+      - SC-20
+    sufficiency: full
+  - countermeasure: crm-fulfill-sc-21-on-gsa-pages-component-definition
+    requirements:
+      - SC-21
+    sufficiency: full
+  - countermeasure: crm-fulfill-sc-21-on-gsa-pages-component-definition
+    requirements:
+      - SC-21
+    sufficiency: full
+  - countermeasure: crm-fulfill-sc-22-on-gsa-pages-component-definition
+    requirements:
+      - SC-22
+    sufficiency: full
+  - countermeasure: crm-fulfill-sc-22-on-gsa-pages-component-definition
+    requirements:
+      - SC-22
+    sufficiency: full
+  - countermeasure: crm-fulfill-sc-28-1-on-cloud-gov-lato-crm
+    requirements:
+      - SC-28(1)
+    sufficiency: full
+  - countermeasure: crm-fulfill-sc-28-1-on-gsa-pages-component-definition
+    requirements:
+      - SC-28(1)
+    sufficiency: full
+  - countermeasure: crm-fulfill-sc-39-on-gsa-pages-component-definition
+    requirements:
+      - SC-39
+    sufficiency: full
+  - countermeasure: crm-fulfill-sc-5-on-gsa-pages-component-definition
+    requirements:
+      - SC-5
+    sufficiency: full
+  - countermeasure: crm-fulfill-sc-5-on-gsa-pages-component-definition
+    requirements:
+      - SC-5
+    sufficiency: full
+  - countermeasure: crm-fulfill-sc-7-on-cloud-gov-lato-crm
+    requirements:
+      - SC-7
+    sufficiency: full
+  - countermeasure: crm-fulfill-sc-7-on-gsa-pages-component-definition
+    requirements:
+      - SC-7
+    sufficiency: full
+  - countermeasure: crm-fulfill-sc-8-1-on-cloud-gov-lato-crm
+    requirements:
+      - SC-8(1)
+    sufficiency: full
+  - countermeasure: crm-fulfill-si-1-on-gsa-common-controls-component-definition
+    requirements:
+      - SI-1
+    sufficiency: full
+  - countermeasure: crm-fulfill-si-12-on-gsa-pages-component-definition
+    requirements:
+      - SI-12
+    sufficiency: full
+  - countermeasure: crm-fulfill-si-2-on-gsa-pages-component-definition
+    requirements:
+      - SI-2
+    sufficiency: full
+  - countermeasure: crm-fulfill-si-3-on-gsa-pages-component-definition
+    requirements:
+      - SI-3
+    sufficiency: full
+  - countermeasure: crm-fulfill-si-4-2-on-cloud-gov-lato-crm
+    requirements:
+      - SI-4(2)
+    sufficiency: full
+  - countermeasure: crm-fulfill-si-4-2-on-gsa-pages-component-definition
+    requirements:
+      - SI-4(2)
+    sufficiency: full
+  - countermeasure: crm-fulfill-si-4-4-on-cloud-gov-lato-crm
+    requirements:
+      - SI-4(4)
+    sufficiency: full
+  - countermeasure: crm-fulfill-si-4-4-on-gsa-pages-component-definition
+    requirements:
+      - SI-4(4)
+    sufficiency: full
+  - countermeasure: crm-fulfill-si-4-5-on-cloud-gov-lato-crm
+    requirements:
+      - SI-4(5)
+    sufficiency: full
+  - countermeasure: crm-fulfill-si-4-5-on-gsa-pages-component-definition
+    requirements:
+      - SI-4(5)
+    sufficiency: full
+  - countermeasure: crm-fulfill-si-4-on-cloud-gov-lato-crm
+    requirements:
+      - SI-4
+    sufficiency: full
+  - countermeasure: crm-fulfill-si-4-on-gsa-pages-component-definition
+    requirements:
+      - SI-4
+    sufficiency: full
+  - countermeasure: crm-fulfill-si-5-on-gsa-common-controls-component-definition
+    requirements:
+      - SI-5
+    sufficiency: full
+  - countermeasure: crm-fulfill-si-7-on-gsa-pages-component-definition
+    requirements:
+      - SI-7
+    sufficiency: full
+  - countermeasure: crm-fulfill-sr-1-on-gsa-common-controls-component-definition
+    requirements:
+      - SR-1
+    sufficiency: full
+  - countermeasure: crm-fulfill-sr-10-on-gsa-pages-component-definition
+    requirements:
+      - SR-10
+    sufficiency: full
+  - countermeasure: crm-fulfill-sr-11-1-on-gsa-common-controls-component-definition
+    requirements:
+      - SR-11(1)
+    sufficiency: full
+  - countermeasure: crm-fulfill-sr-11-1-on-gsa-pages-component-definition
+    requirements:
+      - SR-11(1)
+    sufficiency: full
+  - countermeasure: crm-fulfill-sr-11-2-on-gsa-pages-component-definition
+    requirements:
+      - SR-11(2)
+    sufficiency: full
+  - countermeasure: crm-fulfill-sr-11-on-gsa-common-controls-component-definition
+    requirements:
+      - SR-11
+    sufficiency: full
+  - countermeasure: crm-fulfill-sr-11-on-gsa-pages-component-definition
+    requirements:
+      - SR-11
+    sufficiency: full
+  - countermeasure: crm-fulfill-sr-2-1-on-gsa-common-controls-component-definition
+    requirements:
+      - SR-2(1)
+    sufficiency: full
+  - countermeasure: crm-fulfill-sr-2-on-gsa-pages-component-definition
+    requirements:
+      - SR-2
+    sufficiency: full
+  - countermeasure: crm-fulfill-sr-3-on-gsa-pages-component-definition
+    requirements:
+      - SR-3
+    sufficiency: full
+  - countermeasure: crm-fulfill-sr-5-on-gsa-common-controls-component-definition
+    requirements:
+      - SR-5
+    sufficiency: full
+  - countermeasure: crm-fulfill-sr-8-on-gsa-pages-component-definition
+    requirements:
+      - SR-8
+    sufficiency: full

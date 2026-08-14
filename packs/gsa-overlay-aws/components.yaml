@@ -1,0 +1,231 @@
+components:
+  # ── Approved services absent from community AWS pack ─────────────────────────
+
+  # Database
+  - id: rds
+    name: Amazon RDS
+    category: datastore
+    type: Managed Relational Database
+    provider: aws
+    description: |
+      [GSA: Approved East/West GovCloud | Conditions: encryption-at-rest, tls-in-transit]
+      AWS Relational Database Service. GSA CISO conditionally approved for GSA-hosted
+      systems on FedRAMP AWS East/West or GovCloud. Requires encryption at rest and
+      in transit.
+
+  - id: aurora
+    name: Amazon Aurora
+    category: datastore
+    type: Managed Relational Database
+    provider: aws
+    description: |
+      [GSA: Approved East/West GovCloud w/ Conditions | Conditions: encryption-at-rest, tls-in-transit]
+      MySQL/PostgreSQL-compatible managed relational DB. OCISO approved when enabled
+      with encryption at rest and in transit (see Aurora caveat doc).
+
+  - id: elasticache
+    name: Amazon ElastiCache
+    category: datastore
+    type: Managed Cache
+    provider: aws
+    description: |
+      [GSA: Approved East/West GovCloud | Conditions: encryption-at-rest, tls-in-transit]
+      Managed Redis/Memcached caching service. FedRAMP Approved East/West and GovCloud.
+
+  - id: kms
+    name: AWS KMS
+    category: process
+    type: Key Management
+    provider: aws
+    description: |
+      [GSA: Approved East/West GovCloud]
+      AWS Key Management Service. FedRAMP Approved East/West and GovCloud. Required
+      baseline for encryption of other approved services.
+
+  - id: ecs-fargate
+    name: Amazon ECS / Fargate
+    category: process
+    type: Container Orchestration
+    provider: aws
+    description: |
+      [GSA: Approved East/West GovCloud | Conditions: use-caveats-required]
+      Elastic Container Service and Fargate serverless compute. OCISO recommends
+      approval provided adherence to ECS/Fargate use caveats (IAM task roles,
+      no public ECR, VPC networking).
+
+  - id: efs
+    name: Amazon EFS
+    category: datastore
+    type: Managed File Storage
+    provider: aws
+    description: |
+      [GSA: Approved | Conditions: use-caveats-required]
+      Elastic File System managed NFS. OCISO recommends approval provided adherence
+      to EFS use caveats (encryption at rest with KMS, in-transit via TLS mount).
+
+  - id: sagemaker
+    name: Amazon SageMaker
+    category: process
+    type: ML Platform
+    provider: aws
+    description: |
+      [GSA: Approved FedRAMP | Conditions: use-caveats-required]
+      Managed ML platform for model build, train, deploy. FedRAMP Approved.
+      OCISO recommends approval with adherence to SageMaker use caveats (VPC
+      isolation, no public endpoints, KMS encryption, CloudWatch logging).
+
+  - id: kinesis-firehose
+    name: Amazon Kinesis Data Firehose
+    category: process
+    type: Data Streaming
+    provider: aws
+    description: |
+      [GSA: Approved FedRAMP Authorized | Conditions: use-caveats-required]
+      Managed streaming ETL to S3/Redshift/OpenSearch. FedRAMP Authorized.
+      OCISO recommends approval with adherence to Firehose use caveats.
+
+  - id: quicksight
+    name: Amazon QuickSight
+    category: process
+    type: BI / Analytics
+    provider: aws
+    description: |
+      [GSA: Approved Commercial Moderate / GovCloud High | Conditions: direct-sql-only, no-spice]
+      Business intelligence service. Approved for Direct SQL Query only.
+      SPICE (in-QuickSight data storage) is explicitly PROHIBITED by GSA OCISO.
+
+  - id: ssm-incident-manager
+    name: AWS SSM Incident Manager
+    category: process
+    type: Incident Management
+    provider: aws
+    description: |
+      [GSA: Approved | Conditions: use-caveats-required]
+      Systems Manager Incident Manager for operational incident response automation.
+      OCISO approved per in-house source.
+
+  - id: firewall-manager
+    name: AWS Firewall Manager
+    category: process
+    type: Centralized Firewall Policy
+    provider: aws
+    description: |
+      [GSA: Approved East/West | Conditions: use-caveats-required]
+      Centrally manage WAF rules, Shield Advanced, Security Groups. FedRAMP Approved
+      East/West. OCISO recommends approval with adherence to use caveats.
+
+  - id: glacier
+    name: Amazon Glacier / S3 Glacier
+    category: datastore
+    type: Archival Storage
+    provider: aws
+    description: |
+      [GSA: Approved East/West GovCloud]
+      Long-term archival object storage. FedRAMP Approved East/West and GovCloud.
+
+  - id: snowball-edge
+    name: AWS Snowball Edge
+    category: process
+    type: Edge Compute / Data Transfer
+    provider: aws
+    description: |
+      [GSA: Approved East/West GovCloud | Conditions: use-caveats-required]
+      Physical edge device for offline data transfer and edge compute. OCISO
+      recommends approval.
+
+  - id: import-export
+    name: AWS Import/Export
+    category: process
+    type: Data Transfer
+    provider: aws
+    description: |
+      [GSA: Approved East/West GovCloud | Conditions: encryption-at-rest, govcloud-scope]
+      Physical data import/export. GSA CISO conditionally approved for FedRAMP
+      AWS East/West and GovCloud environments.
+
+  # ── Denied / Pending — present as components so threat can be applied ────────
+
+  - id: aws-codebuild
+    name: AWS CodeBuild (GSA Denied)
+    category: process
+    type: CI Build
+    provider: aws
+    description: |
+      [GSA: DENIED — Not Approved / Not Reviewed]
+      Managed build service. Pending OCISO approval. Do NOT use in GSA systems
+      until approved. Use GitHub Actions or another approved CI mechanism.
+
+  - id: aws-codepipeline
+    name: AWS CodePipeline (GSA Denied)
+    category: process
+    type: CI/CD Pipeline
+    provider: aws
+    description: |
+      [GSA: DENIED — Not Approved / Not Reviewed]
+      Managed CI/CD pipeline service. Not approved by OCISO.
+
+  - id: aws-transfer-family
+    name: AWS Transfer Family (GSA Denied)
+    category: process
+    type: Managed SFTP
+    provider: aws
+    description: |
+      [GSA: DENIED — Pending approval recommendation]
+      Managed SFTP/FTPS/FTP service. Not approved by OCISO. Use
+      approved SFTP alternatives or await OCISO approval.
+
+  - id: aws-secrets-manager
+    name: AWS Secrets Manager (GSA Denied)
+    category: process
+    type: Secrets Management
+    provider: aws
+    description: |
+      [GSA: DENIED — ISE recommends approval but OCISO not yet approved]
+      Secrets storage and rotation service. Use AWS Parameter Store with
+      SecureString + KMS as interim approved alternative.
+
+  - id: aws-guardduty
+    name: Amazon GuardDuty (GSA Denied)
+    category: process
+    type: Threat Detection
+    provider: aws
+    description: |
+      [GSA: DENIED — Not Approved / Not Reviewed]
+      Managed threat detection service. Not approved by OCISO.
+
+  - id: aws-ecr
+    name: Amazon ECR (GSA Denied)
+    category: datastore
+    type: Container Registry
+    provider: aws
+    description: |
+      [GSA: DENIED — Pending OCISO approval]
+      Elastic Container Registry. Not yet approved by OCISO.
+
+  - id: aws-eks
+    name: Amazon EKS (GSA Denied)
+    category: process
+    type: Managed Kubernetes
+    provider: aws
+    description: |
+      [GSA: DENIED — Approved East/West only; GovCloud not approved as of review]
+      EKS approved in East/West but not in GovCloud per last review. Use ECS/Fargate
+      for approved container orchestration on GovCloud.
+
+  - id: aws-ses
+    name: Amazon SES (GSA Denied)
+    category: process
+    type: Email Service
+    provider: aws
+    description: |
+      [GSA: DENIED — ISE recommends approval but OCISO not yet approved]
+      Simple Email Service. Not approved. Use approved notification services.
+
+  - id: aws-msk
+    name: Amazon MSK (GSA Denied)
+    category: process
+    type: Managed Kafka
+    provider: aws
+    description: |
+      [GSA: DENIED — Not Approved / Not Reviewed]
+      Managed Streaming for Apache Kafka. Not approved by OCISO.

@@ -1,0 +1,57 @@
+threats:
+  - id: cloudgov-app-misconfiguration
+    name: Cloud.gov Application Misconfiguration
+    description: |
+      Tenant application deployed with insecure settings: open security groups,
+      publicly exposed internal routes, missing health checks, or environment
+      variables containing plaintext credentials. Platform protections do not
+      compensate for application-level misconfiguration.
+
+  - id: cloudgov-secret-in-manifest
+    name: Credentials Committed to CF Manifest or Source Control
+    description: |
+      Sensitive credentials, API keys, or service binding details committed to a
+      CF manifest.yml or source repository rather than bound via CredHub service
+      or environment variable injection at deploy time.
+
+  - id: cloudgov-service-binding-overshare
+    name: Managed Service Binding Shared Across Applications
+    description: |
+      A Cloud.gov managed service (RDS, S3, Redis) is bound to multiple
+      applications sharing a single credential set, violating least-privilege.
+      Compromise of one app exposes service credentials to all bound apps.
+
+  - id: cloudgov-dependency-vulnerability
+    name: Vulnerable Buildpack or Application Dependency
+    description: |
+      Tenant application running on an outdated Cloud.gov buildpack or carrying
+      known-vulnerable dependencies, exposing a remote code execution or
+      privilege escalation surface within the PaaS container.
+
+  - id: cloudgov-org-space-isolation-gap
+    name: Org/Space Isolation Misconfiguration
+    description: |
+      Cloud Foundry org or space role assignments allow unauthorized users
+      (e.g., developers in another org) to deploy apps, view environment
+      variables, or access services within the tenant's space.
+
+  - id: cloudgov-pages-supply-chain
+    name: GSA Pages Build Pipeline Compromise
+    description: |
+      Malicious dependency, GitHub Action, or build script injected into the
+      GSA Pages CI/CD pipeline produces backdoored static assets served to
+      end users.
+
+  - id: cloudgov-crm-control-gap
+    name: Cloud.gov Tenant CRM Control Not Implemented
+    description: |
+      A control designated as tenant responsibility in the Cloud.gov PaaS
+      CRM/CIS has not been implemented or documented, creating a gap in the
+      system's FedRAMP control baseline.
+
+  - id: cloudgov-non-inheritable-control
+    name: Non-Inheritable Control Claimed as Inherited
+    description: |
+      Tenant SSPP claims inheritance for a Cloud.gov control marked
+      "can_be_inherited: No" in the Cloud.gov CIS, understating tenant
+      security responsibilities.

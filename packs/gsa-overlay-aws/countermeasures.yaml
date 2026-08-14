@@ -1,0 +1,130 @@
+countermeasures:
+  # ── GSA baseline conditions (apply to all approved services) ─────────────────
+  - id: gsa-encryption-at-rest
+    name: Encryption at Rest (GSA Baseline Requirement)
+    description: |
+      All data stored in AWS services must be encrypted at rest. Use KMS-managed
+      keys (SSE-KMS or CMK) unless service only supports SSE-S3. Required condition
+      for all GSA OCISO service approvals.
+    control_type: preventive
+    cost: low
+
+  - id: gsa-tls-in-transit
+    name: TLS Encryption in Transit (GSA Baseline Requirement)
+    description: |
+      All data in transit between AWS services and clients must use TLS 1.2+.
+      Disable plaintext endpoints and enforce HTTPS-only access. Required baseline
+      for all GSA OCISO service approvals.
+    control_type: preventive
+    cost: low
+
+  - id: gsa-least-privilege-iam
+    name: Least-Privilege IAM Policies (GSA Baseline Requirement)
+    description: |
+      IAM policies must follow least-privilege. Deny-by-default for sensitive
+      actions. No use of wildcard (*) resources or actions except where explicitly
+      justified and documented. Required for all approved services.
+    control_type: preventive
+    cost: low
+
+  - id: gsa-sandbox-tags
+    name: Required GSA Sandbox Resource Tags
+    description: |
+      All AWS resources must carry the GSA-required sandbox tags:
+      Project, Owner, TTLExpiry, CostCenter, Cloud, Environment.
+      Missing tags violate GSA sandbox policy and may trigger automated cleanup.
+    control_type: preventive
+    cost: low
+
+  - id: gsa-no-public-exposure
+    name: No Public Exposure Without Compensating Controls
+    description: |
+      Resources must not be publicly accessible unless explicitly authorized by
+      OCISO with documented compensating controls. Applies to S3 buckets, RDS
+      instances, Lambda function URLs, API Gateway stages, etc.
+    control_type: preventive
+    cost: low
+
+  - id: gsa-service-logging
+    name: Enable Service-Level Logging
+    description: |
+      Enable logging for all approved services (CloudTrail API logging, VPC Flow
+      Logs, S3 access logging, API Gateway access logs, RDS audit logs). Required
+      condition noted across multiple OCISO service approvals.
+    control_type: detective
+    cost: low
+
+  # ── Service-specific conditions ──────────────────────────────────────────────
+  - id: gsa-govcloud-deployment
+    name: Deploy in AWS GovCloud (for GovCloud-Only Approvals)
+    description: |
+      Services conditionally approved only in GovCloud (RDS, Aurora, ElastiCache,
+      KMS, Import/Export) must be deployed in us-gov-west-1 or us-gov-east-1.
+      Commercial East/West deployment invalidates the conditional approval.
+    control_type: preventive
+    cost: low
+
+  - id: gsa-quicksight-direct-sql-only
+    name: QuickSight — Direct SQL Query Only (No SPICE)
+    description: |
+      GSA OCISO approval for QuickSight is limited to Direct SQL Query mode.
+      SPICE in-memory storage is explicitly prohibited. Configure datasets to use
+      direct query connections only; disable SPICE refresh schedules.
+    control_type: preventive
+    cost: low
+
+  - id: gsa-aurora-rds-encryption
+    name: Aurora/RDS Encryption at Rest and In Transit
+    description: |
+      Specific OCISO caveat for Aurora/RDS: enable storage encryption at creation
+      (cannot be added post-creation), enforce ssl-enforcement parameter, and use
+      certificate rotation per AWS guidance.
+    control_type: preventive
+    cost: low
+
+  - id: gsa-ecs-task-iam-roles
+    name: ECS/Fargate Task IAM Roles (No Shared Credentials)
+    description: |
+      ECS tasks must use IAM task roles; never pass AWS credentials via environment
+      variables. Enable ECS task role credential vending. Disable instance metadata
+      v1 (IMDSv1) in favor of IMDSv2.
+    control_type: preventive
+    cost: low
+
+  - id: gsa-efs-kms-tls-mount
+    name: EFS Encryption with KMS and TLS Mount
+    description: |
+      EFS volumes must be encrypted at rest with KMS. Mount using amazon-efs-utils
+      with TLS enabled (--tls flag). Disable unauthenticated NFS access via resource
+      policy.
+    control_type: preventive
+    cost: low
+
+  - id: gsa-sagemaker-vpc-isolation
+    name: SageMaker VPC Isolation and No Public Endpoints
+    description: |
+      SageMaker notebooks, training jobs, and endpoints must run within a VPC with
+      no direct internet access. Disable public access on notebook instances.
+      Use PrivateLink for API access.
+    control_type: preventive
+    cost: medium
+
+  - id: gsa-third-party-fedramp-only
+    name: Third-Party Integrations Restricted to FedRAMP/GSA-Authorized
+    description: |
+      Third-party integrations (e.g., CodeBuild external sources, Firehose
+      destinations) must be limited to FedRAMP-authorized or GSA-authorized
+      services only. Blanket condition across multiple OCISO approvals.
+    control_type: preventive
+    cost: low
+
+  - id: gsa-denied-service-prohibition
+    name: Block Use of GSA-Denied AWS Services
+    description: |
+      Implement preventive controls (SCPs, IAM policy boundaries, AWS Config rules)
+      to detect and block provisioning of AWS services denied by GSA OCISO:
+      CodeBuild, CodePipeline, CodeCommit, EKS (GovCloud), ECR, Secrets Manager,
+      GuardDuty, MSK, SES, Transfer Family, CodeStar, ElasticSearch, Cloud9, XRAY,
+      PinPoint, Storage Gateway, Resource Access Manager, Certificate Manager.
+    control_type: preventive
+    cost: medium

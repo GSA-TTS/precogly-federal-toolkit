@@ -1,0 +1,100 @@
+mappings:
+  # Approved services
+  - component: azure-ml
+    threats:
+      - threat: azure-condition-violated
+        applies_to: component
+      - threat: azure-commercial-only-violation
+        applies_to: component
+
+  - component: azure-data-platform
+    threats:
+      - threat: azure-condition-violated
+        applies_to: component
+
+  - component: azure-cognitive-services
+    threats:
+      - threat: azure-condition-violated
+        applies_to: component
+
+  - component: azure-hdinsight
+    threats:
+      - threat: azure-condition-violated
+        applies_to: component
+      - threat: azure-commercial-only-violation
+        applies_to: component
+
+  - component: azure-analysis-services
+    threats:
+      - threat: azure-condition-violated
+        applies_to: component
+      - threat: azure-commercial-only-violation
+        applies_to: component
+
+  - component: azure-synapse-analytics
+    threats:
+      - threat: azure-condition-violated
+        applies_to: component
+      - threat: azure-commercial-only-violation
+        applies_to: component
+
+  - component: azure-iot-hub
+    threats:
+      - threat: azure-condition-violated
+        applies_to: component
+      - threat: azure-commercial-only-violation
+        applies_to: component
+
+  - component: azure-logic-apps
+    threats:
+      - threat: azure-condition-violated
+        applies_to: component
+      - threat: azure-commercial-only-violation
+        applies_to: component
+
+  - component: azure-service-fabric
+    threats:
+      - threat: azure-condition-violated
+        applies_to: component
+      - threat: azure-commercial-only-violation
+        applies_to: component
+
+  - component: azure-automation
+    threats:
+      - threat: azure-condition-violated
+        applies_to: component
+      - threat: azure-commercial-only-violation
+        applies_to: component
+
+  - component: azure-backup
+    threats:
+      - threat: azure-condition-violated
+        applies_to: component
+
+  - component: azure-site-recovery
+    threats:
+      - threat: azure-condition-violated
+        applies_to: component
+
+  - component: azure-bot-service
+    threats:
+      - threat: azure-condition-violated
+        applies_to: component
+
+  - component: azure-intune
+    threats:
+      - threat: azure-condition-violated
+        applies_to: component
+      - threat: azure-missing-govcloud-scope
+        applies_to: component
+
+  # Denied
+  - component: azure-bing-autosuggest
+    threats:
+      - threat: azure-unapproved-service
+        applies_to: component
+
+  - component: azure-bing-search
+    threats:
+      - threat: azure-unapproved-service
+        applies_to: component

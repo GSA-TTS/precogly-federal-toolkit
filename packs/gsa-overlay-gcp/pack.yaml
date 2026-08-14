@@ -1,0 +1,22 @@
+pack:
+  schema_version: 1
+  slug: gsa-overlay-gcp
+  name: GSA GCP Approval Overlay
+  description: |
+    GSA/OCISO approval status overlay for GCP services. Supplements the community
+    GCP pack with: (1) approved services missing from the base pack (Cloud Composer,
+    Data Fusion, BigQuery Data Transfer, Cloud Healthcare, Cloud Source Repositories,
+    Dialogflow CX, AutoML family, Talent Solution, Cloud Debugger), (2) GSA-specific
+    threats for condition violations and denied services (66 services not approved),
+    and (3) countermeasures from OCISO conditions.
+  version: 1.0.0
+  author: GSA/TTS
+  pack_type: technology
+  tags:
+    - gsa
+    - gcp
+    - fedramp
+    - approval
+    - overlay
+    - all
+  repository_url: https://github.com/GSA/cloud-sandbox

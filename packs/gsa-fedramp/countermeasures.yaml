@@ -1,0 +1,208 @@
+countermeasures:
+  # ── Cloud.gov ────────────────────────────────────────────────────────────────
+  - id: cloudgov-credhub
+    name: Use CredHub for Secrets
+    description: |
+      Store all credentials and sensitive configuration in Cloud.gov CredHub
+      rather than CF environment variables or manifests.
+    control_type: preventive
+    cost: low
+
+  - id: cloudgov-security-groups
+    name: Restrict CF Security Groups
+    description: |
+      Apply least-privilege application security groups to limit outbound traffic
+      from Cloud.gov application containers to only required endpoints.
+    control_type: preventive
+    cost: low
+
+  - id: cloudgov-internal-routes
+    name: Use Internal Routes for Backend Services
+    description: |
+      Expose backend services only on internal Cloud Foundry routes (apps.internal)
+      rather than public routes, preventing direct external access.
+    control_type: preventive
+    cost: low
+
+  - id: cloudgov-log-drain
+    name: Enable Cloud.gov Log Draining
+    description: |
+      Configure log draining to a SIEM or log aggregation service for all
+      application and platform events.
+    control_type: detective
+    cost: low
+
+  # ── GSA Pages ────────────────────────────────────────────────────────────────
+  - id: pages-dependency-scanning
+    name: Dependency and Supply Chain Scanning
+    description: |
+      Enable Dependabot or equivalent and pin GitHub Actions to commit SHA to
+      prevent supply chain injection in the build pipeline.
+    control_type: preventive
+    cost: low
+
+  - id: pages-branch-protection
+    name: Enforce Branch Protection with Required Reviews
+    description: |
+      Require at least one approving review and status checks before merging
+      to the publication branch.
+    control_type: preventive
+    cost: low
+
+  - id: pages-csp-headers
+    name: Content Security Policy Headers
+    description: |
+      Configure strict Content-Security-Policy headers on published pages to
+      prevent XSS and unauthorized script execution.
+    control_type: preventive
+    cost: low
+
+  # ── Login.gov ────────────────────────────────────────────────────────────────
+  - id: logingov-mfa-enforcement
+    name: Require MFA at Login.gov
+    description: |
+      Configure the Login.gov integration to require at least AAL2 (phishing-
+      resistant MFA) for all users accessing the application.
+    control_type: preventive
+    cost: low
+
+  - id: logingov-ial2
+    name: Require IAL2 Identity Proofing
+    description: |
+      Configure Login.gov to require IAL2 identity proofing for access to
+      systems handling PII or benefits data.
+    control_type: preventive
+    cost: medium
+
+  - id: logingov-oidc-validation
+    name: Validate OIDC Token Claims
+    description: |
+      Implement strict validation of audience, issuer, expiry, and signature on
+      all OIDC tokens received from Login.gov.
+    control_type: preventive
+    cost: low
+
+  # ── GitHub Enterprise ────────────────────────────────────────────────────────
+  - id: github-secret-scanning
+    name: Enable GitHub Secret Scanning
+    description: |
+      Enable GitHub secret scanning and push protection on all repositories to
+      detect and block committed credentials.
+    control_type: detective
+    cost: low
+
+  - id: github-oidc-actions
+    name: Use OIDC for Actions Cloud Auth
+    description: |
+      Use GitHub Actions OIDC federation instead of long-lived credentials for
+      cloud deployments, eliminating stored secrets.
+    control_type: preventive
+    cost: low
+
+  - id: github-branch-protection-rules
+    name: Enforce Branch Protection Rules
+    description: |
+      Require pull request reviews, status checks, and disallow force pushes and
+      deletions on protected branches.
+    control_type: preventive
+    cost: low
+
+  - id: github-codeql
+    name: CodeQL Static Analysis
+    description: |
+      Enable CodeQL or equivalent SAST scanning on all repositories, blocking
+      merges with high-severity findings.
+    control_type: detective
+    cost: low
+
+  # ── FCS data platform ───────────────────────────────────────────────────────────
+  - id: data-platform-table-acls
+    name: data platform Table ACLs
+    description: |
+      Enable Unity Catalog or Table ACLs to enforce column- and row-level access
+      control on Delta Lake tables.
+    control_type: preventive
+    cost: medium
+
+  - id: data-platform-ip-access-list
+    name: data platform IP Access Lists
+    description: |
+      Restrict data platform workspace access to approved IP ranges (GFE VPN, GSA
+      network) via IP access lists.
+    control_type: preventive
+    cost: low
+
+  - id: data-platform-audit-logging
+    name: data platform Audit Log Delivery
+    description: |
+      Enable data platform audit log delivery to S3/SIEM for monitoring all data
+      access, cluster operations, and user actions.
+    control_type: detective
+    cost: low
+
+  - id: data-platform-cluster-policies
+    name: Enforce data platform Cluster Policies
+    description: |
+      Apply cluster policies to enforce credential passthrough, disable DBConnect,
+      and restrict library installs to approved sources.
+    control_type: preventive
+    cost: medium
+
+  # ── GFE ──────────────────────────────────────────────────────────────────────
+  - id: gfe-edr
+    name: Endpoint Detection and Response (EDR)
+    description: |
+      Deploy GSA-approved EDR agent (CrowdStrike or equivalent) on all GFE
+      devices for real-time threat detection and containment.
+    control_type: detective
+    cost: medium
+
+  - id: gfe-dlp
+    name: Data Loss Prevention on GFE
+    description: |
+      Enforce DLP policies blocking transfer of sensitive data to removable
+      media or unapproved cloud storage from GFE.
+    control_type: preventive
+    cost: medium
+
+  - id: gfe-piv-auth
+    name: PIV / HSPD-12 Authentication
+    description: |
+      Require PIV card authentication for GFE login and access to GSA systems
+      per HSPD-12 and OMB M-11-11.
+    control_type: preventive
+    cost: low
+
+  # ── SFTP ─────────────────────────────────────────────────────────────────────
+  - id: sftp-ssh-key-auth
+    name: SSH Key Authentication Only
+    description: |
+      Disable password authentication on SFTP; require SSH key pairs managed
+      through AWS Transfer Family user management.
+    control_type: preventive
+    cost: low
+
+  - id: sftp-ip-allowlist
+    name: SFTP Source IP Allowlist
+    description: |
+      Restrict SFTP access to allowlisted partner agency IP ranges at the
+      security group or Transfer Family policy level.
+    control_type: preventive
+    cost: low
+
+  # ── Cross-cutting ────────────────────────────────────────────────────────────
+  - id: tls-enforcement
+    name: Enforce TLS 1.2+ for All Connections
+    description: |
+      Require TLS 1.2 minimum (prefer TLS 1.3) for all inter-service
+      communication; disable plaintext fallback.
+    control_type: preventive
+    cost: low
+
+  - id: network-segmentation
+    name: Network Segmentation and Zero Trust
+    description: |
+      Segment systems using VPCs, security groups, and service mesh mTLS to
+      enforce least-privilege network access between components.
+    control_type: preventive
+    cost: medium

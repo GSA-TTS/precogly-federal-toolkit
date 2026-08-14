@@ -1,0 +1,455 @@
+pack:
+  schema_version: 1
+  slug: nist-800-53-r5
+  name: NIST SP 800-53 Rev. 5
+  version: 5.0.0
+  pack_type: compliance
+  description: NIST 800-53 Rev 5 compliance requirements generated from parsed OSCAL files.
+  author: NIST
+  tags:
+    - compliance
+    - security
+    - government
+frameworks:
+  - slug: nist-800-53-r5
+    name: NIST SP 800-53 Rev. 5
+    version: '5'
+    issuer: NIST
+    description: Security and Privacy Controls for Information Systems and Organizations
+    requirements:
+      - section_code: AC-1
+        description: 'AC-1: Obligations to meet for this control.'
+      - section_code: AC-2
+        description: 'AC-2: Obligations to meet for this control.'
+      - section_code: AC-2(5)
+        description: 'AC-2(5): Obligations to meet for this control.'
+      - section_code: AC-3
+        description: 'AC-3: Obligations to meet for this control.'
+      - section_code: AC-6(5)
+        description: 'AC-6(5): Obligations to meet for this control.'
+      - section_code: AC-6(9)
+        description: 'AC-6(9): Obligations to meet for this control.'
+      - section_code: AC-20
+        description: 'AC-20: Obligations to meet for this control.'
+      - section_code: AC-20(1)
+        description: 'AC-20(1): Obligations to meet for this control.'
+      - section_code: AC-20(2)
+        description: 'AC-20(2): Obligations to meet for this control.'
+      - section_code: AT-1
+        description: 'AT-1: Obligations to meet for this control.'
+      - section_code: AT-2
+        description: 'AT-2: Obligations to meet for this control.'
+      - section_code: AT-2(2)
+        description: 'AT-2(2): Obligations to meet for this control.'
+      - section_code: AT-2(3)
+        description: 'AT-2(3): Obligations to meet for this control.'
+      - section_code: AT-3
+        description: 'AT-3: Obligations to meet for this control.'
+      - section_code: AT-3(5)
+        description: 'AT-3(5): Obligations to meet for this control.'
+      - section_code: AT-4
+        description: 'AT-4: Obligations to meet for this control.'
+      - section_code: AU-1
+        description: 'AU-1: Obligations to meet for this control.'
+      - section_code: AU-2
+        description: 'AU-2: Obligations to meet for this control.'
+      - section_code: AU-3
+        description: 'AU-3: Obligations to meet for this control.'
+      - section_code: AU-4
+        description: 'AU-4: Obligations to meet for this control.'
+      - section_code: AU-5
+        description: 'AU-5: Obligations to meet for this control.'
+      - section_code: AU-6
+        description: 'AU-6: Obligations to meet for this control.'
+      - section_code: AU-8
+        description: 'AU-8: Obligations to meet for this control.'
+      - section_code: AU-9
+        description: 'AU-9: Obligations to meet for this control.'
+      - section_code: AU-11
+        description: 'AU-11: Obligations to meet for this control.'
+      - section_code: AU-12
+        description: 'AU-12: Obligations to meet for this control.'
+      - section_code: CA-1
+        description: 'CA-1: Obligations to meet for this control.'
+      - section_code: CA-2
+        description: 'CA-2: Obligations to meet for this control.'
+      - section_code: CA-3
+        description: 'CA-3: Obligations to meet for this control.'
+      - section_code: CA-5
+        description: 'CA-5: Obligations to meet for this control.'
+      - section_code: CA-6
+        description: 'CA-6: Obligations to meet for this control.'
+      - section_code: CA-7
+        description: 'CA-7: Obligations to meet for this control.'
+      - section_code: CA-7(1)
+        description: 'CA-7(1): Obligations to meet for this control.'
+      - section_code: CA-7(4)
+        description: 'CA-7(4): Obligations to meet for this control.'
+      - section_code: CA-8
+        description: 'CA-8: Obligations to meet for this control.'
+      - section_code: CA-8(1)
+        description: 'CA-8(1): Obligations to meet for this control.'
+      - section_code: CA-9
+        description: 'CA-9: Obligations to meet for this control.'
+      - section_code: CM-1
+        description: 'CM-1: Obligations to meet for this control.'
+      - section_code: CM-2
+        description: 'CM-2: Obligations to meet for this control.'
+      - section_code: CM-2(2)
+        description: 'CM-2(2): Obligations to meet for this control.'
+      - section_code: CM-3(1)
+        description: 'CM-3(1): Obligations to meet for this control.'
+      - section_code: CM-4
+        description: 'CM-4: Obligations to meet for this control.'
+      - section_code: CM-5
+        description: 'CM-5: Obligations to meet for this control.'
+      - section_code: CM-6
+        description: 'CM-6: Obligations to meet for this control.'
+      - section_code: CM-6(1)
+        description: 'CM-6(1): Obligations to meet for this control.'
+      - section_code: CM-7
+        description: 'CM-7: Obligations to meet for this control.'
+      - section_code: CM-7(5)
+        description: 'CM-7(5): Obligations to meet for this control.'
+      - section_code: CM-8
+        description: 'CM-8: Obligations to meet for this control.'
+      - section_code: CM-10
+        description: 'CM-10: Obligations to meet for this control.'
+      - section_code: CM-11
+        description: 'CM-11: Obligations to meet for this control.'
+      - section_code: CP-1
+        description: 'CP-1: Obligations to meet for this control.'
+      - section_code: CP-2
+        description: 'CP-2: Obligations to meet for this control.'
+      - section_code: CP-3
+        description: 'CP-3: Obligations to meet for this control.'
+      - section_code: CP-4
+        description: 'CP-4: Obligations to meet for this control.'
+      - section_code: CP-7
+        description: 'CP-7: Obligations to meet for this control.'
+      - section_code: CP-7(1)
+        description: 'CP-7(1): Obligations to meet for this control.'
+      - section_code: CP-9
+        description: 'CP-9: Obligations to meet for this control.'
+      - section_code: CP-10
+        description: 'CP-10: Obligations to meet for this control.'
+      - section_code: IA-1
+        description: 'IA-1: Obligations to meet for this control.'
+      - section_code: IA-2
+        description: 'IA-2: Obligations to meet for this control.'
+      - section_code: IA-2(1)
+        description: 'IA-2(1): Obligations to meet for this control.'
+      - section_code: IA-2(2)
+        description: 'IA-2(2): Obligations to meet for this control.'
+      - section_code: IA-2(8)
+        description: 'IA-2(8): Obligations to meet for this control.'
+      - section_code: IA-2(12)
+        description: 'IA-2(12): Obligations to meet for this control.'
+      - section_code: IA-4
+        description: 'IA-4: Obligations to meet for this control.'
+      - section_code: IA-5
+        description: 'IA-5: Obligations to meet for this control.'
+      - section_code: IA-5(1)
+        description: 'IA-5(1): Obligations to meet for this control.'
+      - section_code: IA-11
+        description: 'IA-11: Obligations to meet for this control.'
+      - section_code: IR-1
+        description: 'IR-1: Obligations to meet for this control.'
+      - section_code: IR-2
+        description: 'IR-2: Obligations to meet for this control.'
+      - section_code: IR-2(3)
+        description: 'IR-2(3): Obligations to meet for this control.'
+      - section_code: IR-3
+        description: 'IR-3: Obligations to meet for this control.'
+      - section_code: IR-3(2)
+        description: 'IR-3(2): Obligations to meet for this control.'
+      - section_code: IR-4
+        description: 'IR-4: Obligations to meet for this control.'
+      - section_code: IR-4(1)
+        description: 'IR-4(1): Obligations to meet for this control.'
+      - section_code: IR-5
+        description: 'IR-5: Obligations to meet for this control.'
+      - section_code: IR-6
+        description: 'IR-6: Obligations to meet for this control.'
+      - section_code: IR-6(1)
+        description: 'IR-6(1): Obligations to meet for this control.'
+      - section_code: IR-6(3)
+        description: 'IR-6(3): Obligations to meet for this control.'
+      - section_code: IR-7
+        description: 'IR-7: Obligations to meet for this control.'
+      - section_code: IR-7(1)
+        description: 'IR-7(1): Obligations to meet for this control.'
+      - section_code: IR-8
+        description: 'IR-8: Obligations to meet for this control.'
+      - section_code: IR-8(1)
+        description: 'IR-8(1): Obligations to meet for this control.'
+      - section_code: MA-1
+        description: 'MA-1: Obligations to meet for this control.'
+      - section_code: MA-2
+        description: 'MA-2: Obligations to meet for this control.'
+      - section_code: MA-4
+        description: 'MA-4: Obligations to meet for this control.'
+      - section_code: MA-5
+        description: 'MA-5: Obligations to meet for this control.'
+      - section_code: MP-1
+        description: 'MP-1: Obligations to meet for this control.'
+      - section_code: MP-2
+        description: 'MP-2: Obligations to meet for this control.'
+      - section_code: MP-6
+        description: 'MP-6: Obligations to meet for this control.'
+      - section_code: MP-7
+        description: 'MP-7: Obligations to meet for this control.'
+      - section_code: PE-1
+        description: 'PE-1: Obligations to meet for this control.'
+      - section_code: PE-2
+        description: 'PE-2: Obligations to meet for this control.'
+      - section_code: PE-3
+        description: 'PE-3: Obligations to meet for this control.'
+      - section_code: PE-6
+        description: 'PE-6: Obligations to meet for this control.'
+      - section_code: PE-8
+        description: 'PE-8: Obligations to meet for this control.'
+      - section_code: PE-12
+        description: 'PE-12: Obligations to meet for this control.'
+      - section_code: PE-13
+        description: 'PE-13: Obligations to meet for this control.'
+      - section_code: PE-14
+        description: 'PE-14: Obligations to meet for this control.'
+      - section_code: PE-16
+        description: 'PE-16: Obligations to meet for this control.'
+      - section_code: PL-1
+        description: 'PL-1: Obligations to meet for this control.'
+      - section_code: PL-2
+        description: 'PL-2: Obligations to meet for this control.'
+      - section_code: PL-4
+        description: 'PL-4: Obligations to meet for this control.'
+      - section_code: PL-4(1)
+        description: 'PL-4(1): Obligations to meet for this control.'
+      - section_code: PL-8
+        description: 'PL-8: Obligations to meet for this control.'
+      - section_code: PL-9
+        description: 'PL-9: Obligations to meet for this control.'
+      - section_code: PL-10
+        description: 'PL-10: Obligations to meet for this control.'
+      - section_code: PL-11
+        description: 'PL-11: Obligations to meet for this control.'
+      - section_code: PM-1
+        description: 'PM-1: Obligations to meet for this control.'
+      - section_code: PM-2
+        description: 'PM-2: Obligations to meet for this control.'
+      - section_code: PM-3
+        description: 'PM-3: Obligations to meet for this control.'
+      - section_code: PM-4
+        description: 'PM-4: Obligations to meet for this control.'
+      - section_code: PM-5
+        description: 'PM-5: Obligations to meet for this control.'
+      - section_code: PM-5(1)
+        description: 'PM-5(1): Obligations to meet for this control.'
+      - section_code: PM-6
+        description: 'PM-6: Obligations to meet for this control.'
+      - section_code: PM-7
+        description: 'PM-7: Obligations to meet for this control.'
+      - section_code: PM-7(1)
+        description: 'PM-7(1): Obligations to meet for this control.'
+      - section_code: PM-8
+        description: 'PM-8: Obligations to meet for this control.'
+      - section_code: PM-9
+        description: 'PM-9: Obligations to meet for this control.'
+      - section_code: PM-10
+        description: 'PM-10: Obligations to meet for this control.'
+      - section_code: PM-11
+        description: 'PM-11: Obligations to meet for this control.'
+      - section_code: PM-12
+        description: 'PM-12: Obligations to meet for this control.'
+      - section_code: PM-13
+        description: 'PM-13: Obligations to meet for this control.'
+      - section_code: PM-14
+        description: 'PM-14: Obligations to meet for this control.'
+      - section_code: PM-15
+        description: 'PM-15: Obligations to meet for this control.'
+      - section_code: PM-16
+        description: 'PM-16: Obligations to meet for this control.'
+      - section_code: PM-16(1)
+        description: 'PM-16(1): Obligations to meet for this control.'
+      - section_code: PM-17
+        description: 'PM-17: Obligations to meet for this control.'
+      - section_code: PM-18
+        description: 'PM-18: Obligations to meet for this control.'
+      - section_code: PM-19
+        description: 'PM-19: Obligations to meet for this control.'
+      - section_code: PM-20
+        description: 'PM-20: Obligations to meet for this control.'
+      - section_code: PM-20(1)
+        description: 'PM-20(1): Obligations to meet for this control.'
+      - section_code: PM-21
+        description: 'PM-21: Obligations to meet for this control.'
+      - section_code: PM-22
+        description: 'PM-22: Obligations to meet for this control.'
+      - section_code: PM-23
+        description: 'PM-23: Obligations to meet for this control.'
+      - section_code: PM-24
+        description: 'PM-24: Obligations to meet for this control.'
+      - section_code: PM-25
+        description: 'PM-25: Obligations to meet for this control.'
+      - section_code: PM-26
+        description: 'PM-26: Obligations to meet for this control.'
+      - section_code: PM-27
+        description: 'PM-27: Obligations to meet for this control.'
+      - section_code: PM-28
+        description: 'PM-28: Obligations to meet for this control.'
+      - section_code: PM-29
+        description: 'PM-29: Obligations to meet for this control.'
+      - section_code: PM-30
+        description: 'PM-30: Obligations to meet for this control.'
+      - section_code: PM-30(1)
+        description: 'PM-30(1): Obligations to meet for this control.'
+      - section_code: PM-31
+        description: 'PM-31: Obligations to meet for this control.'
+      - section_code: PM-32
+        description: 'PM-32: Obligations to meet for this control.'
+      - section_code: PS-1
+        description: 'PS-1: Obligations to meet for this control.'
+      - section_code: PS-2
+        description: 'PS-2: Obligations to meet for this control.'
+      - section_code: PS-3
+        description: 'PS-3: Obligations to meet for this control.'
+      - section_code: PS-4
+        description: 'PS-4: Obligations to meet for this control.'
+      - section_code: PS-5
+        description: 'PS-5: Obligations to meet for this control.'
+      - section_code: PS-6
+        description: 'PS-6: Obligations to meet for this control.'
+      - section_code: PS-7
+        description: 'PS-7: Obligations to meet for this control.'
+      - section_code: PS-8
+        description: 'PS-8: Obligations to meet for this control.'
+      - section_code: PS-9
+        description: 'PS-9: Obligations to meet for this control.'
+      - section_code: PT-1
+        description: 'PT-1: Obligations to meet for this control.'
+      - section_code: PT-2
+        description: 'PT-2: Obligations to meet for this control.'
+      - section_code: PT-3
+        description: 'PT-3: Obligations to meet for this control.'
+      - section_code: PT-4
+        description: 'PT-4: Obligations to meet for this control.'
+      - section_code: PT-5
+        description: 'PT-5: Obligations to meet for this control.'
+      - section_code: PT-5(2)
+        description: 'PT-5(2): Obligations to meet for this control.'
+      - section_code: PT-6
+        description: 'PT-6: Obligations to meet for this control.'
+      - section_code: PT-6(1)
+        description: 'PT-6(1): Obligations to meet for this control.'
+      - section_code: PT-6(2)
+        description: 'PT-6(2): Obligations to meet for this control.'
+      - section_code: PT-7(1)
+        description: 'PT-7(1): Obligations to meet for this control.'
+      - section_code: PT-7(2)
+        description: 'PT-7(2): Obligations to meet for this control.'
+      - section_code: PT-8
+        description: 'PT-8: Obligations to meet for this control.'
+      - section_code: RA-1
+        description: 'RA-1: Obligations to meet for this control.'
+      - section_code: RA-2
+        description: 'RA-2: Obligations to meet for this control.'
+      - section_code: RA-3
+        description: 'RA-3: Obligations to meet for this control.'
+      - section_code: RA-5
+        description: 'RA-5: Obligations to meet for this control.'
+      - section_code: RA-5(2)
+        description: 'RA-5(2): Obligations to meet for this control.'
+      - section_code: RA-5(11)
+        description: 'RA-5(11): Obligations to meet for this control.'
+      - section_code: RA-7
+        description: 'RA-7: Obligations to meet for this control.'
+      - section_code: RA-8
+        description: 'RA-8: Obligations to meet for this control.'
+      - section_code: SA-1
+        description: 'SA-1: Obligations to meet for this control.'
+      - section_code: SA-2
+        description: 'SA-2: Obligations to meet for this control.'
+      - section_code: SA-3
+        description: 'SA-3: Obligations to meet for this control.'
+      - section_code: SA-3(2)
+        description: 'SA-3(2): Obligations to meet for this control.'
+      - section_code: SA-4
+        description: 'SA-4: Obligations to meet for this control.'
+      - section_code: SA-4(10)
+        description: 'SA-4(10): Obligations to meet for this control.'
+      - section_code: SA-5
+        description: 'SA-5: Obligations to meet for this control.'
+      - section_code: SA-8
+        description: 'SA-8: Obligations to meet for this control.'
+      - section_code: SA-9
+        description: 'SA-9: Obligations to meet for this control.'
+      - section_code: SA-11
+        description: 'SA-11: Obligations to meet for this control.'
+      - section_code: SA-22
+        description: 'SA-22: Obligations to meet for this control.'
+      - section_code: SC-1
+        description: 'SC-1: Obligations to meet for this control.'
+      - section_code: SC-5
+        description: 'SC-5: Obligations to meet for this control.'
+      - section_code: SC-7
+        description: 'SC-7: Obligations to meet for this control.'
+      - section_code: SC-8(1)
+        description: 'SC-8(1): Obligations to meet for this control.'
+      - section_code: SC-12
+        description: 'SC-12: Obligations to meet for this control.'
+      - section_code: SC-13
+        description: 'SC-13: Obligations to meet for this control.'
+      - section_code: SC-15
+        description: 'SC-15: Obligations to meet for this control.'
+      - section_code: SC-18
+        description: 'SC-18: Obligations to meet for this control.'
+      - section_code: SC-20
+        description: 'SC-20: Obligations to meet for this control.'
+      - section_code: SC-21
+        description: 'SC-21: Obligations to meet for this control.'
+      - section_code: SC-22
+        description: 'SC-22: Obligations to meet for this control.'
+      - section_code: SC-28(1)
+        description: 'SC-28(1): Obligations to meet for this control.'
+      - section_code: SC-39
+        description: 'SC-39: Obligations to meet for this control.'
+      - section_code: SI-1
+        description: 'SI-1: Obligations to meet for this control.'
+      - section_code: SI-2
+        description: 'SI-2: Obligations to meet for this control.'
+      - section_code: SI-3
+        description: 'SI-3: Obligations to meet for this control.'
+      - section_code: SI-4
+        description: 'SI-4: Obligations to meet for this control.'
+      - section_code: SI-4(2)
+        description: 'SI-4(2): Obligations to meet for this control.'
+      - section_code: SI-4(4)
+        description: 'SI-4(4): Obligations to meet for this control.'
+      - section_code: SI-4(5)
+        description: 'SI-4(5): Obligations to meet for this control.'
+      - section_code: SI-5
+        description: 'SI-5: Obligations to meet for this control.'
+      - section_code: SI-7
+        description: 'SI-7: Obligations to meet for this control.'
+      - section_code: SI-12
+        description: 'SI-12: Obligations to meet for this control.'
+      - section_code: SR-1
+        description: 'SR-1: Obligations to meet for this control.'
+      - section_code: SR-2
+        description: 'SR-2: Obligations to meet for this control.'
+      - section_code: SR-2(1)
+        description: 'SR-2(1): Obligations to meet for this control.'
+      - section_code: SR-3
+        description: 'SR-3: Obligations to meet for this control.'
+      - section_code: SR-5
+        description: 'SR-5: Obligations to meet for this control.'
+      - section_code: SR-8
+        description: 'SR-8: Obligations to meet for this control.'
+      - section_code: SR-10
+        description: 'SR-10: Obligations to meet for this control.'
+      - section_code: SR-11
+        description: 'SR-11: Obligations to meet for this control.'
+      - section_code: SR-11(1)
+        description: 'SR-11(1): Obligations to meet for this control.'
+      - section_code: SR-11(2)
+        description: 'SR-11(2): Obligations to meet for this control.'

@@ -1,0 +1,63 @@
+countermeasures:
+  - id: managed-cloud-service-crm-review
+    name: managed cloud service CRM Tenant Responsibility Review
+    description: |
+      Review the managed cloud service CRM v6 during SSPP authoring and document implementation
+      for all hybrid and system-specific controls. Map each tenant responsibility
+      to an SSPP section. Update after each significant platform change.
+    control_type: preventive
+    cost: low
+
+  - id: managed-cloud-service-inheritance-validation
+    name: Validate Control Inheritance Claims Against CRM
+    description: |
+      Cross-reference SSPP inheritance claims against the FCS Inheritance Model
+      YAML before ATO submission. Flag any control claimed as Fully Inherited
+      that CRM marks as Hybrid or System-Specific.
+    control_type: preventive
+    cost: low
+
+  - id: managed-cloud-service-network-segmentation
+    name: managed cloud service Tenant Network Segmentation
+    description: |
+      Use managed cloud service-provided security groups and network policies to isolate tenant
+      workloads. Do not permit direct pod-to-pod or instance-to-instance access
+      across tenant boundaries.
+    control_type: preventive
+    cost: low
+
+  - id: managed-cloud-service-secrets-management
+    name: Use managed cloud service Secrets Management (Not Env Vars)
+    description: |
+      Store all credentials through the managed cloud service-approved secrets path. Reference
+      secrets at runtime via environment injection from secure store, not
+      hardcoded values or plain-text environment variables.
+    control_type: preventive
+    cost: low
+
+  - id: managed-cloud-service-data-platform-acls
+    name: Enforce data platform Unity Catalog / Table ACLs
+    description: |
+      Configure Unity Catalog data governance or Table ACLs on all FCS data platform
+      workspaces to enforce column/row-level access control per tenant data
+      classification requirements.
+    control_type: preventive
+    cost: medium
+
+  - id: managed-cloud-service-ebta-threat-model
+    name: Conduct EBTA-Specific Threat Model for Novel Workloads
+    description: |
+      Perform a dedicated threat modeling exercise for EBTA workloads covering
+      novel risks (AI/ML model attacks, prompt injection, API abuse) before
+      deploying into the FCS boundary.
+    control_type: preventive
+    cost: medium
+
+  - id: vpcaas-full-control-baseline
+    name: Implement Full NIST 800-53 Moderate Baseline for VPCaaS
+    description: |
+      VPCaaS tenants must implement all NIST 800-53 Moderate controls as
+      system-specific. Use GSA Moderate SSPP template as baseline. Document
+      each control with implementation detail in the tenant SSPP.
+    control_type: preventive
+    cost: high

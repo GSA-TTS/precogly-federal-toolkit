@@ -1,0 +1,56 @@
+mappings:
+  - component: gcp-cloud-composer
+    threats:
+      - threat: gcp-condition-violated
+        applies_to: component
+
+  - component: gcp-data-fusion
+    threats:
+      - threat: gcp-condition-violated
+        applies_to: component
+
+  - component: gcp-bq-transfer
+    threats:
+      - threat: gcp-condition-violated
+        applies_to: component
+
+  - component: gcp-cloud-healthcare
+    threats:
+      - threat: gcp-condition-violated
+        applies_to: component
+
+  - component: gcp-cloud-source-repos
+    threats:
+      - threat: gcp-condition-violated
+        applies_to: component
+
+  - component: gcp-dialogflow-cx
+    threats:
+      - threat: gcp-condition-violated
+        applies_to: component
+      - threat: gcp-moderate-only-on-high-system
+        applies_to: component
+
+  - component: gcp-automl
+    threats:
+      - threat: gcp-condition-violated
+        applies_to: component
+      - threat: gcp-moderate-only-on-high-system
+        applies_to: component
+
+  - component: gcp-talent-solution
+    threats:
+      - threat: gcp-condition-violated
+        applies_to: component
+
+  - component: gcp-vpc-service-controls
+    threats:
+      - threat: gcp-ancillary-data-storage
+        applies_to: component
+      - threat: gcp-condition-violated
+        applies_to: component
+
+  - component: gcp-dlp
+    threats:
+      - threat: gcp-condition-violated
+        applies_to: component

@@ -1,0 +1,23 @@
+components:
+  - id: gsa-pages-component-definition
+    name: GSA Pages
+    category: external_system_actor
+    type: service
+    provider: gsa
+    description: GSA Pages is a platform that allows GSA employees and contractors to create and manage
+      websites for GSA programs and initiatives. It provides a user-friendly interface for content creation,
+      site management, and deployment while ensuring compliance with GSA security and accessibility standards.
+  - id: cloud-gov-lato-crm
+    name: Cloud.gov
+    category: external_system_actor
+    type: service
+    provider: gsa
+    description: The Cloud.gov Platform-as-a-Service
+  - id: gsa-common-controls-component-definition
+    name: GSA Common Controls
+    category: external_system_actor
+    type: service
+    provider: gsa
+    description: This Common Control Catalog (CCC) was developed in order to provide stakeholders with
+      the detailed information on what GSA considers inheritable common controls and who the responsible
+      party is for implementing the control.

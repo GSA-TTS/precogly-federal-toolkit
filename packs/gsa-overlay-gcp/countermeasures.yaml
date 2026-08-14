@@ -1,0 +1,61 @@
+countermeasures:
+  - id: gcp-kms-cmek
+    name: GCP CMEK with Cloud KMS
+    description: |
+      Use Customer-Managed Encryption Keys (CMEK) with Cloud KMS for GCP services
+      supporting CMEK (BigQuery, Cloud Storage, GKE, Pub/Sub, etc.). Required
+      for all GSA-approved GCP services handling federal data.
+    control_type: preventive
+    cost: medium
+
+  - id: gcp-vpc-service-perimeter
+    name: GCP VPC Service Controls Perimeter
+    description: |
+      Define a VPC Service Controls perimeter around GCP APIs to prevent data
+      exfiltration and enforce context-aware access. Particularly important for
+      BigQuery, Cloud Storage, and GKE workloads.
+    control_type: preventive
+    cost: medium
+
+  - id: gcp-private-google-access
+    name: GCP Private Google Access (No Public Endpoints)
+    description: |
+      Enable Private Google Access on VPC subnets so GCP service API calls
+      traverse internal Google networking rather than public internet.
+    control_type: preventive
+    cost: low
+
+  - id: gcp-audit-logging
+    name: GCP Audit Logging (Data Access + Admin Activity)
+    description: |
+      Enable Data Access audit logs (ADMIN_READ, DATA_READ, DATA_WRITE) for all
+      approved GCP services. Stream to centralized log bucket with locked retention.
+    control_type: detective
+    cost: low
+
+  - id: gcp-denied-service-block
+    name: Block Denied GCP Services via Organization Policy
+    description: |
+      Use GCP Organization Policy constraints (resource type restrictions,
+      allowed APIs) to prevent enabling GSA-denied GCP services within the
+      organization.
+    control_type: preventive
+    cost: low
+
+  - id: gcp-no-ancillary-sensitive-data
+    name: Prevent Sensitive Data Storage in Ancillary Services
+    description: |
+      Ancillary support services (VPC Service Controls, Security Command Center,
+      Access Transparency, Access Context Manager) must not be configured to store
+      or process sensitive federal data. Audit configurations quarterly.
+    control_type: preventive
+    cost: low
+
+  - id: gcp-iam-workload-identity
+    name: Use GCP Workload Identity Federation (No Service Account Keys)
+    description: |
+      Use Workload Identity Federation instead of downloaded service account
+      key files. Disable service account key creation via Organization Policy
+      where possible.
+    control_type: preventive
+    cost: low

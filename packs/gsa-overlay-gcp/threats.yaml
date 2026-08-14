@@ -1,0 +1,29 @@
+threats:
+  - id: gcp-unapproved-service
+    name: Use of GSA-Denied GCP Service
+    description: |
+      System incorporates a GCP service GSA OCISO has not approved. Using a
+      denied service violates GSA IT security policy and may result in an ATO
+      deficiency or POA&M finding.
+
+  - id: gcp-condition-violated
+    name: Approved GCP Service Used Outside OCISO Conditions
+    description: |
+      An OCISO-approved GCP service is deployed without meeting its conditions
+      (VPC isolation, audit logging, KMS encryption, no public access). Ancillary
+      support services must not directly store or process sensitive data.
+
+  - id: gcp-ancillary-data-storage
+    name: Ancillary Support Service Storing Sensitive Data
+    description: |
+      Several GCP services (VPC Service Controls, Security Command Center,
+      Access Transparency) are approved as ancillary support services only —
+      they must not directly store or process sensitive federal data. Violations
+      extend the system boundary beyond the approved scope.
+
+  - id: gcp-moderate-only-on-high-system
+    name: Moderate-Authorized Service on High-Impact System
+    description: |
+      GCP AutoML, Dialogflow, and other Moderate-authorized services are used
+      within a High-impact system boundary without additional authorization,
+      potentially insufficiently protecting high-impact data.

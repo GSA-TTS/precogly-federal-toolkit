@@ -1,0 +1,108 @@
+mappings:
+  - threat: cloudgov-misconfigured-app
+    countermeasures:
+      - cloudgov-security-groups
+      - cloudgov-internal-routes
+      - cloudgov-log-drain
+
+  - threat: cloudgov-shared-tenant-escape
+    countermeasures:
+      - cloudgov-security-groups
+      - network-segmentation
+
+  - threat: cloudgov-secret-exposure
+    countermeasures:
+      - cloudgov-credhub
+      - github-secret-scanning
+
+  - threat: pages-supply-chain
+    countermeasures:
+      - pages-dependency-scanning
+      - github-oidc-actions
+      - github-codeql
+
+  - threat: pages-content-injection
+    countermeasures:
+      - pages-branch-protection
+      - pages-csp-headers
+      - github-branch-protection-rules
+
+  - threat: logingov-account-takeover
+    countermeasures:
+      - logingov-mfa-enforcement
+      - logingov-oidc-validation
+
+  - threat: logingov-oidc-misconfiguration
+    countermeasures:
+      - logingov-oidc-validation
+
+  - threat: logingov-proofing-bypass
+    countermeasures:
+      - logingov-ial2
+      - logingov-mfa-enforcement
+
+  - threat: github-actions-pwn
+    countermeasures:
+      - github-oidc-actions
+      - pages-dependency-scanning
+      - github-branch-protection-rules
+
+  - threat: github-secret-leak
+    countermeasures:
+      - github-secret-scanning
+      - github-oidc-actions
+
+  - threat: github-branch-protection-bypass
+    countermeasures:
+      - github-branch-protection-rules
+      - pages-branch-protection
+
+  - threat: data-platform-data-exfiltration
+    countermeasures:
+      - data-platform-table-acls
+      - data-platform-audit-logging
+      - network-segmentation
+
+  - threat: data-platform-notebook-injection
+    countermeasures:
+      - data-platform-cluster-policies
+      - data-platform-table-acls
+
+  - threat: data-platform-cluster-misconfiguration
+    countermeasures:
+      - data-platform-cluster-policies
+      - data-platform-ip-access-list
+      - data-platform-audit-logging
+
+  - threat: common-controls-gap
+    countermeasures:
+      - network-segmentation
+
+  - threat: gfe-malware
+    countermeasures:
+      - gfe-edr
+      - gfe-piv-auth
+
+  - threat: gfe-removable-media
+    countermeasures:
+      - gfe-dlp
+      - gfe-edr
+
+  - threat: sftp-brute-force
+    countermeasures:
+      - sftp-ssh-key-auth
+      - sftp-ip-allowlist
+
+  - threat: sftp-path-traversal
+    countermeasures:
+      - sftp-ssh-key-auth
+      - sftp-ip-allowlist
+
+  - threat: dataflow-unencrypted
+    countermeasures:
+      - tls-enforcement
+
+  - threat: dataflow-unauthorized-access
+    countermeasures:
+      - network-segmentation
+      - tls-enforcement

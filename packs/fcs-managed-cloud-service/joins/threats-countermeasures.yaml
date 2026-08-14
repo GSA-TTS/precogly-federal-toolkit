@@ -1,0 +1,31 @@
+mappings:
+  - threat: managed-cloud-service-tenant-crm-gap
+    countermeasures:
+      - managed-cloud-service-crm-review
+      - managed-cloud-service-inheritance-validation
+
+  - threat: managed-cloud-service-inheritance-misclaim
+    countermeasures:
+      - managed-cloud-service-inheritance-validation
+      - managed-cloud-service-crm-review
+
+  - threat: managed-cloud-service-multi-tenant-isolation
+    countermeasures:
+      - managed-cloud-service-network-segmentation
+
+  - threat: vpcaas-unmanaged-controls
+    countermeasures:
+      - vpcaas-full-control-baseline
+      - managed-cloud-service-crm-review
+
+  - threat: managed-cloud-service-data-platform-overprivilege
+    countermeasures:
+      - managed-cloud-service-data-platform-acls
+
+  - threat: managed-cloud-service-ebta-novel-risk
+    countermeasures:
+      - managed-cloud-service-ebta-threat-model
+
+  - threat: managed-cloud-service-secret-in-env
+    countermeasures:
+      - managed-cloud-service-secrets-management

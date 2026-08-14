@@ -1,0 +1,18 @@
+# Pycache / compilation
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IDE and OS
+.DS_Store
+.idea/
+.vscode/
+
+# Python environment
+.venv/
+env/
+venv/
+
+# Ignore general build folders but preserve our versioned shell CDX
+build/*
+!build/generic-crm-shell.cdx.json

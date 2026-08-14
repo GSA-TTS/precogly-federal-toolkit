@@ -1,0 +1,15 @@
+pack:
+  schema_version: 1
+  slug: generic-crm-technology
+  name: Generic CRM Technology Pack
+  version: 1.0.0
+  pack_type: full
+  description: Standard threat library representing shared-responsibility boundaries.
+  author: GSA TTSE
+  depends_on:
+    - standards/nist-800-53-r5
+  tags:
+    - gsa
+    - crm
+    - compliance
+    - government

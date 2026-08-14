@@ -1,0 +1,162 @@
+components:
+  # ── Approved services missing from community Azure pack ─────────────────────
+
+  - id: azure-ml
+    name: Azure Machine Learning Services
+    category: process
+    type: ML Platform
+    provider: azure
+    description: |
+      [GSA: Approved Azure Commercial & Government]
+      Managed ML platform for model training, deployment, and MLOps pipelines.
+      FedRAMP Authorized on both Azure Commercial and Azure Government.
+
+  - id: azure-data-platform
+    name: Azure data platform
+    category: process
+    type: Analytics Platform
+    provider: azure
+    description: |
+      [GSA: Approved Azure Commercial & Government]
+      Managed Apache Spark analytics platform. FedRAMP Authorized on Azure
+      Commercial Cloud and Azure Government.
+
+  - id: azure-cognitive-services
+    name: Azure Cognitive Services
+    category: process
+    type: AI / ML APIs
+    provider: azure
+    description: |
+      [GSA: Approved Azure Commercial & Government]
+      Suite of AI APIs (Vision, Speech, Language, Decision). FedRAMP Authorized
+      on Azure Commercial and Government. Content Moderator included.
+
+  - id: azure-hdinsight
+    name: Azure HDInsight
+    category: process
+    type: Managed Hadoop / Spark
+    provider: azure
+    description: |
+      [GSA: Approved Azure Government]
+      Managed open-source analytics clusters (Hadoop, Spark, Kafka, HBase).
+      FedRAMP Authorized on Azure Government only.
+
+  - id: azure-analysis-services
+    name: Azure Analysis Services
+    category: process
+    type: OLAP / Semantic Model
+    provider: azure
+    description: |
+      [GSA: Approved Azure Government]
+      Managed enterprise-grade semantic modeling (tabular OLAP). FedRAMP
+      Authorized on Azure Government.
+
+  - id: azure-synapse-analytics
+    name: Azure SQL Data Warehouse / Synapse
+    category: datastore
+    type: Data Warehouse
+    provider: azure
+    description: |
+      [GSA: Approved Azure Government]
+      Unified analytics platform combining data warehousing and big data.
+      FedRAMP Authorized on Azure Government.
+
+  - id: azure-iot-hub
+    name: Azure IoT Hub
+    category: process
+    type: IoT Messaging
+    provider: azure
+    description: |
+      [GSA: Approved Azure Government]
+      Managed IoT device connectivity and message routing. FedRAMP Authorized
+      on Azure Government.
+
+  - id: azure-logic-apps
+    name: Azure Logic Apps
+    category: process
+    type: Workflow Automation
+    provider: azure
+    description: |
+      [GSA: Approved Azure Government]
+      Serverless workflow integration service. FedRAMP Authorized on Azure
+      Government.
+
+  - id: azure-service-fabric
+    name: Azure Service Fabric
+    category: process
+    type: Microservices Platform
+    provider: azure
+    description: |
+      [GSA: Approved Azure Government]
+      Distributed systems platform for microservices and containers. FedRAMP
+      Authorized on Azure Government.
+
+  - id: azure-automation
+    name: Azure Automation
+    category: process
+    type: Runbook / Configuration
+    provider: azure
+    description: |
+      [GSA: Approved Azure Government]
+      Process automation, update management, and DSC configuration service.
+      FedRAMP Authorized on Azure Government.
+
+  - id: azure-backup
+    name: Azure Backup
+    category: process
+    type: Backup / Recovery
+    provider: azure
+    description: |
+      [GSA: Approved Azure Government]
+      Managed backup service for VMs, SQL, files, blobs. FedRAMP Authorized
+      on Azure Government.
+
+  - id: azure-site-recovery
+    name: Azure Site Recovery
+    category: process
+    type: Disaster Recovery
+    provider: azure
+    description: |
+      [GSA: Approved Azure Government]
+      Managed DR orchestration replicating workloads to secondary regions.
+      FedRAMP Authorized on Azure Government.
+
+  - id: azure-bot-service
+    name: Azure Bot Service
+    category: process
+    type: Conversational AI
+    provider: azure
+    description: |
+      [GSA: Approved Azure Commercial & Government]
+      Managed bot development platform integrating with Teams, web, and other
+      channels. FedRAMP Authorized on both clouds.
+
+  - id: azure-intune
+    name: Microsoft Intune
+    category: process
+    type: Mobile Device Management
+    provider: azure
+    description: |
+      [GSA: Approved Azure Government]
+      Cloud-based endpoint management for devices, apps, and policies. FedRAMP
+      Authorized on Azure Government.
+
+  # ── Denied services ──────────────────────────────────────────────────────────
+  - id: azure-bing-autosuggest
+    name: Bing Autosuggest (GSA Denied)
+    category: process
+    type: AI API
+    provider: azure
+    description: |
+      [GSA: DENIED — Not Approved]
+      Bing Autosuggest API. Not approved by GSA OCISO.
+
+  - id: azure-bing-search
+    name: Bing Search APIs (GSA Denied)
+    category: process
+    type: AI API
+    provider: azure
+    description: |
+      [GSA: DENIED — Not Approved]
+      Bing Entity Search, News Search, Web Search, Spell Check APIs.
+      Not approved by GSA OCISO.

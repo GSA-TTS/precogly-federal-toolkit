@@ -1,0 +1,92 @@
+mappings:
+  - component: cloudgov
+    threats:
+      - threat: cloudgov-misconfigured-app
+        applies_to: component
+      - threat: cloudgov-shared-tenant-escape
+        applies_to: component
+      - threat: cloudgov-secret-exposure
+        applies_to: component
+      - threat: dataflow-unencrypted
+        applies_to: flow
+      - threat: dataflow-unauthorized-access
+        applies_to: flow
+
+  - component: gsa-pages
+    threats:
+      - threat: pages-supply-chain
+        applies_to: component
+      - threat: pages-content-injection
+        applies_to: component
+      - threat: dataflow-unauthorized-access
+        applies_to: flow
+
+  - component: logingov
+    threats:
+      - threat: logingov-account-takeover
+        applies_to: component
+      - threat: logingov-oidc-misconfiguration
+        applies_to: component
+      - threat: logingov-proofing-bypass
+        applies_to: component
+      - threat: dataflow-unencrypted
+        applies_to: flow
+
+  - component: gsa-okta
+    threats:
+      - threat: logingov-account-takeover
+        applies_to: component
+      - threat: logingov-oidc-misconfiguration
+        applies_to: component
+      - threat: dataflow-unencrypted
+        applies_to: flow
+
+  - component: github-enterprise
+    threats:
+      - threat: github-actions-pwn
+        applies_to: component
+      - threat: github-secret-leak
+        applies_to: component
+      - threat: github-branch-protection-bypass
+        applies_to: component
+
+  - component: fcs-data-platform
+    threats:
+      - threat: data-platform-data-exfiltration
+        applies_to: component
+      - threat: data-platform-notebook-injection
+        applies_to: component
+      - threat: data-platform-cluster-misconfiguration
+        applies_to: component
+      - threat: dataflow-unencrypted
+        applies_to: flow
+      - threat: dataflow-unauthorized-access
+        applies_to: flow
+
+  - component: gsa-common-controls
+    threats:
+      - threat: common-controls-gap
+        applies_to: component
+
+  - component: gsa-aws-govcloud
+    threats:
+      - threat: dataflow-unencrypted
+        applies_to: flow
+      - threat: dataflow-unauthorized-access
+        applies_to: flow
+
+  - component: gfe-developer
+    threats:
+      - threat: gfe-malware
+        applies_to: component
+      - threat: gfe-removable-media
+        applies_to: component
+
+  - component: sftp-transfer
+    threats:
+      - threat: sftp-brute-force
+        applies_to: component
+      - threat: sftp-path-traversal
+        applies_to: component
+      - threat: dataflow-unencrypted
+        applies_to: flow

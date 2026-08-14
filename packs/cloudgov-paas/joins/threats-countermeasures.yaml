@@ -1,0 +1,34 @@
+mappings:
+  - threat: cloudgov-app-misconfiguration
+    countermeasures:
+      - cloudgov-internal-routes
+      - cloudgov-space-roles
+      - cloudgov-log-drain
+
+  - threat: cloudgov-secret-in-manifest
+    countermeasures:
+      - cloudgov-credhub-secrets
+
+  - threat: cloudgov-service-binding-overshare
+    countermeasures:
+      - cloudgov-per-app-service-binding
+
+  - threat: cloudgov-dependency-vulnerability
+    countermeasures:
+      - cloudgov-buildpack-currency
+
+  - threat: cloudgov-org-space-isolation-gap
+    countermeasures:
+      - cloudgov-space-roles
+
+  - threat: cloudgov-pages-supply-chain
+    countermeasures:
+      - cloudgov-pages-branch-protection
+
+  - threat: cloudgov-crm-control-gap
+    countermeasures:
+      - cloudgov-crm-review
+
+  - threat: cloudgov-non-inheritable-control
+    countermeasures:
+      - cloudgov-crm-review

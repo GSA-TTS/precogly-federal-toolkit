@@ -1,0 +1,24 @@
+pack:
+  schema_version: 1
+  slug: gsa-overlay-azure
+  name: GSA Azure Approval Overlay
+  description: |
+    GSA/OCISO approval status overlay for Azure services. Supplements the community
+    Azure pack with: (1) approved services missing from the base pack (Machine Learning
+    Services, data platform, Cognitive Services, HDInsight, Analysis Services, Power BI,
+    SQL Data Warehouse, IoT Hub, Logic Apps, Service Fabric, Automation, Backup,
+    Site Recovery), (2) GSA-specific threats for condition violations and use of
+    denied services (119 services denied including all Bing APIs), and (3)
+    countermeasures derived from OCISO conditions.
+  version: 1.0.0
+  author: GSA/TTS
+  pack_type: technology
+  tags:
+    - gsa
+    - azure
+    - fedramp
+    - azure-government
+    - approval
+    - overlay
+    - all
+  repository_url: https://github.com/GSA/cloud-sandbox

@@ -1,0 +1,28 @@
+threats:
+  - id: azure-unapproved-service
+    name: Use of GSA-Denied Azure Service
+    description: |
+      System incorporates an Azure service GSA OCISO has explicitly denied
+      (e.g., Bing APIs). Using a denied service violates GSA IT security policy
+      and may result in an ATO deficiency or POA&M finding.
+
+  - id: azure-commercial-only-violation
+    name: Azure Government-Only Service in Commercial Environment
+    description: |
+      Several Azure services are approved for Azure Government only. Deploying
+      them in Azure Commercial Cloud without additional authorization violates
+      the scope of the OCISO approval.
+
+  - id: azure-condition-violated
+    name: Approved Azure Service Used Outside OCISO Conditions
+    description: |
+      An OCISO-approved Azure service is configured without meeting documented
+      conditions (encryption at rest/transit, private endpoints, RBAC, audit
+      logging, no public internet exposure).
+
+  - id: azure-missing-govcloud-scope
+    name: Azure Government Boundary Not Used for Required Services
+    description: |
+      Services requiring Azure Government (for FISMA Moderate/High workloads)
+      are deployed in Azure Commercial, reducing inherited FedRAMP controls
+      and potentially invalidating the system ATO.

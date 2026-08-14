@@ -1,0 +1,60 @@
+mappings:
+  - component: cloudgov-platform
+    threats:
+      - threat: cloudgov-org-space-isolation-gap
+        applies_to: component
+      - threat: cloudgov-crm-control-gap
+        applies_to: component
+      - threat: cloudgov-non-inheritable-control
+        applies_to: component
+
+  - component: cloudgov-apps
+    threats:
+      - threat: cloudgov-app-misconfiguration
+        applies_to: component
+      - threat: cloudgov-secret-in-manifest
+        applies_to: component
+      - threat: cloudgov-dependency-vulnerability
+        applies_to: component
+      - threat: cloudgov-org-space-isolation-gap
+        applies_to: component
+
+  - component: cloudgov-rds
+    threats:
+      - threat: cloudgov-service-binding-overshare
+        applies_to: component
+      - threat: cloudgov-crm-control-gap
+        applies_to: component
+
+  - component: cloudgov-s3
+    threats:
+      - threat: cloudgov-service-binding-overshare
+        applies_to: component
+      - threat: cloudgov-app-misconfiguration
+        applies_to: component
+
+  - component: cloudgov-redis
+    threats:
+      - threat: cloudgov-service-binding-overshare
+        applies_to: component
+
+  - component: cloudgov-elasticsearch
+    threats:
+      - threat: cloudgov-service-binding-overshare
+        applies_to: component
+
+  - component: cloudgov-cdn
+    threats:
+      - threat: cloudgov-app-misconfiguration
+        applies_to: component
+      - threat: cloudgov-dependency-vulnerability
+        applies_to: flow
+
+  - component: cloudgov-pages
+    threats:
+      - threat: cloudgov-pages-supply-chain
+        applies_to: component
+      - threat: cloudgov-crm-control-gap
+        applies_to: component
+      - threat: cloudgov-non-inheritable-control
+        applies_to: component

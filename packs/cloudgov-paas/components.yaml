@@ -1,0 +1,91 @@
+components:
+  # ── Platform Layer ────────────────────────────────────────────────────────────
+  - id: cloudgov-platform
+    name: Cloud.gov Platform (PaaS Runtime)
+    category: process
+    type: PaaS Platform
+    provider: gsa
+    description: |
+      GSA-operated Cloud Foundry PaaS on AWS GovCloud. FedRAMP High authorized.
+      Provides managed Diego cell compute, BOSH-managed infrastructure, UAA
+      identity, CredHub secrets, and platform-level controls inherited by all
+      tenant applications. GSA applications may inherit Cloud.gov's control
+      implementations; non-GSA agencies must inherit separately.
+
+  - id: cloudgov-apps
+    name: Cloud.gov Application (Tenant Workload)
+    category: process
+    type: Hosted Application
+    provider: gsa
+    description: |
+      Tenant application running within a Cloud.gov org/space. Inherits
+      platform controls from Cloud.gov. Tenant team remains responsible for
+      application-layer controls: code security, dependency management,
+      application-level access control, and configuration of bound services.
+
+  # ── Managed Service Tiers ─────────────────────────────────────────────────────
+  - id: cloudgov-rds
+    name: Cloud.gov RDS (Managed PostgreSQL / MySQL)
+    category: datastore
+    type: Managed Relational Database
+    provider: gsa
+    description: |
+      Cloud.gov managed RDS service plan providing PostgreSQL or MySQL databases
+      on AWS GovCloud. Encryption at rest (KMS) and in transit (TLS) provided
+      by platform. Tenant is responsible for application-level data access
+      control and backup retention policy selection.
+
+  - id: cloudgov-s3
+    name: Cloud.gov S3 (Managed Object Storage)
+    category: datastore
+    type: Managed Object Storage
+    provider: gsa
+    description: |
+      Cloud.gov managed S3 service plan providing GovCloud S3 buckets with
+      server-side encryption (SSE-KMS) and IAM-scoped access credentials.
+      Tenant is responsible for bucket-level data classification and access
+      patterns.
+
+  - id: cloudgov-redis
+    name: Cloud.gov Redis (Managed Cache)
+    category: datastore
+    type: Managed Cache
+    provider: gsa
+    description: |
+      Cloud.gov managed Redis service plan providing ElastiCache Redis on
+      GovCloud with encryption at rest and in transit. Tenant is responsible
+      for application-level session and cache data classification.
+
+  - id: cloudgov-elasticsearch
+    name: Cloud.gov Elasticsearch (Managed Search)
+    category: datastore
+    type: Managed Search
+    provider: gsa
+    description: |
+      Cloud.gov managed Elasticsearch/OpenSearch service plan on GovCloud.
+      Encryption at rest and in transit provided by platform. Tenant is
+      responsible for index-level access control and data sensitivity review.
+
+  - id: cloudgov-cdn
+    name: Cloud.gov CDN / External Domain Service
+    category: process
+    type: CDN / TLS Termination
+    provider: gsa
+    description: |
+      Cloud.gov CDN service routing traffic through CloudFront with automatic
+      TLS certificate management (Let's Encrypt). Provides WAF-level edge
+      caching and DDoS mitigation via AWS Shield Standard. Tenant is
+      responsible for configuring custom domains and origin headers.
+
+  # ── GSA Pages (built on Cloud.gov) ──────────────────────────────────────────
+  - id: cloudgov-pages
+    name: GSA Pages (Static Site Hosting)
+    category: process
+    type: Static Hosting
+    provider: gsa
+    description: |
+      GSA Pages (formerly Federalist) static site publishing platform built on
+      Cloud.gov infrastructure. Builds and serves Jekyll/Hugo/static sites from
+      GitHub. FedRAMP Moderate authorized. Tenant (website manager) is
+      responsible for content, GitHub branch protection, and contributor access
+      management per GSA Pages CRM.

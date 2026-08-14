@@ -1,0 +1,38 @@
+mappings:
+  - threat: gsa-unapproved-service
+    countermeasures:
+      - gsa-denied-service-prohibition
+
+  - threat: gsa-condition-violated
+    countermeasures:
+      - gsa-encryption-at-rest
+      - gsa-tls-in-transit
+      - gsa-least-privilege-iam
+      - gsa-sandbox-tags
+      - gsa-no-public-exposure
+      - gsa-service-logging
+
+  - threat: aws-quicksight-spice-violation
+    countermeasures:
+      - gsa-quicksight-direct-sql-only
+
+  - threat: aws-govcloud-scope-violation
+    countermeasures:
+      - gsa-govcloud-deployment
+
+  - threat: aws-missing-sandbox-tags
+    countermeasures:
+      - gsa-sandbox-tags
+
+  - threat: aws-encryption-condition-unmet
+    countermeasures:
+      - gsa-encryption-at-rest
+      - gsa-tls-in-transit
+      - gsa-aurora-rds-encryption
+      - gsa-efs-kms-tls-mount
+
+  - threat: aws-public-exposure-violation
+    countermeasures:
+      - gsa-no-public-exposure
+      - gsa-sagemaker-vpc-isolation
+      - gsa-ecs-task-iam-roles

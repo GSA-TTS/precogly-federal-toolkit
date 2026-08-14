@@ -1,0 +1,513 @@
+mappings:
+  - component: cloud-gov-lato-crm
+    threats:
+      - threat: cloud-gov-lato-crm-crm-ac-2
+        applies_to: component
+      - threat: cloud-gov-lato-crm-crm-ac-3
+        applies_to: component
+      - threat: cloud-gov-lato-crm-crm-ac-6-5
+        applies_to: component
+      - threat: cloud-gov-lato-crm-crm-ac-6-9
+        applies_to: component
+      - threat: cloud-gov-lato-crm-crm-au-2
+        applies_to: component
+      - threat: cloud-gov-lato-crm-crm-ca-7
+        applies_to: component
+      - threat: cloud-gov-lato-crm-crm-cm-2-2
+        applies_to: component
+      - threat: cloud-gov-lato-crm-crm-cm-6-1
+        applies_to: component
+      - threat: cloud-gov-lato-crm-crm-cp-7-1
+        applies_to: component
+      - threat: cloud-gov-lato-crm-crm-ia-2
+        applies_to: component
+      - threat: cloud-gov-lato-crm-crm-ia-2-1
+        applies_to: component
+      - threat: cloud-gov-lato-crm-crm-ia-2-2
+        applies_to: component
+      - threat: cloud-gov-lato-crm-crm-sc-7
+        applies_to: component
+      - threat: cloud-gov-lato-crm-crm-sc-8-1
+        applies_to: component
+      - threat: cloud-gov-lato-crm-crm-sc-28-1
+        applies_to: component
+      - threat: cloud-gov-lato-crm-crm-si-4
+        applies_to: component
+      - threat: cloud-gov-lato-crm-crm-si-4-2
+        applies_to: component
+      - threat: cloud-gov-lato-crm-crm-si-4-4
+        applies_to: component
+      - threat: cloud-gov-lato-crm-crm-si-4-5
+        applies_to: component
+  - component: gsa-common-controls-component-definition
+    threats:
+      - threat: gsa-common-controls-component-definition-crm-ac-1
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-ac-2-5
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-ac-20
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-ac-20-1
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-ac-20-2
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-at-1
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-at-2
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-at-2-2
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-at-2-3
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-at-3
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-at-3-5
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-at-4
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-au-1
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-ca-1
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-ca-6
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-ca-7
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-ca-7-1
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-ca-7-4
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-ca-8
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-ca-8-1
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-cm-1
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-cp-1
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-ia-1
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-ir-1
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-ir-2
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-ir-2-3
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-ir-3
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-ir-3-2
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-ir-4
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-ir-4-1
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-ir-5
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-ir-6
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-ir-6-1
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-ir-6-3
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-ir-7
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-ir-7-1
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-ir-8
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-ir-8-1
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-ma-1
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-mp-1
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-mp-7
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pe-1
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pl-1
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pl-4
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pl-4-1
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pl-8
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pl-9
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pl-10
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pl-11
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pm-1
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pm-2
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pm-3
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pm-4
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pm-5
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pm-5-1
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pm-6
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pm-7
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pm-7-1
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pm-8
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pm-9
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pm-10
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pm-11
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pm-12
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pm-13
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pm-14
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pm-15
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pm-16
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pm-16-1
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pm-17
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pm-18
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pm-19
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pm-20
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pm-20-1
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pm-21
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pm-22
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pm-23
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pm-24
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pm-25
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pm-26
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pm-27
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pm-28
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pm-29
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pm-30
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pm-30-1
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pm-31
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pm-32
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-ps-1
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-ps-2
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-ps-3
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-ps-4
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-ps-5
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-ps-6
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-ps-7
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-ps-8
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-ps-9
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pt-1
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pt-2
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pt-3
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pt-4
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pt-5
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pt-5-2
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pt-6
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pt-6-1
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pt-6-2
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pt-7-1
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pt-7-2
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-pt-8
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-ra-1
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-ra-3
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-sa-1
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-sa-4
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-sa-4-10
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-sa-8
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-sa-9
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-sc-1
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-sc-18
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-si-1
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-si-5
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-sr-1
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-sr-2-1
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-sr-5
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-sr-11
+        applies_to: component
+      - threat: gsa-common-controls-component-definition-crm-sr-11-1
+        applies_to: component
+  - component: gsa-pages-component-definition
+    threats:
+      - threat: gsa-pages-component-definition-crm-sc-7
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-ac-6-5
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-cm-2-2
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-cm-6-1
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-cp-7-1
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-si-4-2
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-si-4-5
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-ir-3
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-sc-28-1
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-pl-2
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-pl-9
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-pl-8
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-pl-11
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-ac-2
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-ac-3
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-ca-5
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-ca-9
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-ca-7-4
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-ca-2
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-ca-3
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-ia-2
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-ia-5-1
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-ia-2-1
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-ia-2-12
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-ia-2-2
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-ia-4
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-ia-2-8
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-ia-5
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-ia-11
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-cm-2
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-cp-2
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-mp-2
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-sc-20
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-sc-21
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-sc-22
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-sc-5
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-ra-2
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-ra-7
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-ra-8
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-sa-3-2
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-sa-8
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-sa-9
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-sa-2
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-sa-3
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-sa-4
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-sa-5
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-au-5
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-au-4
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-au-11
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-au-9
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-au-12
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-au-8
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-au-3
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-au-6
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-au-2
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-cm-10
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-cm-11
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-cm-5
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-cm-8
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-cm-6
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-cm-7
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-cp-10
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-cp-9
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-cp-7
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-cp-3
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-cp-4
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-ca-7
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-ca-8
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-cm-3-1
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-cm-4
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-cm-7-5
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-ma-2
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-ma-4
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-ma-5
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-mp-6
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-pe-12
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-pe-13
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-pe-14
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-pe-16
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-pe-2
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-pe-3
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-pe-6
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-pe-8
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-pl-10
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-ra-5
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-ra-5-2
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-ra-5-11
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-sa-11
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-sa-22
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-sc-12
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-sc-13
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-sc-15
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-sc-20
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-sc-21
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-sc-22
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-sc-39
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-sc-5
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-si-12
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-si-4
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-si-2
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-si-3
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-si-4-4
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-si-7
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-sr-10
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-sr-11
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-sr-11-1
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-sr-11-2
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-sr-2
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-sr-3
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-sr-8
+        applies_to: component
+      - threat: gsa-pages-component-definition-crm-ca-6
+        applies_to: component

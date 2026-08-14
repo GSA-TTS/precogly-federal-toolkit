@@ -1,0 +1,159 @@
+mappings:
+  # Approved services — condition threat applies to all
+  - component: rds
+    threats:
+      - threat: gsa-condition-violated
+        applies_to: component
+      - threat: aws-govcloud-scope-violation
+        applies_to: component
+      - threat: aws-encryption-condition-unmet
+        applies_to: component
+      - threat: aws-missing-sandbox-tags
+        applies_to: component
+
+  - component: aurora
+    threats:
+      - threat: gsa-condition-violated
+        applies_to: component
+      - threat: aws-govcloud-scope-violation
+        applies_to: component
+      - threat: aws-encryption-condition-unmet
+        applies_to: component
+      - threat: aws-missing-sandbox-tags
+        applies_to: component
+
+  - component: elasticache
+    threats:
+      - threat: gsa-condition-violated
+        applies_to: component
+      - threat: aws-encryption-condition-unmet
+        applies_to: component
+      - threat: aws-missing-sandbox-tags
+        applies_to: component
+
+  - component: kms
+    threats:
+      - threat: gsa-condition-violated
+        applies_to: component
+      - threat: aws-missing-sandbox-tags
+        applies_to: component
+
+  - component: ecs-fargate
+    threats:
+      - threat: gsa-condition-violated
+        applies_to: component
+      - threat: aws-public-exposure-violation
+        applies_to: component
+      - threat: aws-missing-sandbox-tags
+        applies_to: component
+
+  - component: efs
+    threats:
+      - threat: gsa-condition-violated
+        applies_to: component
+      - threat: aws-encryption-condition-unmet
+        applies_to: component
+      - threat: aws-missing-sandbox-tags
+        applies_to: component
+
+  - component: sagemaker
+    threats:
+      - threat: gsa-condition-violated
+        applies_to: component
+      - threat: aws-public-exposure-violation
+        applies_to: component
+      - threat: aws-missing-sandbox-tags
+        applies_to: component
+
+  - component: kinesis-firehose
+    threats:
+      - threat: gsa-condition-violated
+        applies_to: component
+      - threat: aws-missing-sandbox-tags
+        applies_to: component
+
+  - component: quicksight
+    threats:
+      - threat: aws-quicksight-spice-violation
+        applies_to: component
+      - threat: gsa-condition-violated
+        applies_to: component
+      - threat: aws-missing-sandbox-tags
+        applies_to: component
+
+  - component: ssm-incident-manager
+    threats:
+      - threat: gsa-condition-violated
+        applies_to: component
+
+  - component: firewall-manager
+    threats:
+      - threat: gsa-condition-violated
+        applies_to: component
+
+  - component: glacier
+    threats:
+      - threat: gsa-condition-violated
+        applies_to: component
+      - threat: aws-encryption-condition-unmet
+        applies_to: component
+
+  - component: snowball-edge
+    threats:
+      - threat: gsa-condition-violated
+        applies_to: component
+
+  - component: import-export
+    threats:
+      - threat: gsa-condition-violated
+        applies_to: component
+      - threat: aws-govcloud-scope-violation
+        applies_to: component
+
+  # Denied services — unapproved threat applies
+  - component: aws-codebuild
+    threats:
+      - threat: gsa-unapproved-service
+        applies_to: component
+
+  - component: aws-codepipeline
+    threats:
+      - threat: gsa-unapproved-service
+        applies_to: component
+
+  - component: aws-transfer-family
+    threats:
+      - threat: gsa-unapproved-service
+        applies_to: component
+
+  - component: aws-secrets-manager
+    threats:
+      - threat: gsa-unapproved-service
+        applies_to: component
+
+  - component: aws-guardduty
+    threats:
+      - threat: gsa-unapproved-service
+        applies_to: component
+
+  - component: aws-ecr
+    threats:
+      - threat: gsa-unapproved-service
+        applies_to: component
+
+  - component: aws-eks
+    threats:
+      - threat: gsa-unapproved-service
+        applies_to: component
+      - threat: aws-govcloud-scope-violation
+        applies_to: component
+
+  - component: aws-ses
+    threats:
+      - threat: gsa-unapproved-service
+        applies_to: component
+
+  - component: aws-msk
+    threats:
+      - threat: gsa-unapproved-service
+        applies_to: component

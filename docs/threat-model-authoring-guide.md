@@ -1,0 +1,171 @@
+---
+id: threat-model-authoring-guide
+type: Guide
+title: "Threat Model Authoring, Export, and Library Workflow"
+status: draft
+last_updated: "2026-08-13"
+keywords: ["threat modeling", "Precogly", "CycloneDX", "libraries", "OSCAL vault", "SSPP"]
+related_files:
+  - README.md
+  - Makefile
+  - data/packs/
+  - build/systems/
+  - catalog/index.yaml
+---
+
+# Threat Model Authoring, Export, and Library Workflow
+
+This guide explains how to develop a threat model in this repository without
+losing generated CRM content, leaking sensitive data, or bypassing the reusable
+GSA technology libraries.
+
+## Mental model
+
+The repository has three layers:
+
+1. **Source data**: YAML and redacted source exports under `data/`.
+2. **Generated artifacts**: Precogly-native CycloneDX files under `build/`.
+3. **Editor workflow**: Precogly imports and exports the CycloneDX files for DFD
+   authoring and library-assisted modeling.
+
+Prefer editing source YAML for generated controls and threats. Use Precogly for
+DFD layout, assets, flows, zones, and library selection.
+
+## Choose the right starting point
+
+| Goal | Start with | Result |
+|---|---|---|
+| Update the Example System CRM model | `build/example-system-crm-threat-model.cdx.json` | Revised Example System artifact plus source YAML changes |
+| Model a vault-projected GSA system | `build/systems/<slug>/<slug>.cdx.json` | Revised per-system artifact or pack proposal |
+| Create a new model from reusable services | Installed Precogly packs | New Precogly model using approved components |
+| Refresh the whole portfolio catalog | `vendor/oscal-vault` or `../oscal-vault` | Updated `build/systems/`, `catalog/index.yaml`, and docs catalog |
+
+## Install and use the libraries
+
+Start Precogly and install all packs:
+
+```bash
+make precogly-up
+make pack-install-all
+```
+
+The pack library includes:
+
+- `gsa-fedramp` for GSA-operated FedRAMP platforms.
+- `fcs-managed-cloud-service` for managed cloud service service tiers.
+- `cloudgov-paas` for cloud.gov PaaS managed services.
+- `gsa-overlay-aws`, `gsa-overlay-azure`, and `gsa-overlay-gcp` for GSA OCISO
+  cloud service approval overlays.
+
+In Precogly, use packs as building blocks instead of hand-copying controls:
+
+1. Create or open a threat model.
+2. Add components from the installed libraries for platforms, cloud services,
+   identity providers, CI/CD, hosting layers, and managed databases.
+3. Review imported threats and countermeasures for applicability.
+4. Keep tenant-specific residual actions separate from provider-managed controls.
+5. Export the model and commit the changed artifact only after validation.
+
+## What to edit
+
+| Change | Edit | Command |
+|---|---|---|
+| CRM responsibility text or mappings from spreadsheets | `data/crm/*.yaml` | `make generate validate` |
+| Countermeasure wording, mechanism, gap, or residual action | `data/countermeasures/countermeasures.yaml` | `make generate validate` |
+| Shared evidence text reused across many controls | `data/model/evidence.yaml` | `make generate validate` |
+| Asset mappings, flow bindings, zones, risk scores | `data/model/architecture.yaml` | `make generate validate` |
+| Example System DFD structure and layout | Edit in Precogly, then export to `data/model/base-dfd.cdx.json` | `make reinject validate drift` |
+| Pack component, threat, or countermeasure library content | `data/packs/<pack>/` | `make pack-install-all` and test in Precogly |
+| Vault-projected system content | Source OSCAL vault, not generated `build/systems/` files | `make vault-import-all VAULT_ROOT=./vendor/oscal-vault` |
+
+Avoid hand-editing generated `controls[]` or generated CRM threats directly in
+`build/example-system-crm-threat-model.cdx.json`; those edits are overwritten by
+`make generate` or `make reinject`.
+
+## Update the Example System CRM model
+
+1. Edit the YAML source file that owns the change.
+2. Regenerate and validate:
+
+   ```bash
+   make generate validate
+   make drift
+   ```
+
+3. If `make drift` fails because the artifact has stale generated content, run:
+
+   ```bash
+   make reinject
+   make validate drift
+   ```
+
+4. Review the diff for both source YAML and the generated CycloneDX artifact.
+
+## Edit the DFD in Precogly
+
+Use this workflow for assets, flows, trust zones, and diagram layout:
+
+1. Start Precogly with `make precogly-up`.
+2. Import `build/example-system-crm-threat-model.cdx.json`.
+3. Edit only DFD-owned content in the UI.
+4. Export the model.
+5. Save the exported DFD baseline over `data/model/base-dfd.cdx.json`.
+6. If asset, zone, or flow references changed, update `data/model/architecture.yaml`.
+7. Run `make reinject validate drift`.
+
+Precogly preserves countermeasures when they are top-level `controls[]` linked
+bidirectionally to threats. The generator already emits that native schema.
+
+## Refresh the vault catalog
+
+The CI workflow uses the pinned submodule at `vendor/oscal-vault`. To refresh
+from that source:
+
+```bash
+git submodule update --init --recursive
+make vault-import-all VAULT_ROOT=./vendor/oscal-vault
+make example-system-backfill
+make vault-validate
+make catalog-all VAULT_ROOT=./vendor/oscal-vault
+make precogly-seed
+make vault-drift VAULT_ROOT=./vendor/oscal-vault
+```
+
+If you intentionally update the vault source, advance the submodule, regenerate
+the catalog artifacts, and include both changes in the same pull request.
+
+## Export formats
+
+Use Precogly-native CycloneDX as the source of truth. For OWASP-compatible
+downstream checks, generate the one-way projection:
+
+```bash
+make export-owasp
+```
+
+The export writes `build/owasp-threat-model.json`. Do not edit the OWASP export
+as source; regenerate it from the CycloneDX model.
+
+## Redaction and review checklist
+
+Before committing:
+
+- Run `make validate` for the Example System model.
+- Run `make vault-validate` and `make vault-drift VAULT_ROOT=./vendor/oscal-vault`
+  when catalog artifacts change.
+- Confirm no secrets, PII, internal hostnames, private URLs, or unredacted IPs
+  appear in YAML, CycloneDX, screenshots, or docs.
+- Keep generated files and their source edits together in one commit.
+- Explain whether a countermeasure is implemented, recommended, verified,
+  rejected, planned, or in-progress.
+- Document tenant-responsible residual actions separately from inherited
+  provider controls.
+
+## Pull request checklist
+
+- Source YAML changed when generated CRM content changed.
+- Generated CycloneDX artifacts are refreshed.
+- Pack changes were installed and smoke-tested in Precogly.
+- Catalog changes pass the drift gate.
+- README or catalog docs are updated when user-facing workflow changes.
+- ISSO/ISSM review is requested before compliance use.

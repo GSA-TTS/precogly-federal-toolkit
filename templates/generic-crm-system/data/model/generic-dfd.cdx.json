@@ -1,0 +1,44 @@
+{
+  "specFormat": "CycloneDX",
+  "specVersion": "2.0",
+  "serialNumber": "urn:uuid:6533f92d-96f7-4180-8777-6ef7d66fc88c",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-08-06T15:30:00.000Z",
+    "tools": {
+      "components": [
+        {
+          "type": "application",
+          "name": "Precogly Guest Editor",
+          "version": "1.0.0"
+        }
+      ]
+    }
+  },
+  "blueprints": [
+    {
+      "bom-ref": "blueprint-generic-crm-dfd-1",
+      "name": "Generic CRM DFD",
+      "modelTypes": [
+        "data-flow"
+      ],
+      "zones": [
+        {
+          "bom-ref": "zone-this-system-boundary-1",
+          "name": "This System Boundary",
+          "type": "trust",
+          "trustLevel": 25
+        }
+      ],
+      "assets": [
+        {
+          "bom-ref": "asset-this-system-core-1",
+          "name": "This System Core",
+          "type": "process",
+          "zone": "zone-this-system-boundary-1"
+        }
+      ],
+      "flows": []
+    }
+  ]
+}

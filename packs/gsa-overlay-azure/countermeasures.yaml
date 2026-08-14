@@ -1,0 +1,61 @@
+countermeasures:
+  - id: azure-gov-deployment
+    name: Deploy in Azure Government for FISMA Workloads
+    description: |
+      FISMA Moderate/High workloads must use Azure Government (not Azure Commercial)
+      to inherit the full FedRAMP High authorization boundary and required controls.
+    control_type: preventive
+    cost: low
+
+  - id: azure-encryption-at-rest
+    name: Azure Encryption at Rest (Platform + CMK)
+    description: |
+      Enable Azure Storage Service Encryption and use Customer-Managed Keys (CMK)
+      in Azure Key Vault for services supporting CMK. Required for all GSA-approved
+      Azure services handling federal data.
+    control_type: preventive
+    cost: low
+
+  - id: azure-tls-enforcement
+    name: TLS 1.2+ Enforcement on Azure Services
+    description: |
+      Configure minimum TLS version 1.2 on Azure Storage accounts, App Services,
+      API Management, SQL databases, and other approved services. Reject TLS 1.0/1.1.
+    control_type: preventive
+    cost: low
+
+  - id: azure-private-endpoints
+    name: Use Azure Private Endpoints
+    description: |
+      Deploy Azure Private Endpoints for storage, databases, key vault, and other
+      services to prevent public internet exposure and keep traffic on the Azure
+      backbone network.
+    control_type: preventive
+    cost: medium
+
+  - id: azure-denied-service-block
+    name: Block Denied Azure Services via Policy
+    description: |
+      Implement Azure Policy deny assignments to block provisioning of GSA-denied
+      services (all Bing APIs, other non-approved services) within the Azure
+      subscription/management group scope.
+    control_type: preventive
+    cost: low
+
+  - id: azure-rbac-least-privilege
+    name: Azure RBAC Least-Privilege Role Assignments
+    description: |
+      Use built-in Azure RBAC roles at the narrowest possible scope. Avoid
+      Owner/Contributor at subscription scope. Use custom roles when built-ins
+      are over-privileged.
+    control_type: preventive
+    cost: low
+
+  - id: azure-diagnostic-logging
+    name: Enable Azure Diagnostic Logging to Log Analytics
+    description: |
+      Enable diagnostic settings on all Azure resources to stream activity and
+      resource logs to a centralized Log Analytics workspace (Azure Monitor /
+      Microsoft Sentinel).
+    control_type: detective
+    cost: low

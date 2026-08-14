@@ -1,0 +1,105 @@
+components:
+  # ── PaaS / Hosting ──────────────────────────────────────────────────────────
+  - id: cloudgov
+    name: Cloud.gov
+    category: process
+    type: PaaS Platform
+    provider: gsa
+    description: |
+      GSA-operated FedRAMP High PaaS (Cloud Foundry on AWS GovCloud). Provides
+      multi-tenant application hosting, managed services (RDS, Redis, S3), and
+      inherited controls for teams operating at Low/Moderate/High impact levels.
+
+  - id: gsa-pages
+    name: GSA Pages
+    category: process
+    type: Static Hosting
+    provider: gsa
+    description: |
+      FedRAMP-authorized static-site publishing platform (formerly Federalist).
+      Builds and serves Jekyll/Hugo/static sites from GitHub repositories via
+      CloudFront with automated compliance scanning.
+
+  # ── Identity & Access ───────────────────────────────────────────────────────
+  - id: logingov
+    name: Login.gov
+    category: process
+    type: Identity Provider
+    provider: gsa
+    description: |
+      GSA-operated shared authentication service providing SAML 2.0 / OIDC
+      identity proofing (IAL1/IAL2) and MFA for federal agency applications.
+      FedRAMP Moderate authorized.
+
+  - id: gsa-okta
+    name: GSA SecureAuth / Okta
+    category: process
+    type: SSO / IAM
+    provider: gsa
+    description: |
+      GSA enterprise identity platform providing SAML/OIDC SSO, MFA enforcement,
+      and SCIM provisioning for internal GSA applications and staff.
+
+  # ── Source Control & CI/CD ──────────────────────────────────────────────────
+  - id: github-enterprise
+    name: GitHub Enterprise (GSA)
+    category: process
+    type: SCM / CI
+    provider: github
+    description: |
+      GSA-managed GitHub Enterprise Cloud organization. Hosts source code,
+      manages Actions CI/CD pipelines, and enforces branch protection / code
+      scanning across GSA projects.
+
+  # ── Data & Analytics ────────────────────────────────────────────────────────
+  - id: fcs-data-platform
+    name: FCS data platform
+    category: datastore
+    type: Analytics Platform
+    provider: data-platform
+    description: |
+      GSA Federal Collaboration Space data platform workspace on AWS GovCloud.
+      Provides managed Spark compute, Delta Lake storage, and ML workflows.
+      Tenant-level access governed by managed cloud service CRM.
+
+  # ── Common / Inherited Controls ─────────────────────────────────────────────
+  - id: gsa-common-controls
+    name: GSA Common Controls
+    category: process
+    type: Inherited Control Provider
+    provider: gsa
+    description: |
+      GSA-level common and hybrid controls inherited by all GSA-operated systems.
+      Covers physical security, personnel, policy, incident response, and
+      continuity programs documented in the GSA SSB SSP.
+
+  - id: gsa-aws-govcloud
+    name: AWS GovCloud (GSA Tenant)
+    category: process
+    type: IaaS / FedRAMP High
+    provider: aws
+    description: |
+      AWS GovCloud region hosting used by Cloud.gov, GSA Pages, and other
+      GSA services. FedRAMP High authorized; GSA acts as the agency AO for
+      tenant workloads.
+
+  # ── Endpoint / Actor ────────────────────────────────────────────────────────
+  - id: gfe-developer
+    name: GFE Developer Workstation
+    category: process
+    type: Endpoint
+    provider: gsa
+    description: |
+      Government Furnished Equipment (GFE) laptop or desktop used by GSA
+      developers and operators. Subject to GSA endpoint management, BigFix,
+      and HSPD-12 PIV authentication requirements.
+
+  # ── File Transfer ───────────────────────────────────────────────────────────
+  - id: sftp-transfer
+    name: SFTP / AWS Transfer Family
+    category: process
+    type: Managed File Transfer
+    provider: aws
+    description: |
+      AWS Transfer Family SFTP endpoint used for secure bulk file exchange with
+      agency partners. Operates within the GSA FCS boundary on GovCloud.

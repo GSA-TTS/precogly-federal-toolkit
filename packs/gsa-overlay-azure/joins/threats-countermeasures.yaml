@@ -1,0 +1,20 @@
+mappings:
+  - threat: azure-unapproved-service
+    countermeasures:
+      - azure-denied-service-block
+
+  - threat: azure-condition-violated
+    countermeasures:
+      - azure-encryption-at-rest
+      - azure-tls-enforcement
+      - azure-private-endpoints
+      - azure-rbac-least-privilege
+      - azure-diagnostic-logging
+
+  - threat: azure-commercial-only-violation
+    countermeasures:
+      - azure-gov-deployment
+
+  - threat: azure-missing-govcloud-scope
+    countermeasures:
+      - azure-gov-deployment

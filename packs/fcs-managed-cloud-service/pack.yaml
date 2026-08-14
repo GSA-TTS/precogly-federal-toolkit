@@ -1,0 +1,35 @@
+pack:
+  schema_version: 1
+  slug: fcs-managed-cloud-service
+  name: GSA FCS managed cloud service Service Tiers
+  description: |
+    Components representing the GSA Federal Collaboration Space (FCS) Managed
+    Cloud as a Service (managed cloud service) platform and its discrete service tiers. managed cloud service
+    is a GSA-operated multi-tenant PaaS built on AWS GovCloud providing
+    FedRAMP Moderate authorized managed services to GSA application teams.
+
+    Service tiers modeled:
+    - FCS Core (shared inherited infrastructure)
+    - managed cloud service (managed container/application platform)
+    - CaaS (Container as a Service — Kubernetes/ECS layer)
+    - VPCaaS (VPC as a Service — network isolation layer)
+    - Data (managed data services — S3, RDS, etc.)
+    - EBTA (Emerging Business Technology Applications)
+    - FCS data platform (analytics / ML workspace)
+
+    Tenant systems inherit FedRAMP Moderate controls through the FCS managed cloud service
+    boundary. Tenant responsibilities are documented in the managed cloud service CRM v6.
+  version: 1.0.0
+  author: GSA/TTS
+  pack_type: technology
+  tags:
+    - gsa
+    - fcs
+    - managed-cloud-service
+    - paas
+    - fedramp
+    - govcloud
+    - federal
+    - all
+  repository_url: https://github.com/GSA/oscal-vault
+  documentation_url: https://insite.gsa.gov/employee-resources/information-technology/do-it-yourself-self-help/cloud-infrastructure-and-services/cloud-computing/federal-collaboration-space

@@ -1,0 +1,51 @@
+threats:
+  # ── Tenant boundary threats ──────────────────────────────────────────────────
+  - id: managed-cloud-service-tenant-crm-gap
+    name: Tenant managed cloud service CRM Control Not Implemented
+    description: |
+      A hybrid control listed in the managed cloud service CRM v6 as tenant responsibility has
+      not been implemented or documented by the tenant application team, creating
+      a gap in the system's FedRAMP Moderate control baseline.
+
+  - id: managed-cloud-service-inheritance-misclaim
+    name: Control Falsely Claimed as Fully Inherited from managed cloud service
+    description: |
+      Tenant SSPP claims full inheritance for a control that the managed cloud service CRM
+      designates as hybrid or system-specific, understating the tenant's
+      security responsibilities and creating an ATO deficiency.
+
+  - id: managed-cloud-service-multi-tenant-isolation
+    name: Multi-Tenant Isolation Failure
+    description: |
+      Misconfiguration in managed cloud service networking, IAM, or storage allows one tenant's
+      workload to access another tenant's data or resources within the shared
+      FCS boundary.
+
+  - id: vpcaas-unmanaged-controls
+    name: VPCaaS System-Specific Controls Not Implemented
+    description: |
+      VPCaaS tenants receive no inherited controls from FCS Core — all controls
+      are system-specific. Failure to implement required NIST 800-53 Moderate
+      controls within the VPC boundary results in an incomplete ATO package.
+
+  - id: managed-cloud-service-data-platform-overprivilege
+    name: data platform Workspace Over-Privileged Access
+    description: |
+      Tenant data platform workspace lacks Unity Catalog or Table ACL enforcement,
+      allowing workspace users to access data beyond their authorized scope
+      within the FCS boundary.
+
+  - id: managed-cloud-service-ebta-novel-risk
+    name: EBTA Workload Novel Attack Surface Not Assessed
+    description: |
+      Emerging or experimental workloads in the EBTA tier introduce novel
+      attack surfaces (e.g., LLM prompt injection, ML model exfiltration,
+      API sprawl) not addressed in the standard managed cloud service threat model.
+
+  - id: managed-cloud-service-secret-in-env
+    name: Credentials in managed cloud service Container Environment Variables
+    description: |
+      Tenant containers inject secrets as environment variables rather than
+      using the managed cloud service-provided secrets management path (AWS Secrets Manager
+      reference or CredHub equivalent), exposing credentials via cf env or
+      container inspection.

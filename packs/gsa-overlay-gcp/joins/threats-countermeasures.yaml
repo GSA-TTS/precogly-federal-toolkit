@@ -1,0 +1,25 @@
+mappings:
+  - threat: gcp-unapproved-service
+    countermeasures:
+      - gcp-denied-service-block
+
+  - threat: gcp-condition-violated
+    countermeasures:
+      - gcp-kms-cmek
+      - gcp-private-google-access
+      - gcp-audit-logging
+      - gcp-iam-workload-identity
+
+  - threat: gcp-ancillary-data-storage
+    countermeasures:
+      - gcp-no-ancillary-sensitive-data
+      - gcp-vpc-service-perimeter
+
+  - threat: gcp-moderate-only-on-high-system
+    countermeasures:
+      - gcp-vpc-service-perimeter
+      - gcp-kms-cmek
+
+  - threat: gcp-moderate-only-on-high-system
+    countermeasures:
+      - gcp-vpc-service-perimeter

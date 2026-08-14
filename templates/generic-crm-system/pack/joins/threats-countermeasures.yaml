@@ -1,0 +1,760 @@
+mappings:
+  - threat: cloud-gov-lato-crm-crm-ac-2
+    countermeasures:
+      - crm-fulfill-ac-2-on-cloud-gov-lato-crm
+  - threat: cloud-gov-lato-crm-crm-ac-3
+    countermeasures:
+      - crm-fulfill-ac-3-on-cloud-gov-lato-crm
+  - threat: cloud-gov-lato-crm-crm-ac-6-5
+    countermeasures:
+      - crm-fulfill-ac-6-5-on-cloud-gov-lato-crm
+  - threat: cloud-gov-lato-crm-crm-ac-6-9
+    countermeasures:
+      - crm-fulfill-ac-6-9-on-cloud-gov-lato-crm
+  - threat: cloud-gov-lato-crm-crm-au-2
+    countermeasures:
+      - crm-fulfill-au-2-on-cloud-gov-lato-crm
+  - threat: cloud-gov-lato-crm-crm-ca-7
+    countermeasures:
+      - crm-fulfill-ca-7-on-cloud-gov-lato-crm
+  - threat: cloud-gov-lato-crm-crm-cm-2-2
+    countermeasures:
+      - crm-fulfill-cm-2-2-on-cloud-gov-lato-crm
+  - threat: cloud-gov-lato-crm-crm-cm-6-1
+    countermeasures:
+      - crm-fulfill-cm-6-1-on-cloud-gov-lato-crm
+  - threat: cloud-gov-lato-crm-crm-cp-7-1
+    countermeasures:
+      - crm-fulfill-cp-7-1-on-cloud-gov-lato-crm
+  - threat: cloud-gov-lato-crm-crm-ia-2
+    countermeasures:
+      - crm-fulfill-ia-2-on-cloud-gov-lato-crm
+  - threat: cloud-gov-lato-crm-crm-ia-2-1
+    countermeasures:
+      - crm-fulfill-ia-2-1-on-cloud-gov-lato-crm
+  - threat: cloud-gov-lato-crm-crm-ia-2-2
+    countermeasures:
+      - crm-fulfill-ia-2-2-on-cloud-gov-lato-crm
+  - threat: cloud-gov-lato-crm-crm-sc-28-1
+    countermeasures:
+      - crm-fulfill-sc-28-1-on-cloud-gov-lato-crm
+  - threat: cloud-gov-lato-crm-crm-sc-7
+    countermeasures:
+      - crm-fulfill-sc-7-on-cloud-gov-lato-crm
+  - threat: cloud-gov-lato-crm-crm-sc-8-1
+    countermeasures:
+      - crm-fulfill-sc-8-1-on-cloud-gov-lato-crm
+  - threat: cloud-gov-lato-crm-crm-si-4
+    countermeasures:
+      - crm-fulfill-si-4-on-cloud-gov-lato-crm
+  - threat: cloud-gov-lato-crm-crm-si-4-2
+    countermeasures:
+      - crm-fulfill-si-4-2-on-cloud-gov-lato-crm
+  - threat: cloud-gov-lato-crm-crm-si-4-4
+    countermeasures:
+      - crm-fulfill-si-4-4-on-cloud-gov-lato-crm
+  - threat: cloud-gov-lato-crm-crm-si-4-5
+    countermeasures:
+      - crm-fulfill-si-4-5-on-cloud-gov-lato-crm
+  - threat: gsa-common-controls-component-definition-crm-ac-1
+    countermeasures:
+      - crm-fulfill-ac-1-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-ac-2-5
+    countermeasures:
+      - crm-fulfill-ac-2-5-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-ac-20
+    countermeasures:
+      - crm-fulfill-ac-20-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-ac-20-1
+    countermeasures:
+      - crm-fulfill-ac-20-1-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-ac-20-2
+    countermeasures:
+      - crm-fulfill-ac-20-2-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-at-1
+    countermeasures:
+      - crm-fulfill-at-1-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-at-2
+    countermeasures:
+      - crm-fulfill-at-2-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-at-2-2
+    countermeasures:
+      - crm-fulfill-at-2-2-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-at-2-3
+    countermeasures:
+      - crm-fulfill-at-2-3-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-at-3
+    countermeasures:
+      - crm-fulfill-at-3-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-at-3-5
+    countermeasures:
+      - crm-fulfill-at-3-5-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-at-4
+    countermeasures:
+      - crm-fulfill-at-4-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-au-1
+    countermeasures:
+      - crm-fulfill-au-1-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-ca-1
+    countermeasures:
+      - crm-fulfill-ca-1-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-ca-6
+    countermeasures:
+      - crm-fulfill-ca-6-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-ca-7
+    countermeasures:
+      - crm-fulfill-ca-7-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-ca-7-1
+    countermeasures:
+      - crm-fulfill-ca-7-1-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-ca-7-4
+    countermeasures:
+      - crm-fulfill-ca-7-4-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-ca-8
+    countermeasures:
+      - crm-fulfill-ca-8-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-ca-8-1
+    countermeasures:
+      - crm-fulfill-ca-8-1-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-cm-1
+    countermeasures:
+      - crm-fulfill-cm-1-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-cp-1
+    countermeasures:
+      - crm-fulfill-cp-1-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-ia-1
+    countermeasures:
+      - crm-fulfill-ia-1-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-ir-1
+    countermeasures:
+      - crm-fulfill-ir-1-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-ir-2
+    countermeasures:
+      - crm-fulfill-ir-2-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-ir-2-3
+    countermeasures:
+      - crm-fulfill-ir-2-3-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-ir-3
+    countermeasures:
+      - crm-fulfill-ir-3-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-ir-3-2
+    countermeasures:
+      - crm-fulfill-ir-3-2-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-ir-4
+    countermeasures:
+      - crm-fulfill-ir-4-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-ir-4-1
+    countermeasures:
+      - crm-fulfill-ir-4-1-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-ir-5
+    countermeasures:
+      - crm-fulfill-ir-5-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-ir-6
+    countermeasures:
+      - crm-fulfill-ir-6-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-ir-6-1
+    countermeasures:
+      - crm-fulfill-ir-6-1-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-ir-6-3
+    countermeasures:
+      - crm-fulfill-ir-6-3-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-ir-7
+    countermeasures:
+      - crm-fulfill-ir-7-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-ir-7-1
+    countermeasures:
+      - crm-fulfill-ir-7-1-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-ir-8
+    countermeasures:
+      - crm-fulfill-ir-8-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-ir-8-1
+    countermeasures:
+      - crm-fulfill-ir-8-1-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-ma-1
+    countermeasures:
+      - crm-fulfill-ma-1-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-mp-1
+    countermeasures:
+      - crm-fulfill-mp-1-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-mp-7
+    countermeasures:
+      - crm-fulfill-mp-7-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pe-1
+    countermeasures:
+      - crm-fulfill-pe-1-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pl-1
+    countermeasures:
+      - crm-fulfill-pl-1-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pl-10
+    countermeasures:
+      - crm-fulfill-pl-10-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pl-11
+    countermeasures:
+      - crm-fulfill-pl-11-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pl-4
+    countermeasures:
+      - crm-fulfill-pl-4-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pl-4-1
+    countermeasures:
+      - crm-fulfill-pl-4-1-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pl-8
+    countermeasures:
+      - crm-fulfill-pl-8-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pl-9
+    countermeasures:
+      - crm-fulfill-pl-9-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pm-1
+    countermeasures:
+      - crm-fulfill-pm-1-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pm-10
+    countermeasures:
+      - crm-fulfill-pm-10-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pm-11
+    countermeasures:
+      - crm-fulfill-pm-11-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pm-12
+    countermeasures:
+      - crm-fulfill-pm-12-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pm-13
+    countermeasures:
+      - crm-fulfill-pm-13-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pm-14
+    countermeasures:
+      - crm-fulfill-pm-14-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pm-15
+    countermeasures:
+      - crm-fulfill-pm-15-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pm-16
+    countermeasures:
+      - crm-fulfill-pm-16-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pm-16-1
+    countermeasures:
+      - crm-fulfill-pm-16-1-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pm-17
+    countermeasures:
+      - crm-fulfill-pm-17-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pm-18
+    countermeasures:
+      - crm-fulfill-pm-18-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pm-19
+    countermeasures:
+      - crm-fulfill-pm-19-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pm-2
+    countermeasures:
+      - crm-fulfill-pm-2-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pm-20
+    countermeasures:
+      - crm-fulfill-pm-20-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pm-20-1
+    countermeasures:
+      - crm-fulfill-pm-20-1-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pm-21
+    countermeasures:
+      - crm-fulfill-pm-21-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pm-22
+    countermeasures:
+      - crm-fulfill-pm-22-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pm-23
+    countermeasures:
+      - crm-fulfill-pm-23-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pm-24
+    countermeasures:
+      - crm-fulfill-pm-24-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pm-25
+    countermeasures:
+      - crm-fulfill-pm-25-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pm-26
+    countermeasures:
+      - crm-fulfill-pm-26-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pm-27
+    countermeasures:
+      - crm-fulfill-pm-27-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pm-28
+    countermeasures:
+      - crm-fulfill-pm-28-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pm-29
+    countermeasures:
+      - crm-fulfill-pm-29-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pm-3
+    countermeasures:
+      - crm-fulfill-pm-3-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pm-30
+    countermeasures:
+      - crm-fulfill-pm-30-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pm-30-1
+    countermeasures:
+      - crm-fulfill-pm-30-1-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pm-31
+    countermeasures:
+      - crm-fulfill-pm-31-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pm-32
+    countermeasures:
+      - crm-fulfill-pm-32-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pm-4
+    countermeasures:
+      - crm-fulfill-pm-4-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pm-5
+    countermeasures:
+      - crm-fulfill-pm-5-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pm-5-1
+    countermeasures:
+      - crm-fulfill-pm-5-1-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pm-6
+    countermeasures:
+      - crm-fulfill-pm-6-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pm-7
+    countermeasures:
+      - crm-fulfill-pm-7-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pm-7-1
+    countermeasures:
+      - crm-fulfill-pm-7-1-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pm-8
+    countermeasures:
+      - crm-fulfill-pm-8-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pm-9
+    countermeasures:
+      - crm-fulfill-pm-9-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-ps-1
+    countermeasures:
+      - crm-fulfill-ps-1-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-ps-2
+    countermeasures:
+      - crm-fulfill-ps-2-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-ps-3
+    countermeasures:
+      - crm-fulfill-ps-3-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-ps-4
+    countermeasures:
+      - crm-fulfill-ps-4-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-ps-5
+    countermeasures:
+      - crm-fulfill-ps-5-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-ps-6
+    countermeasures:
+      - crm-fulfill-ps-6-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-ps-7
+    countermeasures:
+      - crm-fulfill-ps-7-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-ps-8
+    countermeasures:
+      - crm-fulfill-ps-8-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-ps-9
+    countermeasures:
+      - crm-fulfill-ps-9-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pt-1
+    countermeasures:
+      - crm-fulfill-pt-1-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pt-2
+    countermeasures:
+      - crm-fulfill-pt-2-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pt-3
+    countermeasures:
+      - crm-fulfill-pt-3-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pt-4
+    countermeasures:
+      - crm-fulfill-pt-4-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pt-5
+    countermeasures:
+      - crm-fulfill-pt-5-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pt-5-2
+    countermeasures:
+      - crm-fulfill-pt-5-2-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pt-6
+    countermeasures:
+      - crm-fulfill-pt-6-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pt-6-1
+    countermeasures:
+      - crm-fulfill-pt-6-1-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pt-6-2
+    countermeasures:
+      - crm-fulfill-pt-6-2-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pt-7-1
+    countermeasures:
+      - crm-fulfill-pt-7-1-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pt-7-2
+    countermeasures:
+      - crm-fulfill-pt-7-2-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-pt-8
+    countermeasures:
+      - crm-fulfill-pt-8-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-ra-1
+    countermeasures:
+      - crm-fulfill-ra-1-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-ra-3
+    countermeasures:
+      - crm-fulfill-ra-3-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-sa-1
+    countermeasures:
+      - crm-fulfill-sa-1-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-sa-4
+    countermeasures:
+      - crm-fulfill-sa-4-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-sa-4-10
+    countermeasures:
+      - crm-fulfill-sa-4-10-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-sa-8
+    countermeasures:
+      - crm-fulfill-sa-8-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-sa-9
+    countermeasures:
+      - crm-fulfill-sa-9-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-sc-1
+    countermeasures:
+      - crm-fulfill-sc-1-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-sc-18
+    countermeasures:
+      - crm-fulfill-sc-18-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-si-1
+    countermeasures:
+      - crm-fulfill-si-1-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-si-5
+    countermeasures:
+      - crm-fulfill-si-5-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-sr-1
+    countermeasures:
+      - crm-fulfill-sr-1-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-sr-11
+    countermeasures:
+      - crm-fulfill-sr-11-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-sr-11-1
+    countermeasures:
+      - crm-fulfill-sr-11-1-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-sr-2-1
+    countermeasures:
+      - crm-fulfill-sr-2-1-on-gsa-common-controls-component-definition
+  - threat: gsa-common-controls-component-definition-crm-sr-5
+    countermeasures:
+      - crm-fulfill-sr-5-on-gsa-common-controls-component-definition
+  - threat: gsa-pages-component-definition-crm-ac-2
+    countermeasures:
+      - crm-fulfill-ac-2-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-ac-3
+    countermeasures:
+      - crm-fulfill-ac-3-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-ac-6-5
+    countermeasures:
+      - crm-fulfill-ac-6-5-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-au-11
+    countermeasures:
+      - crm-fulfill-au-11-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-au-12
+    countermeasures:
+      - crm-fulfill-au-12-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-au-2
+    countermeasures:
+      - crm-fulfill-au-2-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-au-3
+    countermeasures:
+      - crm-fulfill-au-3-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-au-4
+    countermeasures:
+      - crm-fulfill-au-4-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-au-5
+    countermeasures:
+      - crm-fulfill-au-5-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-au-6
+    countermeasures:
+      - crm-fulfill-au-6-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-au-8
+    countermeasures:
+      - crm-fulfill-au-8-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-au-9
+    countermeasures:
+      - crm-fulfill-au-9-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-ca-2
+    countermeasures:
+      - crm-fulfill-ca-2-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-ca-3
+    countermeasures:
+      - crm-fulfill-ca-3-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-ca-5
+    countermeasures:
+      - crm-fulfill-ca-5-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-ca-6
+    countermeasures:
+      - crm-fulfill-ca-6-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-ca-7
+    countermeasures:
+      - crm-fulfill-ca-7-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-ca-7-4
+    countermeasures:
+      - crm-fulfill-ca-7-4-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-ca-8
+    countermeasures:
+      - crm-fulfill-ca-8-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-ca-9
+    countermeasures:
+      - crm-fulfill-ca-9-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-cm-10
+    countermeasures:
+      - crm-fulfill-cm-10-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-cm-11
+    countermeasures:
+      - crm-fulfill-cm-11-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-cm-2
+    countermeasures:
+      - crm-fulfill-cm-2-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-cm-2-2
+    countermeasures:
+      - crm-fulfill-cm-2-2-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-cm-3-1
+    countermeasures:
+      - crm-fulfill-cm-3-1-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-cm-4
+    countermeasures:
+      - crm-fulfill-cm-4-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-cm-5
+    countermeasures:
+      - crm-fulfill-cm-5-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-cm-6
+    countermeasures:
+      - crm-fulfill-cm-6-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-cm-6-1
+    countermeasures:
+      - crm-fulfill-cm-6-1-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-cm-7
+    countermeasures:
+      - crm-fulfill-cm-7-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-cm-7-5
+    countermeasures:
+      - crm-fulfill-cm-7-5-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-cm-8
+    countermeasures:
+      - crm-fulfill-cm-8-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-cp-10
+    countermeasures:
+      - crm-fulfill-cp-10-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-cp-2
+    countermeasures:
+      - crm-fulfill-cp-2-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-cp-3
+    countermeasures:
+      - crm-fulfill-cp-3-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-cp-4
+    countermeasures:
+      - crm-fulfill-cp-4-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-cp-7
+    countermeasures:
+      - crm-fulfill-cp-7-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-cp-7-1
+    countermeasures:
+      - crm-fulfill-cp-7-1-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-cp-9
+    countermeasures:
+      - crm-fulfill-cp-9-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-ia-11
+    countermeasures:
+      - crm-fulfill-ia-11-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-ia-2
+    countermeasures:
+      - crm-fulfill-ia-2-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-ia-2-1
+    countermeasures:
+      - crm-fulfill-ia-2-1-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-ia-2-12
+    countermeasures:
+      - crm-fulfill-ia-2-12-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-ia-2-2
+    countermeasures:
+      - crm-fulfill-ia-2-2-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-ia-2-8
+    countermeasures:
+      - crm-fulfill-ia-2-8-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-ia-4
+    countermeasures:
+      - crm-fulfill-ia-4-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-ia-5
+    countermeasures:
+      - crm-fulfill-ia-5-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-ia-5-1
+    countermeasures:
+      - crm-fulfill-ia-5-1-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-ir-3
+    countermeasures:
+      - crm-fulfill-ir-3-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-ma-2
+    countermeasures:
+      - crm-fulfill-ma-2-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-ma-4
+    countermeasures:
+      - crm-fulfill-ma-4-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-ma-5
+    countermeasures:
+      - crm-fulfill-ma-5-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-mp-2
+    countermeasures:
+      - crm-fulfill-mp-2-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-mp-6
+    countermeasures:
+      - crm-fulfill-mp-6-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-pe-12
+    countermeasures:
+      - crm-fulfill-pe-12-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-pe-13
+    countermeasures:
+      - crm-fulfill-pe-13-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-pe-14
+    countermeasures:
+      - crm-fulfill-pe-14-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-pe-16
+    countermeasures:
+      - crm-fulfill-pe-16-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-pe-2
+    countermeasures:
+      - crm-fulfill-pe-2-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-pe-3
+    countermeasures:
+      - crm-fulfill-pe-3-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-pe-6
+    countermeasures:
+      - crm-fulfill-pe-6-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-pe-8
+    countermeasures:
+      - crm-fulfill-pe-8-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-pl-10
+    countermeasures:
+      - crm-fulfill-pl-10-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-pl-11
+    countermeasures:
+      - crm-fulfill-pl-11-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-pl-2
+    countermeasures:
+      - crm-fulfill-pl-2-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-pl-8
+    countermeasures:
+      - crm-fulfill-pl-8-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-pl-9
+    countermeasures:
+      - crm-fulfill-pl-9-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-ra-2
+    countermeasures:
+      - crm-fulfill-ra-2-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-ra-5
+    countermeasures:
+      - crm-fulfill-ra-5-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-ra-5-11
+    countermeasures:
+      - crm-fulfill-ra-5-11-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-ra-5-2
+    countermeasures:
+      - crm-fulfill-ra-5-2-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-ra-7
+    countermeasures:
+      - crm-fulfill-ra-7-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-ra-8
+    countermeasures:
+      - crm-fulfill-ra-8-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-sa-11
+    countermeasures:
+      - crm-fulfill-sa-11-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-sa-2
+    countermeasures:
+      - crm-fulfill-sa-2-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-sa-22
+    countermeasures:
+      - crm-fulfill-sa-22-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-sa-3
+    countermeasures:
+      - crm-fulfill-sa-3-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-sa-3-2
+    countermeasures:
+      - crm-fulfill-sa-3-2-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-sa-4
+    countermeasures:
+      - crm-fulfill-sa-4-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-sa-5
+    countermeasures:
+      - crm-fulfill-sa-5-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-sa-8
+    countermeasures:
+      - crm-fulfill-sa-8-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-sa-9
+    countermeasures:
+      - crm-fulfill-sa-9-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-sc-12
+    countermeasures:
+      - crm-fulfill-sc-12-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-sc-13
+    countermeasures:
+      - crm-fulfill-sc-13-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-sc-15
+    countermeasures:
+      - crm-fulfill-sc-15-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-sc-20
+    countermeasures:
+      - crm-fulfill-sc-20-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-sc-20
+    countermeasures:
+      - crm-fulfill-sc-20-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-sc-21
+    countermeasures:
+      - crm-fulfill-sc-21-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-sc-21
+    countermeasures:
+      - crm-fulfill-sc-21-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-sc-22
+    countermeasures:
+      - crm-fulfill-sc-22-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-sc-22
+    countermeasures:
+      - crm-fulfill-sc-22-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-sc-28-1
+    countermeasures:
+      - crm-fulfill-sc-28-1-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-sc-39
+    countermeasures:
+      - crm-fulfill-sc-39-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-sc-5
+    countermeasures:
+      - crm-fulfill-sc-5-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-sc-5
+    countermeasures:
+      - crm-fulfill-sc-5-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-sc-7
+    countermeasures:
+      - crm-fulfill-sc-7-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-si-12
+    countermeasures:
+      - crm-fulfill-si-12-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-si-2
+    countermeasures:
+      - crm-fulfill-si-2-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-si-3
+    countermeasures:
+      - crm-fulfill-si-3-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-si-4
+    countermeasures:
+      - crm-fulfill-si-4-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-si-4-2
+    countermeasures:
+      - crm-fulfill-si-4-2-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-si-4-4
+    countermeasures:
+      - crm-fulfill-si-4-4-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-si-4-5
+    countermeasures:
+      - crm-fulfill-si-4-5-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-si-7
+    countermeasures:
+      - crm-fulfill-si-7-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-sr-10
+    countermeasures:
+      - crm-fulfill-sr-10-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-sr-11
+    countermeasures:
+      - crm-fulfill-sr-11-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-sr-11-1
+    countermeasures:
+      - crm-fulfill-sr-11-1-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-sr-11-2
+    countermeasures:
+      - crm-fulfill-sr-11-2-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-sr-2
+    countermeasures:
+      - crm-fulfill-sr-2-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-sr-3
+    countermeasures:
+      - crm-fulfill-sr-3-on-gsa-pages-component-definition
+  - threat: gsa-pages-component-definition-crm-sr-8
+    countermeasures:
+      - crm-fulfill-sr-8-on-gsa-pages-component-definition
