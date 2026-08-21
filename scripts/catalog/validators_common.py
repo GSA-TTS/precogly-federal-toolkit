@@ -9,20 +9,23 @@ from __future__ import annotations
 
 import re
 
-
 CATEGORIES = frozenset({"preventive", "detective", "corrective"})
-STATUSES = frozenset({"implemented", "recommended", "verified", "rejected", "planned", "in-progress"})
+STATUSES = frozenset(
+    {"implemented", "recommended", "verified", "rejected", "planned", "in-progress"}
+)
 RISK_LEVELS = frozenset({"low", "medium", "high", "critical", "info"})
 
-FLOW_AUTH_MECHANISMS = frozenset({
-    "OAuth 2.0",
-    "mTLS",
-    "JWT",
-    "API key",
-    "SSH key",
-    "HMAC",
-    "AWS IAM role",
-})
+FLOW_AUTH_MECHANISMS = frozenset(
+    {
+        "OAuth 2.0",
+        "mTLS",
+        "JWT",
+        "API key",
+        "SSH key",
+        "HMAC",
+        "AWS IAM role",
+    }
+)
 
 
 FORBIDDEN_PATTERNS: list[tuple[re.Pattern[str], str]] = [
@@ -43,7 +46,7 @@ _SECTION_CTX_RE = re.compile(r"(?i)(?:section|sections|§|para\.?|paragraph)\s+$
 def find_ipv4_leak(text: str) -> re.Match[str] | None:
     """Return the first non-NIST-section-cited IPv4 in ``text`` (or None)."""
     for m in _IPV4_RE.finditer(text):
-        preceding = text[max(0, m.start() - 40): m.start()]
+        preceding = text[max(0, m.start() - 40) : m.start()]
         if _SECTION_CTX_RE.search(preceding):
             continue
         return m
@@ -63,7 +66,9 @@ def find_leaks(text: str) -> list[tuple[str, str]]:
     return findings
 
 
-def bidirectional_control_threat_errors(threats: list[dict], controls: list[dict]) -> list[str]:
+def bidirectional_control_threat_errors(
+    threats: list[dict], controls: list[dict]
+) -> list[str]:
     """Return a list of human-readable messages for broken threat<->control links."""
     control_by_ref = {c["bom-ref"]: c for c in controls}
     errors: list[str] = []

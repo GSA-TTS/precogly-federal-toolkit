@@ -145,7 +145,11 @@ def promote_and_evidence(controls, overlay):
         pri_slug = pri_meta["slug"]
         control_slug = slug(cid) if cid else slug(ctrl.get("name", ""))
         url = f"{root}/{pri_slug}/{control_slug or ctrl['bom-ref']}.pdf"
-        add_evidence(ctrl, url, description=f"Mock evidence bundle for {pri} — {pri_meta['title']}")
+        add_evidence(
+            ctrl,
+            url,
+            description=f"Mock evidence bundle for {pri} — {pri_meta['title']}",
+        )
 
         # (d) Attach per-control extra evidence snippets as properties so the
         # imported CM description references the ideal narrative.
@@ -165,7 +169,7 @@ def score_scenarios(scenarios, controls, overlay):
     level is the pre-remediation risk carried in the base CDX (`riskScore.level`
     when set) or `high` by default for residual controls. The residual level
     is `low` because every gap has been treated as implemented + evidenced."""
-    ctrl_by_ref = {c["bom-ref"]: c for c in controls}
+    {c["bom-ref"]: c for c in controls}
     scored = 0
     for s in scenarios:
         # Base CDX already stores an approximate level under riskScore.level;
@@ -210,13 +214,31 @@ def build_risks(controls, overlay):
             "bom-ref": r["id"],
             "name": r["name"],
             "statement": r["description"].strip(),
-            "inherentRisk": {"riskScore": {"level": r["inherent_level"], "score": level_to_score[r["inherent_level"]]}},
-            "residualRisk": {"riskScore": {"level": r["residual_level"], "score": level_to_score[r["residual_level"]]}},
-            "targetRisk": {"riskScore": {"level": r["target_level"], "score": level_to_score[r["target_level"]]}},
+            "inherentRisk": {
+                "riskScore": {
+                    "level": r["inherent_level"],
+                    "score": level_to_score[r["inherent_level"]],
+                }
+            },
+            "residualRisk": {
+                "riskScore": {
+                    "level": r["residual_level"],
+                    "score": level_to_score[r["residual_level"]],
+                }
+            },
+            "targetRisk": {
+                "riskScore": {
+                    "level": r["target_level"],
+                    "score": level_to_score[r["target_level"]],
+                }
+            },
             "domains": r.get("domains", []),
             "properties": [
                 {"name": "mock:priority", "value": r["priority"]},
-                {"name": "mock:mitigating-controls", "value": ",".join(ctrl_by_pri.get(r["priority"], []))},
+                {
+                    "name": "mock:mitigating-controls",
+                    "value": ",".join(ctrl_by_pri.get(r["priority"], [])),
+                },
             ],
         }
         risks.append(risk)
@@ -228,7 +250,11 @@ def add_object_poisoning_countermeasure(cdx, overlay, next_seq):
     That threat is present in the base DFD but has no dedicated
     countermeasure entry today."""
     threats = cdx.get("threats", {}).get("threats", [])
-    op_threats = [t for t in threats if (t.get("name") or "").strip().lower() == "object poisoning"]
+    op_threats = [
+        t
+        for t in threats
+        if (t.get("name") or "").strip().lower() == "object poisoning"
+    ]
     if not op_threats:
         return None
     op_meta = overlay["object_poisoning_countermeasure"]
@@ -244,7 +270,10 @@ def add_object_poisoning_countermeasure(cdx, overlay, next_seq):
             {"name": "nist:control-id", "value": "SI-10"},
             {"name": "crm:control-id", "value": "SI-10"},
             {"name": "mock:priority", "value": "P8"},
-            {"name": "mock:priority-title", "value": overlay["priorities"]["P8"]["title"]},
+            {
+                "name": "mock:priority-title",
+                "value": overlay["priorities"]["P8"]["title"],
+            },
             {"name": "mock:synthetic", "value": "true"},
         ],
         "mitigations": [t["bom-ref"] for t in op_threats],
@@ -265,8 +294,12 @@ def add_object_poisoning_countermeasure(cdx, overlay, next_seq):
 
 
 def bump_metadata(cdx):
-    cdx["serialNumber"] = f"urn:uuid:{uuid.uuid5(_IDEAL_UUID_NS, json.dumps(cdx.get('controls', []), sort_keys=True))}"
-    cdx["version"] = int(cdx.get("version", 1)) + 100  # separate from gap-tracking versioning
+    cdx["serialNumber"] = (
+        f"urn:uuid:{uuid.uuid5(_IDEAL_UUID_NS, json.dumps(cdx.get('controls', []), sort_keys=True))}"
+    )
+    cdx["version"] = (
+        int(cdx.get("version", 1)) + 100
+    )  # separate from gap-tracking versioning
     bp = cdx["blueprints"][0]
     # Force a recognizable, deterministic blueprint name so Precogly imports
     # this as "Example System CRM Threat Model (Ideal State)" regardless of what the
@@ -336,7 +369,10 @@ def main():
 
     implemented = sum(1 for c in controls if c.get("status") == "implemented")
     with_evidence = sum(
-        1 for c in controls if c.get("externalReferences") or get_prop(c.get("properties", []), "evidence:url")
+        1
+        for c in controls
+        if c.get("externalReferences")
+        or get_prop(c.get("properties", []), "evidence:url")
     )
     print(
         f"Wrote {os.path.relpath(args.out, ROOT)}",

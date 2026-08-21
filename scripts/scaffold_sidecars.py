@@ -15,6 +15,7 @@ Usage:
     uv run python scripts/scaffold_sidecars.py --all
     uv run python scripts/scaffold_sidecars.py --system challenge-gov-2022
 """
+
 from __future__ import annotations
 
 import argparse
@@ -35,6 +36,7 @@ CATALOG_INDEX = REPO_ROOT / "catalog" / "index.yaml"
 sys.path.insert(0, str(REPO_ROOT / "scripts" / "catalog"))
 try:
     from vault_reader import OrgParty, parse_org_parties
+
     _VAULT_READER_AVAILABLE = True
 except ImportError:
     _VAULT_READER_AVAILABLE = False
@@ -73,22 +75,26 @@ def _contacts_from_vault(vault_system_dir: str, slug: str) -> list[dict]:
         if p.contact_type in seen_types:
             continue
         seen_types.add(p.contact_type)
-        contacts.append({
-            "contactType": p.contact_type,
-            "contactName": p.name,
-            "contactEmail": f"tbd-{p.contact_type.lower()}-{slug}@example.gov",
-            "contactPhone": "555-555-5555",
-        })
+        contacts.append(
+            {
+                "contactType": p.contact_type,
+                "contactName": p.name,
+                "contactEmail": f"tbd-{p.contact_type.lower()}-{slug}@example.gov",
+                "contactPhone": "555-555-5555",
+            }
+        )
 
     # Ensure both Security and Sales slots are always present
     for contact_type in ("Security", "Sales"):
         if contact_type not in seen_types:
-            contacts.append({
-                "contactType": contact_type,
-                "contactName": f"TBD {contact_type} Contact",
-                "contactEmail": f"tbd-{contact_type.lower()}-{slug}@example.gov",
-                "contactPhone": "555-555-5555",
-            })
+            contacts.append(
+                {
+                    "contactType": contact_type,
+                    "contactName": f"TBD {contact_type} Contact",
+                    "contactEmail": f"tbd-{contact_type.lower()}-{slug}@example.gov",
+                    "contactPhone": "555-555-5555",
+                }
+            )
     return contacts
 
 
@@ -98,9 +104,7 @@ def scaffold(entry: dict, vault_root: str | None = None) -> dict:
     provider = ORG_TO_PROVIDER.get(entry.get("organization") or "", "TBD provider name")
     acronym = derive_acronym(entry)
     vault_system_dir = (
-        str(Path(vault_root) / "examples" / "vault" / slug)
-        if vault_root
-        else ""
+        str(Path(vault_root) / "examples" / "vault" / slug) if vault_root else ""
     )
     contacts = _contacts_from_vault(vault_system_dir, slug)
     return {
@@ -129,7 +133,9 @@ def scaffold(entry: dict, vault_root: str | None = None) -> dict:
     }
 
 
-def write_sidecar(slug: str, entry: dict, vault_root: str | None = None) -> tuple[Path, bool]:
+def write_sidecar(
+    slug: str, entry: dict, vault_root: str | None = None
+) -> tuple[Path, bool]:
     SYSTEMS_DIR.mkdir(parents=True, exist_ok=True)
     path = SYSTEMS_DIR / f"{slug}.yaml"
     if path.exists():
@@ -147,7 +153,11 @@ def write_sidecar(slug: str, entry: dict, vault_root: str | None = None) -> tupl
 
 def main() -> int:
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--vault-root", default=None, help="path to oscal-vault checkout (to pre-populate contacts from Organizations/*.md)")
+    p.add_argument(
+        "--vault-root",
+        default=None,
+        help="path to oscal-vault checkout (to pre-populate contacts from Organizations/*.md)",
+    )
     g = p.add_mutually_exclusive_group(required=True)
     g.add_argument("--system", help="single system slug")
     g.add_argument("--all", action="store_true", help="scaffold every missing sidecar")
@@ -157,7 +167,9 @@ def main() -> int:
     if args.system:
         if args.system not in catalog:
             sys.exit(f"slug not in catalog: {args.system}")
-        path, wrote = write_sidecar(args.system, catalog[args.system], vault_root=args.vault_root)
+        path, wrote = write_sidecar(
+            args.system, catalog[args.system], vault_root=args.vault_root
+        )
         print(f"{'wrote' if wrote else 'exists'}: {path.relative_to(REPO_ROOT)}")
         return 0
 

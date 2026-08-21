@@ -11,7 +11,6 @@ import sys
 
 import yaml
 
-
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 DEFAULT_CATALOG = os.path.join(ROOT, "catalog", "index.yaml")
@@ -49,7 +48,9 @@ def render(catalog: dict) -> str:
     lines.append("")
     lines.append("## Systems")
     lines.append("")
-    lines.append("| Slug | Name | FIPS-199 | Status | Threats | Controls | Inheritance | Artifacts |")
+    lines.append(
+        "| Slug | Name | FIPS-199 | Status | Threats | Controls | Inheritance | Artifacts |"
+    )
     lines.append("|---|---|---|---|---:|---:|---:|---|")
 
     for s in sorted(systems, key=lambda e: e["slug"]):
@@ -63,16 +64,18 @@ def render(catalog: dict) -> str:
         if pack:
             art_cell_parts.append(f"[pack]({pack})")
         art_cell = " / ".join(art_cell_parts) or "-"
-        lines.append("| {slug} | {name} | {fips} | {status} | {threats} | {controls} | {inh} | {art} |".format(
-            slug=s["slug"],
-            name=_fmt(s.get("name")),
-            fips=_fmt(s.get("fips_199")),
-            status=_fmt(s.get("status")),
-            threats=_fmt(stats.get("threats")),
-            controls=_fmt(stats.get("countermeasures")),
-            inh=_fmt(stats.get("inheritance_entries")),
-            art=art_cell,
-        ))
+        lines.append(
+            "| {slug} | {name} | {fips} | {status} | {threats} | {controls} | {inh} | {art} |".format(
+                slug=s["slug"],
+                name=_fmt(s.get("name")),
+                fips=_fmt(s.get("fips_199")),
+                status=_fmt(s.get("status")),
+                threats=_fmt(stats.get("threats")),
+                controls=_fmt(stats.get("countermeasures")),
+                inh=_fmt(stats.get("inheritance_entries")),
+                art=art_cell,
+            )
+        )
 
     lines.append("")
     if skipped:
@@ -81,11 +84,13 @@ def render(catalog: dict) -> str:
         lines.append("| Slug | Reason | Vault path |")
         lines.append("|---|---|---|")
         for entry in skipped:
-            lines.append("| {s} | {r} | `{p}` |".format(
-                s=entry.get("system", "-"),
-                r=entry.get("reason", "-"),
-                p=entry.get("vault_path", "-"),
-            ))
+            lines.append(
+                "| {s} | {r} | `{p}` |".format(
+                    s=entry.get("system", "-"),
+                    r=entry.get("reason", "-"),
+                    p=entry.get("vault_path", "-"),
+                )
+            )
         lines.append("")
 
     lines.append("## Cross-system inheritance")
@@ -96,9 +101,11 @@ def render(catalog: dict) -> str:
         for rel in s.get("relationships", []) or []:
             if rel.get("type") != "depends_on":
                 continue
-            lines.append("| {c} | {p} | {m} |".format(
-                c=s["slug"], p=_fmt(rel.get("target")), m=_fmt(rel.get("mode"))
-            ))
+            lines.append(
+                "| {c} | {p} | {m} |".format(
+                    c=s["slug"], p=_fmt(rel.get("target")), m=_fmt(rel.get("mode"))
+                )
+            )
     lines.append("")
 
     return "\n".join(lines)

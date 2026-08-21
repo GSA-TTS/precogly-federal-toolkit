@@ -1,6 +1,5 @@
 components:
   # ── Approved services missing from community Azure pack ─────────────────────
-
   - id: azure-ml
     name: Azure Machine Learning Services
     category: process

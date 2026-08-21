@@ -12,24 +12,25 @@ import os
 import re
 import sys
 import uuid
+from collections import defaultdict
 from datetime import UTC, datetime
 
 import yaml
-
-from vault_reader import (
-    ControlRecord,
-    InheritanceEntry,
-    parse_control,
-    parse_inheritance,
-    load_status_and_origination,
-)
 from heuristics import (
     ORIGINATION_TO_CONTROL_TYPE,
     STATUS_RISK,
     STATUS_TO_CDX,
     classify_control_type,
 )
-
+from vault_reader import (
+    ControlRecord,
+    InheritanceEntry,
+    PpsFlow,
+    load_status_and_origination,
+    load_topology,
+    parse_control,
+    parse_inheritance,
+)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
@@ -43,7 +44,10 @@ def slugify(text: str) -> str:
 
 REDACTIONS: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"https?://[^\s\"'>,)\]]+", re.IGNORECASE), "<REDACTED_URL>"),
-    (re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b"), "<REDACTED_EMAIL>"),
+    (
+        re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b"),
+        "<REDACTED_EMAIL>",
+    ),
 ]
 
 # IPv4 requires each octet 0-255 and negative context to avoid clobbering NIST
@@ -60,7 +64,7 @@ _SECTION_CTX_RE = re.compile(r"(?i)(?:section|sections|§|para\.?|paragraph)\s+$
 
 def _redact_ipv4(text: str) -> str:
     def replace(match: re.Match[str]) -> str:
-        preceding = text[max(0, match.start() - 40): match.start()]
+        preceding = text[max(0, match.start() - 40) : match.start()]
         if _SECTION_CTX_RE.search(preceding):
             return match.group(0)
         return "<REDACTED_IP>"
@@ -126,7 +130,9 @@ def extract_evidence(body_evidence: str, *, internal: bool = False) -> list[dict
         ).strip()
         if not display_text:
             continue
-        key = re.sub(r"[^a-z0-9]+", "-", display_text.lower()).strip("-")[:_EVIDENCE_KEY_MAX]
+        key = re.sub(r"[^a-z0-9]+", "-", display_text.lower()).strip("-")[
+            :_EVIDENCE_KEY_MAX
+        ]
         row = {"key": key or "evidence", "artifact": display_text}
         links: list[str] = []
         if wiki_targets:
@@ -142,8 +148,15 @@ def extract_evidence(body_evidence: str, *, internal: bool = False) -> list[dict
 def dump_yaml(obj: dict, path: str) -> None:
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
-        yaml.dump(obj, f, Dumper=_IndentDumper, sort_keys=False,
-                  allow_unicode=True, default_flow_style=False, width=100)
+        yaml.dump(
+            obj,
+            f,
+            Dumper=_IndentDumper,
+            sort_keys=False,
+            allow_unicode=True,
+            default_flow_style=False,
+            width=100,
+        )
 
 
 def interpolate_parameters(text: str, parameters: list[dict]) -> str:
@@ -155,8 +168,9 @@ def interpolate_parameters(text: str, parameters: list[dict]) -> str:
         value = param.get("value")
         if not pid or value is None:
             continue
-        pattern = re.compile(rf"\{{\{{\s*insert:\s*param,\s*{re.escape(pid)}\s*\}}\}}",
-                             re.IGNORECASE)
+        pattern = re.compile(
+            rf"\{{\{{\s*insert:\s*param,\s*{re.escape(pid)}\s*\}}\}}", re.IGNORECASE
+        )
         out = pattern.sub(str(value), out)
         alt = re.compile(rf"\[{re.escape(pid)}\]")
         out = alt.sub(str(value), out)
@@ -171,7 +185,9 @@ def _sort_control_key(cid: str) -> tuple[str, int, int]:
 
 
 def iter_control_records(vault_root: str, system_slug: str, status_map, orig_map):
-    controls_dir = os.path.join(vault_root, "examples", "vault", system_slug, "Controls")
+    controls_dir = os.path.join(
+        vault_root, "examples", "vault", system_slug, "Controls"
+    )
     if not os.path.isdir(controls_dir):
         raise FileNotFoundError(f"vault system missing: {controls_dir}")
     for name in sorted(os.listdir(controls_dir)):
@@ -184,34 +200,43 @@ def iter_control_records(vault_root: str, system_slug: str, status_map, orig_map
         target_origin, origin_remark, raw_origins = orig_map.lookup(record.origination)
         record.normalized_status = record.normalized_status or target_status
         record.normalized_origination = record.normalized_origination or target_origin
-        yield record, {
-            "status_remark": status_remark,
-            "origination_remark": origin_remark,
-            "raw_origination": raw_origins,
-        }
+        yield (
+            record,
+            {
+                "status_remark": status_remark,
+                "origination_remark": origin_remark,
+                "raw_origination": raw_origins,
+            },
+        )
 
 
-def _providing_system(entries: list[InheritanceEntry], control_id: str) -> InheritanceEntry | None:
+def _providing_system(
+    entries: list[InheritanceEntry], control_id: str
+) -> InheritanceEntry | None:
     for entry in entries:
         if entry.control_id == control_id and entry.direction.lower() != "receives":
             return entry
     return None
 
 
-def build_pack(system_slug: str,
-               records: list[tuple[ControlRecord, dict]],
-               inheritance: list[InheritanceEntry],
-               vault_root: str) -> dict:
+def build_pack(
+    system_slug: str,
+    records: list[tuple[ControlRecord, dict]],
+    inheritance: list[InheritanceEntry],
+    vault_root: str,
+) -> dict:
     component_id = slugify(system_slug)
     component_name = system_slug.replace("-", " ").title()
-    components = [{
-        "id": component_id,
-        "name": component_name,
-        "category": "external_system_actor",
-        "type": "service",
-        "provider": "gsa",
-        "description": f"Vault-projected system {system_slug} from oscal-vault.",
-    }]
+    components = [
+        {
+            "id": component_id,
+            "name": component_name,
+            "category": "external_system_actor",
+            "type": "service",
+            "provider": "gsa",
+            "description": f"Vault-projected system {system_slug} from oscal-vault.",
+        }
+    ]
     threats: list[dict] = []
     countermeasures: list[dict] = []
     ct_threats: list[dict] = []
@@ -228,7 +253,8 @@ def build_pack(system_slug: str,
         cm_id = f"{component_id}-cm-{slugify(cid)}"
 
         parameters_block = "\n".join(
-            f"- `{p.get('param_id')}` = {redact(str(p.get('value', '')))}" for p in record.parameters
+            f"- `{p.get('param_id')}` = {redact(str(p.get('value', '')))}"
+            for p in record.parameters
             if p.get("param_id")
         )
         evidence_block = redact(record.body_sections.get("Evidence", ""))
@@ -244,17 +270,20 @@ def build_pack(system_slug: str,
         if prose:
             threat_desc_parts.append(prose)
 
-        threats.append({
-            "id": threat_id,
-            "name": f"CRM: {cid} - {component_name}",
-            "description": "\n\n".join(p for p in threat_desc_parts if p).strip(),
-        })
+        threats.append(
+            {
+                "id": threat_id,
+                "name": f"CRM: {cid} - {component_name}",
+                "description": "\n\n".join(p for p in threat_desc_parts if p).strip(),
+            }
+        )
         ct_threats.append({"threat": threat_id, "applies_to": "component"})
 
         control_type = ORIGINATION_TO_CONTROL_TYPE.get(origination)
         if control_type is None:
-            classified = classify_control_type(origination, prose)
-            control_type = "procedural" if classified in {"detective", "corrective"} else "procedural"
+            _classified = classify_control_type(origination, prose)
+            # TODO: map _classified → control_type when detective/corrective types are supported
+            control_type = "procedural"
         cm_desc = [f"Fulfill CRM responsibility for {cid} on {component_name}."]
         if parameters_block:
             cm_desc.append("Parameters:\n" + parameters_block)
@@ -262,16 +291,20 @@ def build_pack(system_slug: str,
             cm_desc.append(prose)
         if evidence_block:
             cm_desc.append("Evidence:\n" + evidence_block)
-        countermeasures.append({
-            "id": cm_id,
-            "name": f"Fulfill {cid} on {component_name}",
-            "description": "\n\n".join(cm_desc),
-            "control_type": control_type,
-            "cost": "medium",
-            "default_status": "gap" if status != "operational" else "implemented",
-        })
+        countermeasures.append(
+            {
+                "id": cm_id,
+                "name": f"Fulfill {cid} on {component_name}",
+                "description": "\n\n".join(cm_desc),
+                "control_type": control_type,
+                "cost": "medium",
+                "default_status": "gap" if status != "operational" else "implemented",
+            }
+        )
         tc_mappings.append({"threat": threat_id, "countermeasures": [cm_id]})
-        fw_mappings.append({"countermeasure": cm_id, "requirements": [cid], "sufficiency": "full"})
+        fw_mappings.append(
+            {"countermeasure": cm_id, "requirements": [cid], "sufficiency": "full"}
+        )
 
     ct_mappings = [{"component": component_id, "threats": ct_threats}]
 
@@ -316,304 +349,544 @@ def build_pack(system_slug: str,
     }
 
 
-def emit_cdx(system_slug: str,
-             records: list[tuple[ControlRecord, dict]],
-             inheritance: list[InheritanceEntry],
-             out_path: str,
-             *,
-             internal: bool = False) -> dict:
-    component_id = slugify(system_slug)
-    component_name = system_slug.replace("-", " ").title()
-    asset_ref = f"asset-{component_id}"
-    zone_ref = f"zone-{component_id}"
+def _sidecar_augment(cdx: dict, system_slug: str) -> None:
+    """Merge extra_threats/extra_scenarios/extra_controls from data/systems/<slug>.yaml.
 
-    # Build external zones/assets/flows from inheritance table.
-    # Each unique provider becomes its own lower-trust zone + asset.
-    # Each inherited/hybrid control link becomes a directed flow.
-    provider_slugs: dict[str, str] = {}  # provider name -> bom-ref prefix
+    These are hand-authored entries that the vault projection doesn't produce:
+    ATU continuous-monitoring scenarios, POA&M-derived gap threats, etc.
+    Each entry must be a full CDX object with a bom-ref that doesn't clash
+    with generated refs (prefix with 'aug-' by convention).
+    """
+    sidecar_path = os.path.join(ROOT, "data", "systems", f"{system_slug}.yaml")
+    if not os.path.isfile(sidecar_path):
+        return
+    with open(sidecar_path, encoding="utf-8") as fh:
+        sc = yaml.safe_load(fh) or {}
+    extras = sc.get("augment", {})
+    if not extras:
+        return
+    cdx["threats"]["threats"].extend(extras.get("threats", []))
+    cdx["threats"]["scenarios"].extend(extras.get("scenarios", []))
+    cdx["controls"].extend(extras.get("controls", []))
+
+
+def _build_inheritance_topology(inheritance, asset_ref):
+    """Build external zones, assets, DFD flows, and provider slug map from inheritance."""
+    provider_slugs: dict[str, str] = {}
     ext_zones: list[dict] = []
     ext_assets: list[dict] = []
     dfd_flows: list[dict] = []
-
-    # DFD canvas nodes and edges (built alongside the blueprint data)
-    _dfd_nodes: list[dict] = []
-    _dfd_edges: list[dict] = []
     for entry in inheritance:
         pslug = slugify(entry.provider)
         if pslug not in provider_slugs:
             provider_slugs[pslug] = pslug
-            ext_zones.append({
-                "bom-ref": f"zone-ext-{pslug}",
-                "name": entry.provider,
-                "type": "trust",
-                "trustLevel": 10,
-            })
-            ext_assets.append({
-                "bom-ref": f"asset-ext-{pslug}",
-                "name": entry.provider,
-                "type": "service",
-                "zone": f"zone-ext-{pslug}",
-            })
+            ext_zones.append(
+                {
+                    "bom-ref": f"zone-ext-{pslug}",
+                    "name": entry.provider,
+                    "type": "trust",
+                    "trustLevel": 10,
+                }
+            )
+            ext_assets.append(
+                {
+                    "bom-ref": f"asset-ext-{pslug}",
+                    "name": entry.provider,
+                    "type": "service",
+                    "zone": f"zone-ext-{pslug}",
+                }
+            )
         mode = entry.mode.lower() if entry.mode else "inherited"
-        dfd_flows.append({
-            "bom-ref": f"flow-{pslug}-{slugify(entry.control_id)}",
-            "name": f"{entry.control_id} ({mode})",
-            "source": f"asset-ext-{pslug}",
-            "destination": asset_ref,
-            "crosses_trust_zone": True,  # P2-C: provider zones are always lower-trust
-            "authenticated": mode in ("hybrid", "shared"),
-            "properties": [
-                {"name": "nist:control-id", "value": entry.control_id},
-                {"name": "vault:inheritance-mode", "value": mode},
-            ],
-        })
+        dfd_flows.append(
+            {
+                "bom-ref": f"flow-{pslug}-{slugify(entry.control_id)}",
+                "name": f"{entry.control_id} ({mode})",
+                "source": f"asset-ext-{pslug}",
+                "destination": asset_ref,
+                "crosses_trust_zone": True,
+                "authenticated": mode in ("hybrid", "shared"),
+                "properties": [
+                    {"name": "nist:control-id", "value": entry.control_id},
+                    {"name": "vault:inheritance-mode", "value": mode},
+                ],
+            }
+        )
+    return ext_zones, ext_assets, dfd_flows, provider_slugs
 
-    blueprint = {
+
+def _build_blueprint(
+    component_id,
+    component_name,
+    zone_ref,
+    asset_ref,
+    ext_zones,
+    ext_assets,
+    dfd_flows,
+    dfd_nodes,
+    dfd_edges,
+):
+    """Construct the CDX blueprint dict (zones, assets, flows, visualizations)."""
+    return {
         "bom-ref": f"blueprint-{component_id}",
         "name": component_name,
         "modelTypes": ["data-flow"],
-        "zones": [{
-            "bom-ref": zone_ref,
-            "name": component_name,
-            "type": "trust",
-            "trustLevel": 40,
-        }] + ext_zones,
-        "assets": [{
-            "bom-ref": asset_ref,
-            "name": component_name,
-            "type": "system",
-            "zone": zone_ref,
-        }] + ext_assets,
+        "zones": [
+            {
+                "bom-ref": zone_ref,
+                "name": component_name,
+                "type": "trust",
+                "trustLevel": 40,
+            }
+        ]
+        + ext_zones,
+        "assets": [
+            {
+                "bom-ref": asset_ref,
+                "name": component_name,
+                "type": "system",
+                "zone": zone_ref,
+            }
+        ]
+        + ext_assets,
         "flows": dfd_flows,
-        "visualizations": [{
-            "type": "precogly-dfd",
-            "name": f"{component_name} Data Flow Diagram",
-            "diagramType": "level1",
-            "data": {"nodes": _dfd_nodes, "edges": _dfd_edges},
-        }],
+        "visualizations": [
+            {
+                "type": "precogly-dfd",
+                "name": f"{component_name} Data Flow Diagram",
+                "diagramType": "level1",
+                "data": {"nodes": dfd_nodes, "edges": dfd_edges},
+            }
+        ],
     }
-    threats: list[dict] = []
-    scenarios: list[dict] = []
-    controls: list[dict] = []
-    seq = 0
 
-    # System scope wrapper
-    _dfd_nodes.append({
-        "id": f"scope-{component_id}",
-        "type": "systemScope",
-        "data": {"label": component_name, "orgsystem_id": None},  # id resolved at import
-        "style": {"width": max(600, 200 + 250 * len(ext_assets)), "height": 400},
-        "position": {"x": 50, "y": 50},
-    })
 
-    # Internal system node (process type represents the boundary system)
-    _dfd_nodes.append({
-        "id": f"process-{component_id}",
-        "type": "process",
-        "data": {"label": component_name, "component_id": None},
-        "parentId": f"scope-{component_id}",
-        "position": {"x": 60 + 250 * len(ext_assets) // 2, "y": 160},
-    })
-
-    # External provider nodes — anchored inside their own external scope node (P1-B)
-    x_step = 220
-    for idx, (pslug, _) in enumerate(provider_slugs.items()):
-        ext_name = next(e.provider for e in inheritance if slugify(e.provider) == pslug)
-        ext_scope_id = f"scope-ext-{pslug}"
-        _dfd_nodes.append({
-            "id": ext_scope_id,
-            "type": "systemScope",
-            "data": {"label": ext_name, "orgsystem_id": None},
-            "style": {"width": 180, "height": 120},
-            "position": {"x": 50 + idx * x_step, "y": 30},
-        })
-        _dfd_nodes.append({
-            "id": f"actor-ext-{pslug}",
-            "type": "systemActor",
-            "data": {"label": ext_name, "systemType": "service", "component_id": None},
-            "parentId": ext_scope_id,
-            "position": {"x": 20, "y": 40},
-        })
-
-    # One edge per provider per NIST family (P2-B: semantic grouping)
-    from collections import defaultdict
+def _build_family_flow_edges(inheritance, component_id, dfd_edges):
+    """Add one DFD edge per provider per NIST family (P2-B: semantic grouping)."""
     family_flows: dict[tuple[str, str], list] = defaultdict(list)
     for entry in inheritance:
         pslug = slugify(entry.provider)
         family = entry.control_id.split("-")[0].upper()
         family_flows[(pslug, family)].append(entry)
-
     for (pslug, family), entries in sorted(family_flows.items()):
         modes = sorted({e.mode.lower() for e in entries if e.mode})
         mode_label = "/".join(modes) if modes else "inherited"
-        is_authenticated = any(e.mode.lower() in ("hybrid", "shared") for e in entries if e.mode)
-        _dfd_edges.append({
-            "id": f"edge-{pslug}-{family.lower()}-to-{component_id}",
-            "type": "dataFlow",
-            "source": f"actor-ext-{pslug}",
-            "target": f"process-{component_id}",
-            "data": {
-                "label": f"{family} ({mode_label}, {len(entries)})",
-                "encrypted": False,
-                "authenticated": is_authenticated,
-            },
-        })
+        is_authenticated = any(
+            e.mode.lower() in ("hybrid", "shared") for e in entries if e.mode
+        )
+        dfd_edges.append(
+            {
+                "id": f"edge-{pslug}-{family.lower()}-to-{component_id}",
+                "type": "dataFlow",
+                "source": f"actor-ext-{pslug}",
+                "target": f"process-{component_id}",
+                "data": {
+                    "label": f"{family} ({mode_label}, {len(entries)})",
+                    "encrypted": False,
+                    "authenticated": is_authenticated,
+                },
+            }
+        )
 
-    for record, meta in records:
-        seq += 1
-        cid = record.control_id
-        status = record.normalized_status or "not-implemented"
-        origination = record.normalized_origination or "system-specific"
-        prose = redact(interpolate_parameters(record.combined_prose, record.parameters))
-        cdx_status = STATUS_TO_CDX.get(status, "recommended")
-        risk = STATUS_RISK.get(status, "medium")
 
-        # Skip not-applicable controls (no threat, no countermeasure).
-        if status == "not-applicable":
+def _build_pps_topology_nodes(
+    topology, component_id, provider_slugs, dfd_nodes, dfd_edges
+):
+    """Add PPS topology nodes and edges to the DFD canvas."""
+    pps_nodes_emitted: set[str] = set()
+    pps_edges_emitted: set[tuple[str, str]] = set()
+    for flow in topology or []:
+        for node_label in (flow.source, flow.destination):
+            nslug = slugify(node_label)
+            node_id = f"pps-{nslug}"
+            if node_id in pps_nodes_emitted:
+                continue
+            if nslug == component_id or nslug in provider_slugs:
+                pps_nodes_emitted.add(node_id)
+                continue
+            dfd_nodes.append(
+                {
+                    "id": node_id,
+                    "type": "systemActor",
+                    "data": {
+                        "label": node_label,
+                        "systemType": "service",
+                        "component_id": None,
+                    },
+                    "position": {"x": 50 + len(pps_nodes_emitted) * 180, "y": 520},
+                }
+            )
+            pps_nodes_emitted.add(node_id)
+        src_nid = f"pps-{slugify(flow.source)}"
+        dst_nid = f"pps-{slugify(flow.destination)}"
+        if (
+            slugify(flow.source) == component_id
+            or slugify(flow.source) in provider_slugs
+        ):
+            src_nid = f"process-{component_id}"
+        if (
+            slugify(flow.destination) == component_id
+            or slugify(flow.destination) in provider_slugs
+        ):
+            dst_nid = f"process-{component_id}"
+        edge_key = (src_nid, dst_nid)
+        if edge_key in pps_edges_emitted:
             continue
+        pps_edges_emitted.add(edge_key)
+        dfd_edges.append(
+            {
+                "id": f"pps-edge-{slugify(flow.source)}-to-{slugify(flow.destination)}",
+                "type": "dataFlow",
+                "source": src_nid,
+                "target": dst_nid,
+                "data": {
+                    "label": flow.service or flow.purpose or flow.protocol,
+                    "encrypted": flow.encrypted,
+                    "authenticated": True,
+                    "crosses_trust_zone": flow.boundary_crossing,
+                    "data_sensitivity": flow.data_sensitivity,
+                },
+            }
+        )
 
-        # Normalize NIST enhancement notation "AC-2(1)" -> "AC-2-1" before
-        # slugifying, so enhancements don't collide with base controls that
-        # share the same digits (e.g. "AC-2(1)" and "AC-21" both slugify to
-        # "ac-21" without this normalization).
-        cid_slug = cid.replace("(", "-").replace(")", "")
-        # Also normalize the display form used in threat names so that
-        # Django's slugify on the threat name produces distinct slugs.
-        cid_display = cid.replace("(", "-").replace(")", "")
-        t_ref = f"threat-{slugify(cid_slug)}-{seq}"
-        s_ref = f"scenario-{slugify(cid_slug)}-{seq}"
-        c_ref = f"control-{slugify(cid_slug)}-{seq}"
 
-        provider = _providing_system(inheritance, cid)
-        properties = [
-            {"name": "nist:control-id", "value": cid},
-            {"name": "vault:implementation-status", "value": status},
-            {"name": "vault:origination", "value": origination},
-        ]
-        for param in record.parameters:
-            pid = param.get("param_id")
-            if pid:
-                properties.append({
+def _build_dfd_canvas(
+    component_id,
+    component_name,
+    ext_assets,
+    provider_slugs,
+    inheritance,
+    topology,
+    dfd_nodes,
+    dfd_edges,
+):
+    """Populate DFD canvas: system scope, internal node, external providers, flows."""
+    # System scope wrapper
+    dfd_nodes.append(
+        {
+            "id": f"scope-{component_id}",
+            "type": "systemScope",
+            "data": {"label": component_name, "orgsystem_id": None},
+            "style": {"width": max(600, 200 + 250 * len(ext_assets)), "height": 400},
+            "position": {"x": 50, "y": 50},
+        }
+    )
+    # Internal system node
+    dfd_nodes.append(
+        {
+            "id": f"process-{component_id}",
+            "type": "process",
+            "data": {"label": component_name, "component_id": None},
+            "parentId": f"scope-{component_id}",
+            "position": {"x": 60 + 250 * len(ext_assets) // 2, "y": 160},
+        }
+    )
+    # External provider nodes (P1-B)
+    x_step = 220
+    for idx, (pslug, _) in enumerate(provider_slugs.items()):
+        ext_name = next(e.provider for e in inheritance if slugify(e.provider) == pslug)
+        ext_scope_id = f"scope-ext-{pslug}"
+        dfd_nodes.append(
+            {
+                "id": ext_scope_id,
+                "type": "systemScope",
+                "data": {"label": ext_name, "orgsystem_id": None},
+                "style": {"width": 180, "height": 120},
+                "position": {"x": 50 + idx * x_step, "y": 30},
+            }
+        )
+        dfd_nodes.append(
+            {
+                "id": f"actor-ext-{pslug}",
+                "type": "systemActor",
+                "data": {
+                    "label": ext_name,
+                    "systemType": "service",
+                    "component_id": None,
+                },
+                "parentId": ext_scope_id,
+                "position": {"x": 20, "y": 40},
+            }
+        )
+    _build_family_flow_edges(inheritance, component_id, dfd_edges)
+    _build_pps_topology_nodes(
+        topology, component_id, provider_slugs, dfd_nodes, dfd_edges
+    )
+
+
+def _build_evidence_properties(record, provider, evidence_rows):
+    """Build control properties list and first evidence URL."""
+    cid = record.control_id
+    status = record.normalized_status or "not-implemented"
+    origination = record.normalized_origination or "system-specific"
+    props = [
+        {
+            "name": "vault:control-type",
+            "value": ORIGINATION_TO_CONTROL_TYPE.get(origination) or "procedural",
+        },
+        {"name": "nist:control-id", "value": cid},
+        {"name": "vault:implementation-status", "value": status},
+        {"name": "vault:origination", "value": origination},
+    ]
+    if provider:
+        props.append({"name": "vault:providing-system", "value": provider.provider})
+        props.append({"name": "vault:inheritance-mode", "value": provider.mode})
+    for param in record.parameters:
+        pid = param.get("param_id")
+        if pid:
+            props.append(
+                {
                     "name": f"vault:param:{pid}",
                     "value": redact(str(param.get("value", ""))),
-                })
-        if meta.get("raw_origination"):
-            properties.append({
+                }
+            )
+    for row in evidence_rows:
+        props.append({"name": "crm:evidence-key", "value": row["key"]})
+        props.append({"name": "crm:evidence-artifact", "value": row["artifact"]})
+        for link in row.get("links", []):
+            props.append({"name": "crm:evidence-link", "value": link})
+    first_url = next(
+        (
+            lnk
+            for row in evidence_rows
+            for lnk in row.get("links", [])
+            if lnk.startswith("http")
+        ),
+        None,
+    )
+    return props, first_url
+
+
+def _build_threat_properties(record, meta, provider, status, origination):
+    """Build the properties list attached to a threat entry."""
+    cid = record.control_id
+    properties = [
+        {"name": "nist:control-id", "value": cid},
+        {"name": "vault:implementation-status", "value": status},
+        {"name": "vault:origination", "value": origination},
+    ]
+    for param in record.parameters:
+        pid = param.get("param_id")
+        if pid:
+            properties.append(
+                {
+                    "name": f"vault:param:{pid}",
+                    "value": redact(str(param.get("value", ""))),
+                }
+            )
+    if meta.get("raw_origination"):
+        properties.append(
+            {
                 "name": "vault:origination-raw",
                 "value": ",".join(meta["raw_origination"]),
-            })
-        if provider:
-            properties.append({"name": "vault:providing-system", "value": provider.provider})
-            properties.append({"name": "vault:inheritance-mode", "value": provider.mode})
-
-        threat_desc = [
-            f"CRM responsibility for {cid} ({record.title}) on {component_name}.",
-            f"Implementation status: {status}. Origination: {origination}.",
-        ]
-        if provider:
-            threat_desc.append(
-                f"Provider: {provider.provider} ({provider.mode})."
-            )
-        if prose:
-            threat_desc.append(prose)
-        # Only emit a threat if there is residual risk (status != operational
-        # implies open exposure). Operational controls still get a countermeasure
-        # linked to the base risk to record evidence.
-        emit_threat = status != "operational"
-        if emit_threat:
-            threats.append({
-                "bom-ref": t_ref,
-                "name": f"CRM: {cid_display} residual risk - {component_name}",
-                "description": "\n\n".join(threat_desc),
-                "affectedAssets": [asset_ref],
-                "properties": properties,
-                "mitigations": [c_ref],
-            })
-            # One scenario per threat; list non-empty parts as properties to avoid
-            # violating the unique(component_id, threat_library_id) DB constraint.
-            emitted_parts = [p for p in record.parts if p.prose.strip()]
-            scenario_entry: dict = {
-                "bom-ref": s_ref,
-                "threat": t_ref,
-                "affectedAssets": [asset_ref],
-                "riskScore": {"level": risk},
             }
-            if emitted_parts:
-                scenario_entry["properties"] = [
-                    {"name": "vault:statement-part", "value": p.part}
-                    for p in emitted_parts
-                ]
+        )
+    if provider:
+        properties.append(
+            {"name": "vault:providing-system", "value": provider.provider}
+        )
+        properties.append({"name": "vault:inheritance-mode", "value": provider.mode})
+    return properties
+
+
+def _build_threat_and_scenario(
+    cid,
+    cid_display,
+    record,
+    component_name,
+    provider,
+    status,
+    origination,
+    prose,
+    risk,
+    asset_ref,
+    t_ref,
+    s_ref,
+    c_ref,
+    properties,
+):
+    """Build threat + scenario dicts; returns (threat|None, scenario|None)."""
+    threat_desc = [
+        f"CRM responsibility for {cid} ({record.title}) on {component_name}.",
+        f"Implementation status: {status}. Origination: {origination}.",
+    ]
+    if provider:
+        threat_desc.append(f"Provider: {provider.provider} ({provider.mode}).")
+    if prose:
+        threat_desc.append(prose)
+    if status == "operational":
+        return None, None
+    threat_entry = {
+        "bom-ref": t_ref,
+        "name": f"CRM: {cid_display} residual risk - {component_name}",
+        "description": "\n\n".join(threat_desc),
+        "affectedAssets": [asset_ref],
+        "properties": properties,
+        "mitigations": [c_ref],
+    }
+    emitted_parts = [p for p in record.parts if p.prose.strip()]
+    scenario_entry: dict = {
+        "bom-ref": s_ref,
+        "threat": t_ref,
+        "affectedAssets": [asset_ref],
+        "riskScore": {"level": risk},
+    }
+    if emitted_parts:
+        scenario_entry["properties"] = [
+            {"name": "vault:statement-part", "value": p.part} for p in emitted_parts
+        ]
+    return threat_entry, scenario_entry
+
+
+def _emit_one_control_record(
+    record,
+    meta,
+    inheritance,
+    component_id,
+    component_name,
+    asset_ref,
+    seq,
+    *,
+    internal=False,
+):
+    """Process one (record, meta) pair; return (threat|None, scenario|None, control, new_seq)."""
+    seq += 1
+    cid = record.control_id
+    status = record.normalized_status or "not-implemented"
+    origination = record.normalized_origination or "system-specific"
+    if status == "not-applicable":
+        return None, None, None, seq
+    prose = redact(interpolate_parameters(record.combined_prose, record.parameters))
+    cid_slug = cid.replace("(", "-").replace(")", "")
+    t_ref = f"threat-{slugify(cid_slug)}-{seq}"
+    s_ref = f"scenario-{slugify(cid_slug)}-{seq}"
+    c_ref = f"control-{slugify(cid_slug)}-{seq}"
+    provider = _providing_system(inheritance, cid)
+    properties = _build_threat_properties(record, meta, provider, status, origination)
+    threat_entry, scenario_entry = _build_threat_and_scenario(
+        cid,
+        cid_slug,
+        record,
+        component_name,
+        provider,
+        status,
+        origination,
+        prose,
+        STATUS_RISK.get(status, "medium"),
+        asset_ref,
+        t_ref,
+        s_ref,
+        c_ref,
+        properties,
+    )
+    emit_threat = threat_entry is not None
+    # Control description
+    control_desc = [f"Fulfills CRM responsibility for {cid} on {component_name}."]
+    params_block = "\n".join(
+        f"- {p.get('param_id')} = {redact(str(p.get('value', '')))}"
+        for p in record.parameters
+        if p.get("param_id")
+    )
+    if params_block:
+        control_desc.append("Parameters:\n" + params_block)
+    if prose:
+        control_desc.append(prose)
+    evidence_block = redact(record.body_sections.get("Evidence", ""), internal=internal)
+    evidence_rows = extract_evidence(
+        record.body_sections.get("Evidence", ""), internal=internal
+    )
+    if evidence_block:
+        control_desc.append("Evidence:\n" + evidence_block)
+    control_properties, first_evidence_url = _build_evidence_properties(
+        record, provider, evidence_rows
+    )
+    control_entry: dict = {
+        "bom-ref": c_ref,
+        "name": f"{cid} implementation - {component_name}",
+        "status": STATUS_TO_CDX.get(status, "recommended"),
+        "description": "\n\n".join(control_desc),
+        "category": classify_control_type(origination, prose),
+        "properties": control_properties,
+        "appliesTo": [asset_ref],
+        "mitigations": [t_ref] if emit_threat else [],
+        "satisfies": [{"reference": cid, "framework": "nist-800-53-r5"}],
+    }
+    if first_evidence_url:
+        control_entry["externalReferences"] = [
+            {"type": "evidence", "url": first_evidence_url}
+        ]
+    return threat_entry, scenario_entry, control_entry, seq
+
+
+def emit_cdx(
+    system_slug: str,
+    records: list[tuple[ControlRecord, dict]],
+    inheritance: list[InheritanceEntry],
+    out_path: str,
+    *,
+    internal: bool = False,
+    topology: list[PpsFlow] | None = None,
+) -> dict:
+    """Emit a CycloneDX threats JSON file for a vault system."""
+    component_id = slugify(system_slug)
+    component_name = system_slug.replace("-", " ").title()
+    asset_ref = f"asset-{component_id}"
+    zone_ref = f"zone-{component_id}"
+    ext_zones, ext_assets, dfd_flows, provider_slugs = _build_inheritance_topology(
+        inheritance, asset_ref
+    )
+    dfd_nodes: list[dict] = []
+    dfd_edges: list[dict] = []
+    _build_dfd_canvas(
+        component_id,
+        component_name,
+        ext_assets,
+        provider_slugs,
+        inheritance,
+        topology,
+        dfd_nodes,
+        dfd_edges,
+    )
+    blueprint = _build_blueprint(
+        component_id,
+        component_name,
+        zone_ref,
+        asset_ref,
+        ext_zones,
+        ext_assets,
+        dfd_flows,
+        dfd_nodes,
+        dfd_edges,
+    )
+    threats: list[dict] = []
+    scenarios: list[dict] = []
+    controls: list[dict] = []
+    seq = 0
+    for record, meta in records:
+        threat_entry, scenario_entry, control_entry, seq = _emit_one_control_record(
+            record,
+            meta,
+            inheritance,
+            component_id,
+            component_name,
+            asset_ref,
+            seq,
+            internal=internal,
+        )
+        if control_entry is None:
+            continue
+        if threat_entry:
+            threats.append(threat_entry)
+        if scenario_entry:
             scenarios.append(scenario_entry)
-
-        control_category = classify_control_type(origination, prose)
-        control_type = ORIGINATION_TO_CONTROL_TYPE.get(origination) or "procedural"
-        control_desc = [
-            f"Fulfills CRM responsibility for {cid} on {component_name}.",
-        ]
-        parameters_block = "\n".join(
-            f"- {p.get('param_id')} = {redact(str(p.get('value', '')))}"
-            for p in record.parameters if p.get("param_id")
-        )
-        if parameters_block:
-            control_desc.append("Parameters:\n" + parameters_block)
-        if prose:
-            control_desc.append(prose)
-        evidence_block = redact(record.body_sections.get("Evidence", ""), internal=internal)
-        evidence_rows = extract_evidence(record.body_sections.get("Evidence", ""), internal=internal)
-        if evidence_block:
-            control_desc.append("Evidence:\n" + evidence_block)
-
-        control_properties = [
-            {"name": "vault:control-type", "value": control_type},
-            {"name": "nist:control-id", "value": cid},
-            {"name": "vault:implementation-status", "value": status},
-            {"name": "vault:origination", "value": origination},
-        ]
-        if provider:
-            control_properties.append({"name": "vault:providing-system", "value": provider.provider})
-            control_properties.append({"name": "vault:inheritance-mode", "value": provider.mode})
-        for param in record.parameters:
-            pid = param.get("param_id")
-            if pid:
-                control_properties.append({
-                    "name": f"vault:param:{pid}",
-                    "value": redact(str(param.get("value", ""))),
-                })
-        for idx, row in enumerate(evidence_rows):
-            control_properties.append({"name": "crm:evidence-key", "value": row["key"]})
-            control_properties.append({"name": "crm:evidence-artifact", "value": row["artifact"]})
-            for link in row.get("links", []):
-                control_properties.append({"name": "crm:evidence-link", "value": link})
-
-        # P2-A: first HTTP evidence link as externalReference for evidence_url import
-        first_evidence_url = next(
-            (lnk for row in evidence_rows for lnk in row.get("links", []) if lnk.startswith("http")),
-            None,
-        )
-
-        control_entry: dict = {
-            "bom-ref": c_ref,
-            "name": f"{cid} implementation - {component_name}",
-            "status": cdx_status,
-            "description": "\n\n".join(control_desc),
-            "category": control_category,
-            "properties": control_properties,
-            "appliesTo": [asset_ref],
-            "mitigations": [t_ref] if emit_threat else [],
-            # P3-A: NIST 800-53 compliance linkage
-            "satisfies": [{"reference": cid, "framework": "nist-800-53-r5"}],
-        }
-        if first_evidence_url:
-            control_entry["externalReferences"] = [{"type": "evidence", "url": first_evidence_url}]
         controls.append(control_entry)
-
+    ts = datetime.now(UTC).isoformat(timespec="milliseconds").replace("+00:00", "Z")
     cdx = {
         "specFormat": "CycloneDX",
         "specVersion": "2.0",
         "serialNumber": f"urn:uuid:{uuid.uuid4()}",
         "version": 1,
         "metadata": {
-            "timestamp": datetime.now(UTC).isoformat(timespec="milliseconds").replace("+00:00", "Z"),
+            "timestamp": ts,
             "properties": [
                 {"name": "vault:system-slug", "value": system_slug},
                 {"name": "vault:source", "value": "oscal-vault"},
@@ -624,7 +897,7 @@ def emit_cdx(system_slug: str,
         "threats": {"threats": threats, "scenarios": scenarios},
         "controls": controls,
     }
-
+    _sidecar_augment(cdx, system_slug)
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(cdx, f, indent=2, ensure_ascii=False)
@@ -637,36 +910,58 @@ def emit_cdx(system_slug: str,
 
 
 def write_pack(system_slug: str, pack: dict, out_dir: str) -> None:
-    slug = slugify(system_slug)
+    slugify(system_slug)
     base = os.path.join(out_dir, "pack")
     dump_yaml(pack["pack"], os.path.join(base, "pack.yaml"))
     dump_yaml(pack["components"], os.path.join(base, "components.yaml"))
     dump_yaml(pack["threats"], os.path.join(base, "threats.yaml"))
     dump_yaml(pack["countermeasures"], os.path.join(base, "countermeasures.yaml"))
-    for key in ("joins/components-threats", "joins/threats-countermeasures",
-                "joins/countermeasures-nist-800-53-r5", "joins/inheritance"):
+    for key in (
+        "joins/components-threats",
+        "joins/threats-countermeasures",
+        "joins/countermeasures-nist-800-53-r5",
+        "joins/inheritance",
+    ):
         dump_yaml(pack[key], os.path.join(base, f"{key}.yaml"))
 
 
-def convert_system(vault_root: str, system_slug: str, out_dir: str,
-                   status_map, orig_map, *, internal: bool = False) -> dict:
+def convert_system(
+    vault_root: str,
+    system_slug: str,
+    out_dir: str,
+    status_map,
+    orig_map,
+    *,
+    internal: bool = False,
+) -> dict:
     records = list(iter_control_records(vault_root, system_slug, status_map, orig_map))
-    inheritance_dir = os.path.join(vault_root, "examples", "vault", system_slug, "Inheritance")
+    inheritance_dir = os.path.join(
+        vault_root, "examples", "vault", system_slug, "Inheritance"
+    )
     inheritance: list[InheritanceEntry] = []
     if os.path.isdir(inheritance_dir):
         for name in sorted(os.listdir(inheritance_dir)):
             if name.endswith(".md"):
-                inheritance.extend(parse_inheritance(os.path.join(inheritance_dir, name)))
+                inheritance.extend(
+                    parse_inheritance(os.path.join(inheritance_dir, name))
+                )
+    topology = load_topology(vault_root, system_slug)
     pack = build_pack(system_slug, records, inheritance, vault_root)
     write_pack(system_slug, pack, out_dir)
-    cdx_stats = emit_cdx(system_slug, records, inheritance,
-                          os.path.join(out_dir, f"{slugify(system_slug)}.cdx.json"),
-                          internal=internal)
+    cdx_stats = emit_cdx(
+        system_slug,
+        records,
+        inheritance,
+        os.path.join(out_dir, f"{slugify(system_slug)}.cdx.json"),
+        internal=internal,
+        topology=topology,
+    )
     stats = {
         "controls_parsed": len(records),
         "threats": cdx_stats["threats"],
         "countermeasures": cdx_stats["controls"],
         "inheritance_entries": len(inheritance),
+        "pps_flows": len(topology),
     }
     with open(os.path.join(out_dir, "import-summary.yaml"), "w", encoding="utf-8") as f:
         yaml.safe_dump({"system": system_slug, "stats": stats}, f, sort_keys=False)
@@ -676,7 +971,8 @@ def convert_system(vault_root: str, system_slug: str, out_dir: str,
 def enumerate_systems(vault_root: str) -> list[str]:
     root = os.path.join(vault_root, "examples", "vault")
     return sorted(
-        name for name in os.listdir(root)
+        name
+        for name in os.listdir(root)
         if os.path.isdir(os.path.join(root, name, "Controls"))
     )
 
@@ -690,25 +986,41 @@ def enumerate_skipped_systems(vault_root: str) -> list[dict]:
             continue
         if os.path.isdir(os.path.join(system_dir, "Controls")):
             continue
-        skipped.append({
-            "system": name,
-            "reason": "no Controls/ directory in vault",
-            "vault_path": os.path.relpath(system_dir, ROOT) if system_dir.startswith(ROOT) else system_dir,
-        })
+        skipped.append(
+            {
+                "system": name,
+                "reason": "no Controls/ directory in vault",
+                "vault_path": os.path.relpath(system_dir, ROOT)
+                if system_dir.startswith(ROOT)
+                else system_dir,
+            }
+        )
     return skipped
 
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--vault-root", default=DEFAULT_VAULT,
-                    help="Path to the sibling oscal-vault checkout.")
-    ap.add_argument("--system", action="append",
-                    help="Vault system slug (repeatable). Use --all for all systems.")
+    ap.add_argument(
+        "--vault-root",
+        default=DEFAULT_VAULT,
+        help="Path to the sibling oscal-vault checkout.",
+    )
+    ap.add_argument(
+        "--system",
+        action="append",
+        help="Vault system slug (repeatable). Use --all for all systems.",
+    )
     ap.add_argument("--all", action="store_true", help="Convert every vault system.")
-    ap.add_argument("--internal", action="store_true",
-                    help="Preserve URLs/emails in build/ CDX (internal artifacts only).")
-    ap.add_argument("--out-root", default=os.path.join(ROOT, "build", "systems"),
-                    help="Output root directory (build/systems by default).")
+    ap.add_argument(
+        "--internal",
+        action="store_true",
+        help="Preserve URLs/emails in build/ CDX (internal artifacts only).",
+    )
+    ap.add_argument(
+        "--out-root",
+        default=os.path.join(ROOT, "build", "systems"),
+        help="Output root directory (build/systems by default).",
+    )
     args = ap.parse_args()
 
     vault_root = os.path.abspath(args.vault_root)
@@ -723,44 +1035,69 @@ def main() -> None:
         systems.extend(enumerate_systems(vault_root))
     systems = sorted(dict.fromkeys(systems))
     if not systems:
-        print("FAIL: no systems requested; pass --system SLUG or --all", file=sys.stderr)
+        print(
+            "FAIL: no systems requested; pass --system SLUG or --all", file=sys.stderr
+        )
         sys.exit(2)
 
     summary = []
     for system in systems:
         out_dir = os.path.join(args.out_root, slugify(system))
         try:
-            stats = convert_system(vault_root, system, out_dir, status_map, orig_map,
-                                   internal=args.internal)
+            stats = convert_system(
+                vault_root,
+                system,
+                out_dir,
+                status_map,
+                orig_map,
+                internal=args.internal,
+            )
         except FileNotFoundError as exc:
             print(f"SKIP {system}: {exc}", file=sys.stderr)
             continue
         summary.append({"system": system, **stats})
-        print(f"{system}: controls={stats['controls_parsed']} "
-              f"threats={stats['threats']} countermeasures={stats['countermeasures']} "
-              f"inheritance={stats['inheritance_entries']}",
-              file=sys.stderr)
+        print(
+            f"{system}: controls={stats['controls_parsed']} "
+            f"threats={stats['threats']} countermeasures={stats['countermeasures']} "
+            f"inheritance={stats['inheritance_entries']}",
+            file=sys.stderr,
+        )
 
     os.makedirs(args.out_root, exist_ok=True)
     index_path = os.path.join(args.out_root, "index.yaml")
     with open(index_path, "w", encoding="utf-8") as f:
-        yaml.safe_dump({
-            "vault_root": os.path.relpath(vault_root, ROOT) if vault_root.startswith(ROOT) else vault_root,
-            "generated_at": datetime.now(UTC).isoformat(),
-            "systems": summary,
-        }, f, sort_keys=False)
+        yaml.safe_dump(
+            {
+                "vault_root": os.path.relpath(vault_root, ROOT)
+                if vault_root.startswith(ROOT)
+                else vault_root,
+                "generated_at": datetime.now(UTC).isoformat(),
+                "systems": summary,
+            },
+            f,
+            sort_keys=False,
+        )
     print(f"Wrote {os.path.relpath(index_path, ROOT)}", file=sys.stderr)
 
     skipped = enumerate_skipped_systems(vault_root) if args.all else []
     if args.all:
         skipped_path = os.path.join(args.out_root, "skipped.yaml")
         with open(skipped_path, "w", encoding="utf-8") as f:
-            yaml.safe_dump({
-                "vault_root": os.path.relpath(vault_root, ROOT) if vault_root.startswith(ROOT) else vault_root,
-                "generated_at": datetime.now(UTC).isoformat(),
-                "skipped": skipped,
-            }, f, sort_keys=False)
-        print(f"Wrote {os.path.relpath(skipped_path, ROOT)} ({len(skipped)} skipped)", file=sys.stderr)
+            yaml.safe_dump(
+                {
+                    "vault_root": os.path.relpath(vault_root, ROOT)
+                    if vault_root.startswith(ROOT)
+                    else vault_root,
+                    "generated_at": datetime.now(UTC).isoformat(),
+                    "skipped": skipped,
+                },
+                f,
+                sort_keys=False,
+            )
+        print(
+            f"Wrote {os.path.relpath(skipped_path, ROOT)} ({len(skipped)} skipped)",
+            file=sys.stderr,
+        )
 
 
 if __name__ == "__main__":

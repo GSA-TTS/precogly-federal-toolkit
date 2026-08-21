@@ -21,14 +21,15 @@ import sys
 from glob import glob
 
 import yaml
-
 from validators_common import (
     CATEGORIES,
-    STATUSES,
     RISK_LEVELS,
-    FORBIDDEN_PATTERNS as FORBIDDEN,
+    STATUSES,
     bidirectional_control_threat_errors,
     find_ipv4_leak,
+)
+from validators_common import (
+    FORBIDDEN_PATTERNS as FORBIDDEN,
 )
 
 failures: list[str] = []
@@ -59,7 +60,10 @@ def validate_cdx(system: str, cdx_path: str) -> tuple[int, int, int]:
     assets = bp.get("assets", [])
     zones = bp.get("zones", [])
     flows = bp.get("flows", [])
-    aset = {a["bom-ref"] for a in assets}
+    # flows are addressable assets; threats/scenarios may reference either
+    aset = {a["bom-ref"] for a in assets} | {
+        f["bom-ref"] for f in flows if "bom-ref" in f
+    }
     zset = {z["bom-ref"] for z in zones}
 
     if not aset:
@@ -77,7 +81,10 @@ def validate_cdx(system: str, cdx_path: str) -> tuple[int, int, int]:
 
     for s in scenarios:
         if s.get("threat") not in tset:
-            fail(system, f"scenario {s.get('bom-ref')} -> missing threat {s.get('threat')}")
+            fail(
+                system,
+                f"scenario {s.get('bom-ref')} -> missing threat {s.get('threat')}",
+            )
         level = (s.get("riskScore") or {}).get("level")
         if level and level not in RISK_LEVELS:
             fail(system, f"scenario {s.get('bom-ref')} bad risk level {level}")
@@ -95,10 +102,12 @@ def validate_cdx(system: str, cdx_path: str) -> tuple[int, int, int]:
         props = {p.get("name"): p.get("value") for p in t.get("properties", [])}
         # Vault-projected: nist:control-id; ADR-005-native (Example System): crm:control-id;
         # base-DFD threats (non-CRM): crm:nist-ref. Accept any.
-        if not any(k in props for k in ("nist:control-id", "crm:control-id", "crm:nist-ref")):
+        if not any(
+            k in props for k in ("nist:control-id", "crm:control-id", "crm:nist-ref")
+        ):
             warn(system, f"threat {t['bom-ref']} missing nist:control-id property")
 
-    control_by_ref = {c["bom-ref"]: c for c in controls}
+    {c["bom-ref"]: c for c in controls}
     for c in controls:
         if c.get("category") not in CATEGORIES:
             fail(system, f"control {c['bom-ref']} bad category {c.get('category')}")
@@ -110,17 +119,47 @@ def validate_cdx(system: str, cdx_path: str) -> tuple[int, int, int]:
         props = {p.get("name"): p.get("value") for p in c.get("properties", [])}
         is_vault_style = any(k.startswith("vault:") for k in props)
         if is_vault_style:
-            for required in ("nist:control-id", "vault:implementation-status", "vault:origination"):
+            for required in (
+                "nist:control-id",
+                "vault:implementation-status",
+                "vault:origination",
+            ):
                 if required not in props:
                     fail(system, f"control {c['bom-ref']} missing {required} property")
+            # Flag undocumented planned controls (mirrors gsa-pages ccc-check)
+            impl_status = props.get("vault:implementation-status", "")
+            if impl_status == "planned" and not (c.get("description") or "").strip():
+                warn(system, f"control {c['bom-ref']} status=planned with no prose")
         else:
-            if not any(k in props for k in ("crm:control-id", "nist:control-id", "crm:evidence-key")):
-                warn(system, f"control {c['bom-ref']} missing crm:/nist:control-id property")
+            if not any(
+                k in props
+                for k in ("crm:control-id", "nist:control-id", "crm:evidence-key")
+            ):
+                warn(
+                    system,
+                    f"control {c['bom-ref']} missing crm:/nist:control-id property",
+                )
 
     for err in bidirectional_control_threat_errors(threats, controls):
         fail(system, err)
 
-    raw = json.dumps(d)
+    # Strip intentional evidence URLs (externalReferences + crm:evidence-link
+    # property values) before running the recon-leak scan.
+    def _strip_evidence_urls(obj: object) -> object:
+        if isinstance(obj, dict):
+            stripped = {k: v for k, v in obj.items() if k != "externalReferences"}
+            if "properties" in stripped:
+                stripped["properties"] = [
+                    p
+                    for p in stripped["properties"]
+                    if p.get("name") != "crm:evidence-link"
+                ]
+            return {k: _strip_evidence_urls(v) for k, v in stripped.items()}
+        if isinstance(obj, list):
+            return [_strip_evidence_urls(i) for i in obj]
+        return obj
+
+    raw = json.dumps(_strip_evidence_urls(d))
     for pattern, label in FORBIDDEN:
         m = pattern.search(raw)
         if m:
@@ -169,25 +208,45 @@ def validate_pack(system: str, pack_dir: str) -> None:
     if ct:
         for row in ct.get("mappings", []):
             if row.get("component") not in cids:
-                fail(system, f"components-threats join references unknown component {row.get('component')}")
+                fail(
+                    system,
+                    f"components-threats join references unknown component {row.get('component')}",
+                )
             for entry in row.get("threats", []):
                 if entry.get("threat") not in tids:
-                    fail(system, f"components-threats join references unknown threat {entry.get('threat')}")
+                    fail(
+                        system,
+                        f"components-threats join references unknown threat {entry.get('threat')}",
+                    )
 
     if tc:
         for row in tc.get("mappings", []):
             if row.get("threat") not in tids:
-                fail(system, f"threats-countermeasures join references unknown threat {row.get('threat')}")
+                fail(
+                    system,
+                    f"threats-countermeasures join references unknown threat {row.get('threat')}",
+                )
             for cm in row.get("countermeasures", []):
                 if cm not in mids:
-                    fail(system, f"threats-countermeasures join references unknown countermeasure {cm}")
+                    fail(
+                        system,
+                        f"threats-countermeasures join references unknown countermeasure {cm}",
+                    )
 
     if fw:
         for row in fw.get("mappings", []):
             if row.get("countermeasure") not in mids:
-                fail(system, f"framework join references unknown countermeasure {row.get('countermeasure')}")
+                fail(
+                    system,
+                    f"framework join references unknown countermeasure {row.get('countermeasure')}",
+                )
 
-    for name in ("pack.yaml", "components.yaml", "threats.yaml", "countermeasures.yaml"):
+    for name in (
+        "pack.yaml",
+        "components.yaml",
+        "threats.yaml",
+        "countermeasures.yaml",
+    ):
         p = os.path.join(pack_dir, name)
         with open(p, encoding="utf-8") as f:
             raw = f.read()
@@ -200,7 +259,9 @@ def validate_pack(system: str, pack_dir: str) -> None:
             fail(system, f"unredacted IPv4 in pack/{name}: '{ipv4.group(0)}'")
 
 
-def validate_summary(system: str, system_dir: str, threats: int, controls: int, scenarios: int) -> None:
+def validate_summary(
+    system: str, system_dir: str, threats: int, controls: int, scenarios: int
+) -> None:
     p = os.path.join(system_dir, "import-summary.yaml")
     if not os.path.isfile(p):
         warn(system, "import-summary.yaml missing")
@@ -215,7 +276,16 @@ def validate_summary(system: str, system_dir: str, threats: int, controls: int, 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--systems-root", default=os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "build", "systems"))
+    ap.add_argument(
+        "--systems-root",
+        default=os.path.join(
+            os.path.dirname(
+                os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            ),
+            "build",
+            "systems",
+        ),
+    )
     ap.add_argument("--only", help="Comma-separated list of system slugs to validate")
     args = ap.parse_args()
 
@@ -226,7 +296,9 @@ def main() -> int:
 
     only = set(args.only.split(",")) if args.only else None
 
-    system_dirs = [d for d in sorted(os.listdir(root)) if os.path.isdir(os.path.join(root, d))]
+    system_dirs = [
+        d for d in sorted(os.listdir(root)) if os.path.isdir(os.path.join(root, d))
+    ]
     total = 0
     for slug in system_dirs:
         if only and slug not in only:
@@ -247,7 +319,9 @@ def main() -> int:
         print(f"FAIL: {f}", file=sys.stderr)
 
     if failures:
-        print(f"\n{len(failures)} failure(s) across {total} system(s).", file=sys.stderr)
+        print(
+            f"\n{len(failures)} failure(s) across {total} system(s).", file=sys.stderr
+        )
         return 1
     print(f"OK - {total} system(s) validated, {len(warnings)} warning(s).")
     return 0

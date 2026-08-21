@@ -6,14 +6,14 @@ Ingests the Precogly-native CycloneDX artifact at either
 `build/systems/<slug>/<slug>.cdx.json`, and emits a schema-valid SDR at
 `build/systems/<slug>/fedramp-sdr.json`.
 
-Scope (2026-08-13): only `securityControls[]` is populated from the CDX. FRRs,
-KSIs, ODP `parameterValues[]` and `portsAndProtocols` remain empty and are
-tracked in `docs/IMPLEMENTATION_PLAN_fedramp_cr26_schemas.md`.
+FRRs are loaded from `data/frr/<slug>.yaml` when present.
+KSIs are loaded from `data/ksi/<slug>.yaml` when present.
 
 Usage:
     uv run python scripts/export_fedramp_sdr.py --system example-system
     uv run python scripts/export_fedramp_sdr.py --all
 """
+
 from __future__ import annotations
 
 import argparse
@@ -33,6 +33,17 @@ SYSTEMS_DIR = REPO_ROOT / "data" / "systems"
 BUILD_SYSTEMS = REPO_ROOT / "build" / "systems"
 CATALOG_INDEX = REPO_ROOT / "catalog" / "index.yaml"
 Example System_CDX = REPO_ROOT / "build" / "example-system-crm-threat-model.cdx.json"
+FRR_DIR = REPO_ROOT / "data" / "frr"
+KSI_DIR = REPO_ROOT / "data" / "ksi"
+# OSCAL POA&M files sourced from sibling repos; path resolved via POAM_DIR env
+# or the default ../gsa-pages layout.
+POAM_PATHS: dict[str, Path] = {
+    "gsa-pages-ssp-2026": Path(__file__).resolve().parent.parent.parent
+    / "gsa-pages"
+    / "plan-of-action-and-milestones"
+    / "gsa-pages"
+    / "plan-of-action-and-milestones.json",
+}
 
 DEFAULT_CPO_URI_TEMPLATE = "https://fedramp.gov/schemas/tbd/{slug}/cpo.json"
 STATUS_MAP = {
@@ -56,6 +67,74 @@ def load_sidecar(slug: str) -> dict:
         return {}
     with path.open() as fh:
         return yaml.safe_load(fh) or {}
+
+
+def load_poam_summary(slug: str) -> dict | None:
+    """Return open/total poam-item counts from a sibling OSCAL POA&M, or None."""
+    path = POAM_PATHS.get(slug)
+    if not path or not path.exists():
+        return None
+    try:
+        with path.open() as fh:
+            raw = json.load(fh)
+    except (OSError, json.JSONDecodeError):
+        return None
+    items = raw.get("plan-of-action-and-milestones", raw).get("poam-items", [])
+    total = len(items)
+    closed_statuses = {"closed", "closed - risk accepted", "completed"}
+    open_items = [
+        it
+        for it in items
+        if (
+            {p["name"]: p.get("value", "") for p in (it.get("props") or {})}.get(
+                "status", ""
+            ).lower()
+            not in closed_statuses
+        )
+    ]
+    return {"open": len(open_items), "total": total}
+
+
+def load_frr(slug: str) -> list[dict]:
+    path = FRR_DIR / f"{slug}.yaml"
+    if not path.exists():
+        return []
+    with path.open() as fh:
+        data = yaml.safe_load(fh) or {}
+    out = []
+    for item in data.get("frr_implementations", []):
+        entry: dict = {"frrID": item["frr_id"]}
+        if "frrImplementationStatus" in item:
+            entry["frrImplementationStatus"] = item["frrImplementationStatus"]
+        for key in ("frrImplementation", "frrValidation", "frrAssessment"):
+            if key in item:
+                entry[key] = item[key]
+        out.append(entry)
+    return out
+
+
+def load_ksi(slug: str) -> list[dict]:
+    path = KSI_DIR / f"{slug}.yaml"
+    if not path.exists():
+        return []
+    with path.open() as fh:
+        data = yaml.safe_load(fh) or {}
+    out = []
+    for item in data.get("ksi_implementations", []):
+        entry: dict = {"ksiId": item["ksi_id"]}
+        if "ksiImplementationStatus" in item:
+            entry["ksiImplementationStatus"] = item["ksiImplementationStatus"]
+        for key in (
+            "ksiImplementation",
+            "ksiValidation",
+            "ksiAssessment",
+            "ksiTests",
+            "ksiEvidence",
+        ):
+            if key in item:
+                entry[key] = item[key]
+        out.append(entry)
+    return out
 
 
 def cdx_path_for(slug: str, catalog_entry: dict) -> Path:
@@ -99,10 +178,16 @@ def _get_property(properties: list, name: str) -> str | None:
 
 
 def build_security_controls(cdx: dict, parameter_values: dict) -> list[dict]:
-    by_control: dict[str, dict] = defaultdict(lambda: {
-        "statuses": set(), "descriptions": [], "names": [],
-        "cdx_params": {}, "origination": None, "providing_system": None,
-    })
+    by_control: dict[str, dict] = defaultdict(
+        lambda: {
+            "statuses": set(),
+            "descriptions": [],
+            "names": [],
+            "cdx_params": {},
+            "origination": None,
+            "providing_system": None,
+        }
+    )
     for c in cdx.get("controls") or []:
         props = c.get("properties") or []
         cid = canonical_control_id(props)
@@ -120,7 +205,7 @@ def build_security_controls(cdx: dict, parameter_values: dict) -> list[dict]:
         for p in props:
             pname = p.get("name") or ""
             if pname.startswith("vault:param:"):
-                param_id = pname[len("vault:param:"):]
+                param_id = pname[len("vault:param:") :]
                 # sidecar takes precedence; only set if not already present
                 entry["cdx_params"].setdefault(param_id, p.get("value") or "")
         # N3: capture origination and providing-system for description header
@@ -147,7 +232,9 @@ def build_security_controls(cdx: dict, parameter_values: dict) -> list[dict]:
         else:
             orig_header = ""
         if orig_header:
-            implementation = orig_header + implementation if implementation else orig_header.strip()
+            implementation = (
+                orig_header + implementation if implementation else orig_header.strip()
+            )
         sc = {
             "controlId": cid,
             "controlImplementationStatus": collapse_status(entry["statuses"]),
@@ -195,21 +282,31 @@ def build_ports_and_protocols(sdr_side: dict) -> list[dict]:
 def build_sdr(slug: str, catalog_entry: dict, sidecar: dict) -> dict:
     cdx_path = cdx_path_for(slug, catalog_entry)
     if not cdx_path.exists():
-        raise SystemExit(f"sdr({slug}): CDX artifact not found at {cdx_path.relative_to(REPO_ROOT)}")
+        raise SystemExit(
+            f"sdr({slug}): CDX artifact not found at {cdx_path.relative_to(REPO_ROOT)}"
+        )
     with cdx_path.open() as fh:
         cdx = json.load(fh)
 
     sdr_side = sidecar.get("sdr") or {}
-    cpo_uri = sdr_side.get("certification_package_overview_uri") or DEFAULT_CPO_URI_TEMPLATE.format(slug=slug)
+    cpo_uri = sdr_side.get(
+        "certification_package_overview_uri"
+    ) or DEFAULT_CPO_URI_TEMPLATE.format(slug=slug)
     parameter_values = sdr_side.get("parameter_values") or {}
 
-    return {
+    doc: dict = {
         "certificationPackageOverviewUri": cpo_uri,
         "securityControls": build_security_controls(cdx, parameter_values),
-        "fedRampRequirements": [],       # TBD — see IMPLEMENTATION_PLAN P2
-        "keySecurityIndicators": [],     # TBD — see IMPLEMENTATION_PLAN P3
+        "fedRampRequirements": load_frr(slug),
+        "keySecurityIndicators": load_ksi(slug),
         "portsAndProtocols": build_ports_and_protocols(sdr_side),
     }
+
+    poam = load_poam_summary(slug)
+    if poam is not None:
+        doc["planOfActionSummary"] = poam
+
+    return doc
 
 
 def export_one(slug: str, catalog: dict[str, dict]) -> Path:
@@ -229,7 +326,9 @@ def main() -> int:
     p = argparse.ArgumentParser(description=__doc__)
     group = p.add_mutually_exclusive_group(required=True)
     group.add_argument("--system", help="single system slug (e.g. example-system)")
-    group.add_argument("--all", action="store_true", help="export SDR for every system with a CDX")
+    group.add_argument(
+        "--all", action="store_true", help="export SDR for every system with a CDX"
+    )
     args = p.parse_args()
 
     catalog = load_catalog()
