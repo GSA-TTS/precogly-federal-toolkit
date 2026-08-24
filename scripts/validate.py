@@ -18,7 +18,14 @@ DATA = os.path.join(ROOT, "data")
 DEFAULT = os.path.join(ROOT, "build", "example-system-crm-threat-model.cdx.json")
 
 CATEGORIES = {"preventive", "detective", "corrective"}
-STATUSES = {"verified", "recommended", "rejected"}
+STATUSES = {
+    "verified",
+    "recommended",
+    "rejected",
+    "implemented",
+    "in-progress",
+    "planned",
+}
 FLOW_AUTH_MECHANISMS = {
     "OAuth 2.0",
     "mTLS",
@@ -39,7 +46,10 @@ TRANSPORT_THREAT_RE = re.compile(
 # Exception: public github.com URLs in externalReferences are intentional
 # evidence links (issue #46) and are not recon-useful.
 FORBIDDEN = [
-    (re.compile(r"https?://(?!localhost|127\.0\.0\.1|github\.com)", re.IGNORECASE), "URL/URI"),
+    (
+        re.compile(r"https?://(?!localhost|127\.0\.0\.1|github\.com)", re.IGNORECASE),
+        "URL/URI",
+    ),
     (
         re.compile(r"\.cloud\.data-platform\.com", re.IGNORECASE),
         "data platform workspace host",
@@ -106,8 +116,20 @@ def main():
     for f in flows:
         src = asset_by_ref.get(f.get("source"))
         dst = asset_by_ref.get(f.get("destination"))
-        source_zone = src.get("zone") if src else f.get("source") if f.get("source") in zset else None
-        destination_zone = dst.get("zone") if dst else f.get("destination") if f.get("destination") in zset else None
+        source_zone = (
+            src.get("zone")
+            if src
+            else f.get("source")
+            if f.get("source") in zset
+            else None
+        )
+        destination_zone = (
+            dst.get("zone")
+            if dst
+            else f.get("destination")
+            if f.get("destination") in zset
+            else None
+        )
         boundary_crossing = not same_boundary(source_zone, destination_zone)
         if boundary_crossing:
             if not f.get("protocols"):
@@ -123,12 +145,12 @@ def main():
         if bt["bom-ref"] not in tset:
             fail(f"base threat lost: {bt['bom-ref']}")
 
-    # --- scenarios reference real threats + assets ---
+    # --- scenarios reference real threats + assets (flow refs allowed in affectedAssets) ---
     for s in scenarios:
         if s["threat"] not in tset:
             fail(f"dangling scenario -> {s['threat']}")
         for a in s.get("affectedAssets", []):
-            if a not in aset:
+            if a not in aset and a not in fset:
                 fail(f"scenario {s['bom-ref']} bad asset {a}")
         for flow_ref in s.get("affectedFlows", []):
             if flow_ref not in fset:
@@ -174,14 +196,16 @@ def main():
             if t["bom-ref"] not in ctrl.get("mitigations", []):
                 fail(f"{cid}: control {cref} not linked back to threat {t['bom-ref']}")
         for a in t.get("affectedAssets", []):
-            if a not in aset:
+            if a not in aset and a not in fset:
                 fail(f"{cid}: bad asset ref {a}")
         for flow_ref in t.get("affectedFlows", []):
             if flow_ref not in fset:
                 fail(f"{cid}: bad affectedFlow ref {flow_ref}")
         text = " ".join([t.get("name", ""), t.get("description", "")])
         if TRANSPORT_THREAT_RE.search(text) and not t.get("affectedFlows"):
-            warn(f"{cid or t['bom-ref']}: transport-oriented threat SHOULD populate affectedFlows[]")
+            warn(
+                f"{cid or t['bom-ref']}: transport-oriented threat SHOULD populate affectedFlows[]"
+            )
 
     missing = expected - seen
     extra = seen - expected

@@ -12,7 +12,11 @@ pack:
     countermeasures derived from OCISO conditions.
   version: 1.0.0
   author: GSA/TTS
+  maintainer: '@GSA-TTS/tts-cybersecurity'
   pack_type: technology
+  precogly_schema_version: '2.0'
+  maturity: Draft
+  icon_map: []
   tags:
     - gsa
     - azure

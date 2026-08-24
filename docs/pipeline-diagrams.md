@@ -38,10 +38,11 @@ classDiagram
 ```
 
 **CA-2(1) example values:**
+
 - `control_id`: `CA-02(01)`
 - `normalized_status`: `not-implemented`
 - `normalized_origination`: `system-specific`
-- `PartRecord.part a prose`: *"GSA OCISO: None, if the assessment is performed by GSA OCISO contracted assessors…"*
+- `PartRecord.part a prose`: _"GSA OCISO: None, if the assessment is performed by GSA OCISO contracted assessors…"_
 
 ---
 
@@ -82,10 +83,11 @@ flowchart TD
 ```
 
 **CA-2(1) trace:**
+
 - `cdx_status` = `recommended` → because `normalized_status=not-implemented`
 - `emit_threat = True` → because status ≠ operational
 - threat name = `"CRM: CA-2-1 residual risk - Gsa Pages Ssp 2026"`
-- control description = *"Fulfills CRM responsibility for CA-2(1)… GSA OCISO: None…"*
+- control description = _"Fulfills CRM responsibility for CA-2(1)… GSA OCISO: None…"_
 
 ---
 
@@ -135,14 +137,15 @@ flowchart TD
 ```
 
 **CA-2(1) result in DB:**
-| Field | Value |
-|---|---|
-| `countermeasure_name` | `CA-2(1) implementation - Gsa Pages Ssp 2026` |
-| `status` | `gap` (recommended → gap) |
-| `countermeasure_description` | 415 chars of prose including statement part a |
-| `is_inherited` | False |
-| `format_metadata.cyclonedx.nist_control_id` | `CA-2(1)` |
-| `format_metadata.cyclonedx.bom_ref` | `control-ca-2-1-…` |
+
+| Field                                       | Value                                         |
+| ------------------------------------------- | --------------------------------------------- |
+| `countermeasure_name`                       | `CA-2(1) implementation - Gsa Pages Ssp 2026` |
+| `status`                                    | `gap` (recommended → gap)                     |
+| `countermeasure_description`                | 415 chars of prose including statement part a |
+| `is_inherited`                              | False                                         |
+| `format_metadata.cyclonedx.nist_control_id` | `CA-2(1)`                                     |
+| `format_metadata.cyclonedx.bom_ref`         | `control-ca-2-1-…`                            |
 
 The **threat** object (`CRM: CA-2-1 residual risk`) is a `ThreatLibrary` entry with its own description. The Precogly UI currently surfaces the threat name prominently but the countermeasure (with the full prose) is a separate linked record.
 

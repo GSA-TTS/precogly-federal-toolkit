@@ -17,15 +17,19 @@ from __future__ import annotations
 import dataclasses
 import os
 import re
-from typing import Iterable
+from collections.abc import Iterable
 
 import yaml
 
-CONTROL_ID_RE = re.compile(r"^\s*([A-Za-z]{2})-?0*(\d+)(?:\s*[.(]\s*0*(\d+)\s*\)?)?\s*$")
+CONTROL_ID_RE = re.compile(
+    r"^\s*([A-Za-z]{2})-?0*(\d+)(?:\s*[.(]\s*0*(\d+)\s*\)?)?\s*$"
+)
 INLINE_META_RE = re.compile(r"^\s*([a-z_][a-z0-9_]*)::\s*(.*)$", re.IGNORECASE)
 PART_HEADING_RE = re.compile(r"^##\s+Part\s+([A-Za-z0-9]+)\s*$")
 SECTION_HEADING_RE = re.compile(r"^#\s+(.+?)\s*$")
-INHERITANCE_ROW_RE = re.compile(r"^\|\s*(?P<provider>[^|]+?)\s*\|\s*(?P<owner>[^|]*?)\s*\|\s*(?P<control>[^|]+?)\s*\|\s*(?P<mode>[^|]+?)\s*\|\s*$")
+INHERITANCE_ROW_RE = re.compile(
+    r"^\|\s*(?P<provider>[^|]+?)\s*\|\s*(?P<owner>[^|]*?)\s*\|\s*(?P<control>[^|]+?)\s*\|\s*(?P<mode>[^|]+?)\s*\|\s*$"
+)
 
 
 def normalize_control_id(raw: str) -> str:
@@ -67,10 +71,12 @@ class StatusMap:
     default: dict
 
     @classmethod
-    def from_yaml(cls, path: str) -> "StatusMap":
+    def from_yaml(cls, path: str) -> StatusMap:
         with open(path, encoding="utf-8") as f:
             data = yaml.safe_load(f) or {}
-        return cls(mapping=data.get("mapping", {}) or {}, default=data.get("default", {}) or {})
+        return cls(
+            mapping=data.get("mapping", {}) or {}, default=data.get("default", {}) or {}
+        )
 
     def lookup(self, value: str | None) -> tuple[str, str | None]:
         if value and value in self.mapping:
@@ -86,7 +92,7 @@ class OriginationMap:
     default: dict
 
     @classmethod
-    def from_yaml(cls, path: str) -> "OriginationMap":
+    def from_yaml(cls, path: str) -> OriginationMap:
         with open(path, encoding="utf-8") as f:
             data = yaml.safe_load(f) or {}
         return cls(
@@ -98,7 +104,11 @@ class OriginationMap:
     def lookup(self, values: Iterable[str] | None) -> tuple[str, str | None, list[str]]:
         raw = [v for v in (values or []) if v]
         if not raw:
-            return self.default.get("target", "system-specific"), self.default.get("remark"), []
+            return (
+                self.default.get("target", "system-specific"),
+                self.default.get("remark"),
+                [],
+            )
         for candidate in self.precedence:
             if candidate in raw:
                 entry = self.mapping.get(candidate, {}) or {}
@@ -132,7 +142,9 @@ class ControlRecord:
 
     @property
     def combined_prose(self) -> str:
-        return "\n\n".join(part.prose.strip() for part in self.parts if part.prose.strip())
+        return "\n\n".join(
+            part.prose.strip() for part in self.parts if part.prose.strip()
+        )
 
 
 def parse_control(path: str) -> ControlRecord | None:
@@ -255,7 +267,7 @@ def parse_inheritance(path: str) -> list[InheritanceEntry]:
         owner = row.group("owner").strip()
         control_field = row.group("control").strip()
         mode = row.group("mode").strip().lower()
-        if provider.startswith("[") or provider.startswith("---") or not provider:
+        if provider.startswith(("[", "---")) or not provider:
             continue
         control_id = _first_control_id(control_field)
         if not control_id:
@@ -290,7 +302,9 @@ def load_status_and_origination(vault_root: str) -> tuple[StatusMap, Origination
     mappings = os.path.join(vault_root, "compliance", "mappings")
     return (
         StatusMap.from_yaml(os.path.join(mappings, "implementation-status-map.yaml")),
-        OriginationMap.from_yaml(os.path.join(mappings, "control-origination-map.yaml")),
+        OriginationMap.from_yaml(
+            os.path.join(mappings, "control-origination-map.yaml")
+        ),
     )
 
 
@@ -352,3 +366,145 @@ def parse_org_parties(vault_system_dir: str) -> list[OrgParty]:
             )
         )
     return parties
+
+
+# ---------------------------------------------------------------------------
+# PPS topology (Ports, Protocols, Services tables in Relationships/*.md)
+# ---------------------------------------------------------------------------
+
+_PPS_NULL = re.compile(r"^(n/a|-+|none)$", re.IGNORECASE)
+
+
+@dataclasses.dataclass
+class PpsFlow:
+    """One row from a Ports, Protocols, and Services table."""
+
+    source: str
+    destination: str
+    direction: str  # "Inbound", "Outbound", "Bi-Directional" (normalised)
+    boundary_crossing: bool
+    port: str
+    protocol: str
+    service: str
+    purpose: str
+    encrypted: bool
+    data_sensitivity: str  # "Low", "Moderate", "High"
+
+
+def _pps_bool(val: str) -> bool:
+    return val.strip().upper() in ("Y", "YES", "TRUE", "1")
+
+
+def _pps_direction(val: str) -> str:
+    v = val.strip().lower()
+    if "inbound" in v and "outbound" in v:
+        return "Bi-Directional"
+    if "inbound" in v:
+        return "Inbound"
+    if "outbound" in v:
+        return "Outbound"
+    return val.strip().title()
+
+
+def _parse_md_table(text: str) -> tuple[list[str], list[list[str]]]:
+    """Parse a raw markdown table string into (headers, data_rows)."""
+    rows: list[list[str]] = []
+    for line in text.strip().split("\n"):
+        if re.match(r"\|[-: |]+\|", line):
+            continue
+        cells = [c.strip() for c in line.strip("|").split("|")]
+        rows.append(cells)
+    if len(rows) < 2:
+        return [], []
+    return rows[0], rows[1:]
+
+
+_MD_TABLE_RE = re.compile(r"\|[^\n]+\|\n\|[-: |]+\|\n(?:\|[^\n]+\|\n)+", re.MULTILINE)
+
+
+def parse_pps_topology(vault_system_dir: str) -> list[PpsFlow]:
+    """Return PpsFlow records parsed from all Relationships/*.md PPS tables.
+
+    The PPS (Ports, Protocols, Services) table is the only consistently
+    machine-readable topology source across vault systems.  Column order
+    varies between systems so we locate columns by keyword match.
+    Rows whose Source AND Destination are both N/A are skipped.
+    """
+    rel_dir = os.path.join(vault_system_dir, "Relationships")
+    if not os.path.isdir(rel_dir):
+        return []
+
+    flows: list[PpsFlow] = []
+    for fname in sorted(os.listdir(rel_dir)):
+        if not fname.endswith(".md"):
+            continue
+        path = os.path.join(rel_dir, fname)
+        try:
+            with open(path, encoding="utf-8") as fh:
+                body = fh.read()
+        except OSError:
+            continue
+        _, content = split_frontmatter(body)
+
+        for m in _MD_TABLE_RE.finditer(content):
+            headers, rows = _parse_md_table(m.group(0))
+            if not headers:
+                continue
+            hl = [h.lower() for h in headers]
+            # Only process tables that have Source and Destination columns.
+            src_col = next((i for i, h in enumerate(hl) if "source" in h), None)
+            dst_col = next((i for i, h in enumerate(hl) if "dest" in h), None)
+            if src_col is None or dst_col is None:
+                continue
+            # Locate optional columns by keyword
+            dir_col = next((i for i, h in enumerate(hl) if "direction" in h), None)
+            bc_col = next((i for i, h in enumerate(hl) if "boundary" in h), None)
+            prt_col = next((i for i, h in enumerate(hl) if "port" in h), None)
+            proto_col = next((i for i, h in enumerate(hl) if "protocol" in h), None)
+            svc_col = next((i for i, h in enumerate(hl) if "service" in h), None)
+            purp_col = next((i for i, h in enumerate(hl) if "purpose" in h), None)
+            enc_col = next((i for i, h in enumerate(hl) if "encrypt" in h), None)
+            sens_col = next(
+                (i for i, h in enumerate(hl) if "sensitiv" in h or "data" in h), None
+            )
+
+            def _cell(row: list[str], col: int | None) -> str:
+                if col is None or col >= len(row):
+                    return ""
+                return row[col].strip()
+
+            for row in rows:
+                if len(row) < max(c for c in [src_col, dst_col] if c is not None) + 1:
+                    continue
+                src = _cell(row, src_col)
+                dst = _cell(row, dst_col)
+                # Skip blank/N/A rows
+                if _PPS_NULL.match(src) and _PPS_NULL.match(dst):
+                    continue
+                if not src and not dst:
+                    continue
+                flows.append(
+                    PpsFlow(
+                        source=src,
+                        destination=dst,
+                        direction=_pps_direction(
+                            _cell(row, dir_col) or "Bi-Directional"
+                        ),
+                        boundary_crossing=_pps_bool(_cell(row, bc_col) or "N"),
+                        port=_cell(row, prt_col),
+                        protocol=_cell(row, proto_col),
+                        service=_cell(row, svc_col),
+                        purpose=_cell(row, purp_col),
+                        encrypted=_pps_bool(_cell(row, enc_col) or "Y"),
+                        data_sensitivity=_cell(row, sens_col) or "Low",
+                    )
+                )
+    return flows
+
+
+def load_topology(vault_root: str, system_slug: str) -> list[PpsFlow]:
+    """Convenience wrapper — returns [] if vault dir is missing."""
+    system_dir = os.path.join(vault_root, "examples", "vault", system_slug)
+    if not os.path.isdir(system_dir):
+        return []
+    return parse_pps_topology(system_dir)

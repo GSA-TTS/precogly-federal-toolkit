@@ -11,6 +11,7 @@ Usage:
     uv run --with jsonschema,referencing python scripts/validate_fedramp.py
     uv run --with jsonschema,referencing python scripts/validate_fedramp.py --strict
 """
+
 from __future__ import annotations
 
 import argparse
@@ -88,7 +89,7 @@ def find_sentinels(instance) -> list[str]:
 def validate_one(artifact_path: Path, registry: Registry, strict: bool) -> list[str]:
     schema_file = dispatch(artifact_path)
     if schema_file is None:
-        return [f"unrecognized artifact filename (expected fedramp-<kind>-*.json)"]
+        return ["unrecognized artifact filename (expected fedramp-<kind>-*.json)"]
     schema_path = SCHEMAS_DIR / schema_file
     if not schema_path.exists():
         return [f"schema not found: {schema_path.relative_to(REPO_ROOT)}"]
@@ -98,7 +99,9 @@ def validate_one(artifact_path: Path, registry: Registry, strict: bool) -> list[
         instance = json.load(fh)
     validator = Draft202012Validator(schema, registry=registry)
     errors = []
-    for err in sorted(validator.iter_errors(instance), key=lambda e: list(e.absolute_path)):
+    for err in sorted(
+        validator.iter_errors(instance), key=lambda e: list(e.absolute_path)
+    ):
         loc = "/".join(str(x) for x in err.absolute_path) or "<root>"
         errors.append(f"  {loc}: {err.message}")
     if strict:
@@ -116,7 +119,9 @@ def main() -> int:
     args = p.parse_args()
 
     if not BUILD_SYSTEMS.exists():
-        print(f"nothing to validate — {BUILD_SYSTEMS.relative_to(REPO_ROOT)} does not exist")
+        print(
+            f"nothing to validate — {BUILD_SYSTEMS.relative_to(REPO_ROOT)} does not exist"
+        )
         return 0
 
     registry = build_registry()

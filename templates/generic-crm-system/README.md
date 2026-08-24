@@ -68,16 +68,19 @@ make validate    # Asserts enums, linkages, and runs the privacy filter
 ## Mapping Logic & ID Normalization
 
 ### 1. Control-ID Normalization
+
 OSCAL definitions emit dotted lowercase identifiers like `ac-2`, `ac-6.5`, `ac-2.13`, whereas the NIST standard uses uppercase and parentheses. The pipeline normalizes these variations:
-* `ac-2`   $\rightarrow$ `AC-2`
-* `ac-6.5` $\rightarrow$ `AC-6(5)`
-* `ac-2.13` $\rightarrow$ `AC-2(13)`
+
+- `ac-2` $\rightarrow$ `AC-2`
+- `ac-6.5` $\rightarrow$ `AC-6(5)`
+- `ac-2.13` $\rightarrow$ `AC-2(13)`
 
 ### 2. Entity Translations
-* **Components**: Each input OSCAL file maps to one Technology Component (e.g. `cloud_gov`, `gsa_pages`, `gsa_common_controls`) defined in `components.yaml`.
-* **Threats**: Every implemented-requirement block is converted to a high-level Threat: `"CRM: <control_id> Responsibility Gap - <component_title>"`. The multi-line responsibility description is parsed, formatted, and set as the threat description.
-* **Countermeasures**: An automated procedural countermeasure is generated for each threat to guide the user in meeting the obligation: `"Fulfill CRM responsibility for <control_id> on <component_title>"`.
-* **Joins**: 
+
+- **Components**: Each input OSCAL file maps to one Technology Component (e.g. `cloud_gov`, `gsa_pages`, `gsa_common_controls`) defined in `components.yaml`.
+- **Threats**: Every implemented-requirement block is converted to a high-level Threat: `"CRM: <control_id> Responsibility Gap - <component_title>"`. The multi-line responsibility description is parsed, formatted, and set as the threat description.
+- **Countermeasures**: An automated procedural countermeasure is generated for each threat to guide the user in meeting the obligation: `"Fulfill CRM responsibility for <control_id> on <component_title>"`.
+- **Joins**:
   - `components-threats.yaml` maps all threats for source $X$ directly to component $X$ (`applies_to: component`).
   - `threats-countermeasures.yaml` links each threat to its corresponding procedural control.
   - `countermeasures-nist-800-53-r5.yaml` overlays each control to its matching NIST 800-53 r5 section_code so it resolves in the compliance audit tab.

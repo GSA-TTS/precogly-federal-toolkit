@@ -7,6 +7,7 @@ Usage:
     uv run python scripts/export_fedramp_cpo.py --system example-system
     uv run python scripts/export_fedramp_cpo.py --all
 """
+
 from __future__ import annotations
 
 import argparse
@@ -44,13 +45,26 @@ def load_sidecar(slug: str) -> dict:
 def build_cpo(slug: str, catalog_entry: dict, sidecar: dict) -> dict:
     cpo = sidecar.get("cpo") or {}
     contacts = sidecar.get("contacts") or []
-    missing = [k for k in (
-        "provider_name", "service_name", "service_acronym", "service_description",
-        "certification_type", "fed_ramp_package_id", "website", "logo",
-        "service_type", "deployment_model",
-    ) if not cpo.get(k)]
+    missing = [
+        k
+        for k in (
+            "provider_name",
+            "service_name",
+            "service_acronym",
+            "service_description",
+            "certification_type",
+            "fed_ramp_package_id",
+            "website",
+            "logo",
+            "service_type",
+            "deployment_model",
+        )
+        if not cpo.get(k)
+    ]
     if missing:
-        raise SystemExit(f"cpo({slug}): sidecar missing required cpo.* fields: {missing}")
+        raise SystemExit(
+            f"cpo({slug}): sidecar missing required cpo.* fields: {missing}"
+        )
 
     types = {c.get("contactType") for c in contacts}
     for required_type in ("Security", "Sales"):
@@ -90,7 +104,9 @@ def export_one(slug: str, catalog: dict[str, dict]) -> Path:
         raise SystemExit(f"cpo({slug}): slug not present in catalog/index.yaml")
     sidecar = load_sidecar(slug)
     if sidecar.get("system") not in (None, slug):
-        raise SystemExit(f"cpo({slug}): sidecar 'system' key mismatch: {sidecar.get('system')!r}")
+        raise SystemExit(
+            f"cpo({slug}): sidecar 'system' key mismatch: {sidecar.get('system')!r}"
+        )
     doc = build_cpo(slug, catalog[slug], sidecar)
     out_dir = BUILD_SYSTEMS / slug
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -103,7 +119,9 @@ def main() -> int:
     p = argparse.ArgumentParser(description=__doc__)
     group = p.add_mutually_exclusive_group(required=True)
     group.add_argument("--system", help="single system slug (e.g. example-system)")
-    group.add_argument("--all", action="store_true", help="export every system with a sidecar")
+    group.add_argument(
+        "--all", action="store_true", help="export every system with a sidecar"
+    )
     args = p.parse_args()
 
     catalog = load_catalog()

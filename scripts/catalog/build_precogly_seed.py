@@ -21,7 +21,6 @@ from datetime import UTC, datetime
 
 import yaml
 
-
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 DEFAULT_CATALOG = os.path.join(ROOT, "catalog", "index.yaml")
@@ -48,29 +47,33 @@ def build_manifest(catalog: dict) -> dict:
 
     for entry in systems:
         slug = entry["slug"]
-        orgsystems.append({
-            "slug": slug,
-            "name": entry.get("name") or slug,
-            "acronym": entry.get("acronym"),
-            "criticality": _criticality(entry.get("fips_199")),
-            "lifecycle_state": entry.get("status") or "unknown",
-            "organization": entry.get("organization") or "gsa",
-            "system_id": entry.get("system_id"),
-            "tags": entry.get("tags") or [],
-        })
+        orgsystems.append(
+            {
+                "slug": slug,
+                "name": entry.get("name") or slug,
+                "acronym": entry.get("acronym"),
+                "criticality": _criticality(entry.get("fips_199")),
+                "lifecycle_state": entry.get("status") or "unknown",
+                "organization": entry.get("organization") or "gsa",
+                "system_id": entry.get("system_id"),
+                "tags": entry.get("tags") or [],
+            }
+        )
 
         artifacts = entry.get("artifacts") or {}
-        threat_models.append({
-            "slug": f"{slug}-tm",
-            "name": f"{entry.get('name') or slug} - Threat Model",
-            "orgsystems": [slug],
-            "library_packs": [f"packs/{slug}-crm"] + SHARED_PACKS,
-            "compliance_frameworks": entry.get("compliance_frameworks", []),
-            "artifacts": {
-                "cdx": artifacts.get("cdx"),
-                "pack": artifacts.get("pack"),
-            },
-        })
+        threat_models.append(
+            {
+                "slug": f"{slug}-tm",
+                "name": f"{entry.get('name') or slug} - Threat Model",
+                "orgsystems": [slug],
+                "library_packs": [f"packs/{slug}-crm"] + SHARED_PACKS,
+                "compliance_frameworks": entry.get("compliance_frameworks", []),
+                "artifacts": {
+                    "cdx": artifacts.get("cdx"),
+                    "pack": artifacts.get("pack"),
+                },
+            }
+        )
 
         for rel in entry.get("relationships", []) or []:
             target = rel.get("target")
@@ -83,13 +86,15 @@ def build_manifest(catalog: dict) -> dict:
                 if simplified in candidate or candidate in simplified:
                     slug_target = candidate
                     break
-            relationships.append({
-                "type": rel.get("type", "depends_on"),
-                "source": slug,
-                "target": slug_target or f"external:{target}",
-                "mode": rel.get("mode"),
-                "resolved": bool(slug_target),
-            })
+            relationships.append(
+                {
+                    "type": rel.get("type", "depends_on"),
+                    "source": slug,
+                    "target": slug_target or f"external:{target}",
+                    "mode": rel.get("mode"),
+                    "resolved": bool(slug_target),
+                }
+            )
 
     return {
         "manifest_version": 1,
@@ -121,11 +126,13 @@ def main() -> int:
         yaml.safe_dump(manifest, f, sort_keys=False, allow_unicode=True, width=100)
 
     unresolved = [r for r in manifest["relationships"] if not r["resolved"]]
-    print(f"Wrote {os.path.relpath(args.out, ROOT)} "
-          f"(orgsystems={len(manifest['orgsystems'])}, "
-          f"threat_models={len(manifest['threat_models'])}, "
-          f"relationships={len(manifest['relationships'])}, "
-          f"unresolved-targets={len(unresolved)})")
+    print(
+        f"Wrote {os.path.relpath(args.out, ROOT)} "
+        f"(orgsystems={len(manifest['orgsystems'])}, "
+        f"threat_models={len(manifest['threat_models'])}, "
+        f"relationships={len(manifest['relationships'])}, "
+        f"unresolved-targets={len(unresolved)})"
+    )
     return 0
 
 

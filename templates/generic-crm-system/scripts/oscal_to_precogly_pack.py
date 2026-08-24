@@ -30,7 +30,7 @@ import json
 import os
 import re
 import sys
-from typing import Iterable
+from collections.abc import Iterable
 
 import yaml
 
@@ -92,9 +92,9 @@ def clean(v: str | None) -> str:
 # Control-ID Normalization (collapses dotted and lowercase variations)
 # ---------------------------------------------------------------------------
 _ID_RE = re.compile(
-    r"^\s*([A-Za-z]{2})-?0*(\d+)"        # family + base number
-    r"(?:\s*[.(]\s*0*(\d+)\s*\)?)?"      # optional .N or (N) enhancement
-    r"(?:\s*_?smt\.?[a-z0-9.]*)?\s*$",   # tolerate statement-id suffix
+    r"^\s*([A-Za-z]{2})-?0*(\d+)"  # family + base number
+    r"(?:\s*[.(]\s*0*(\d+)\s*\)?)?"  # optional .N or (N) enhancement
+    r"(?:\s*_?smt\.?[a-z0-9.]*)?\s*$",  # tolerate statement-id suffix
     re.IGNORECASE,
 )
 
@@ -272,7 +272,9 @@ def main() -> None:
             data = json.load(f)
         cd = data["component-definition"]
         meta_title = cd.get("metadata", {}).get("title", "")
-        slug = slugify(explicit_name or meta_title or os.path.basename(os.path.dirname(src_path)))
+        slug = slugify(
+            explicit_name or meta_title or os.path.basename(os.path.dirname(src_path))
+        )
 
         components = cd.get("components", []) or []
         if not components:
@@ -370,7 +372,9 @@ def main() -> None:
 
     # Sort everything deterministically by ID to stay versioning-safe
     threats_list = [threats_dict[k] for k in sorted(threats_dict)]
-    countermeasures_list = [countermeasures_dict[k] for k in sorted(countermeasures_dict)]
+    countermeasures_list = [
+        countermeasures_dict[k] for k in sorted(countermeasures_dict)
+    ]
     tc_mappings = sorted(tc_mappings, key=lambda m: m["threat"])
     fw_mappings = sorted(fw_mappings, key=lambda m: m["countermeasure"])
     ct_mappings = sorted(ct_mappings, key=lambda m: m["component"])
@@ -392,11 +396,22 @@ def main() -> None:
         },
         os.path.join(PACK_DIR, "pack.yaml"),
     )
-    dump_yaml({"components": components_list}, os.path.join(PACK_DIR, "components.yaml"))
+    dump_yaml(
+        {"components": components_list}, os.path.join(PACK_DIR, "components.yaml")
+    )
     dump_yaml({"threats": threats_list}, os.path.join(PACK_DIR, "threats.yaml"))
-    dump_yaml({"countermeasures": countermeasures_list}, os.path.join(PACK_DIR, "countermeasures.yaml"))
-    dump_yaml({"mappings": ct_mappings}, os.path.join(PACK_DIR, "joins", "components-threats.yaml"))
-    dump_yaml({"mappings": tc_mappings}, os.path.join(PACK_DIR, "joins", "threats-countermeasures.yaml"))
+    dump_yaml(
+        {"countermeasures": countermeasures_list},
+        os.path.join(PACK_DIR, "countermeasures.yaml"),
+    )
+    dump_yaml(
+        {"mappings": ct_mappings},
+        os.path.join(PACK_DIR, "joins", "components-threats.yaml"),
+    )
+    dump_yaml(
+        {"mappings": tc_mappings},
+        os.path.join(PACK_DIR, "joins", "threats-countermeasures.yaml"),
+    )
     dump_yaml(
         {
             "framework": "nist-800-53-r5",

@@ -16,7 +16,6 @@ import argparse
 import json
 import os
 
-
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 DEFAULT_IN = os.path.join(ROOT, "build", "example-system-crm-threat-model.cdx.json")

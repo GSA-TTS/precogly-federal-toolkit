@@ -25,7 +25,6 @@ from datetime import UTC, datetime
 
 import yaml
 
-
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 DEFAULT_SYSTEMS = os.path.join(ROOT, "build", "systems")
@@ -117,11 +116,13 @@ def inheritance_edges(system_dir: str) -> list[dict]:
         if key in seen:
             continue
         seen.add(key)
-        edges.append({
-            "type": "depends_on",
-            "target": provider,
-            "mode": mode,
-        })
+        edges.append(
+            {
+                "type": "depends_on",
+                "target": provider,
+                "mode": mode,
+            }
+        )
     return edges
 
 
@@ -139,13 +140,17 @@ def build_catalog(systems_root: str, vault_root: str) -> dict:
             continue
         summary = load_yaml(os.path.join(system_dir, "import-summary.yaml"))
         stats = summary.get("stats") or {}
-        idx.setdefault("systems", []).append({
-            "system": name,
-            "controls_parsed": stats.get("controls") or stats.get("countermeasures"),
-            "threats": stats.get("threats"),
-            "countermeasures": stats.get("controls") or stats.get("countermeasures"),
-            "inheritance_entries": 0,
-        })
+        idx.setdefault("systems", []).append(
+            {
+                "system": name,
+                "controls_parsed": stats.get("controls")
+                or stats.get("countermeasures"),
+                "threats": stats.get("threats"),
+                "countermeasures": stats.get("controls")
+                or stats.get("countermeasures"),
+                "inheritance_entries": 0,
+            }
+        )
 
     for entry in idx.get("systems", []):
         slug = entry["system"]
@@ -155,36 +160,40 @@ def build_catalog(systems_root: str, vault_root: str) -> dict:
         meta = harvest_system_metadata(vault_root, slug)
         edges = inheritance_edges(system_dir)
 
-        systems_out.append({
-            "slug": slug,
-            "name": meta.get("name") or slug.replace("-", " ").title(),
-            "acronym": meta.get("acronym"),
-            "status": meta.get("status"),
-            "owner": meta.get("owner"),
-            "system_id": meta.get("system_id"),
-            "fips_199": meta.get("fips_199"),
-            "impact_level": meta.get("impact_level"),
-            "organization": meta.get("organization"),
-            "last_updated": meta.get("last_updated"),
-            "tags": meta.get("tags") or [],
-            "artifacts": {
-                "cdx": os.path.relpath(cdx_files[0], ROOT) if cdx_files else None,
-                "pack": os.path.relpath(os.path.join(system_dir, "pack"), ROOT),
-                "summary": os.path.relpath(os.path.join(system_dir, "import-summary.yaml"), ROOT),
-            },
-            "stats": {
-                "controls_parsed": entry.get("controls_parsed"),
-                "threats": cdx_stats.get("threats", entry.get("threats")),
-                "countermeasures": entry.get("countermeasures"),
-                "scenarios": cdx_stats.get("scenarios"),
-                "assets": cdx_stats.get("assets"),
-                "flows": cdx_stats.get("flows"),
-                "zones": cdx_stats.get("zones"),
-                "inheritance_entries": entry.get("inheritance_entries"),
-            },
-            "compliance_frameworks": ["nist-800-53-r5"],
-            "relationships": edges,
-        })
+        systems_out.append(
+            {
+                "slug": slug,
+                "name": meta.get("name") or slug.replace("-", " ").title(),
+                "acronym": meta.get("acronym"),
+                "status": meta.get("status"),
+                "owner": meta.get("owner"),
+                "system_id": meta.get("system_id"),
+                "fips_199": meta.get("fips_199"),
+                "impact_level": meta.get("impact_level"),
+                "organization": meta.get("organization"),
+                "last_updated": meta.get("last_updated"),
+                "tags": meta.get("tags") or [],
+                "artifacts": {
+                    "cdx": os.path.relpath(cdx_files[0], ROOT) if cdx_files else None,
+                    "pack": os.path.relpath(os.path.join(system_dir, "pack"), ROOT),
+                    "summary": os.path.relpath(
+                        os.path.join(system_dir, "import-summary.yaml"), ROOT
+                    ),
+                },
+                "stats": {
+                    "controls_parsed": entry.get("controls_parsed"),
+                    "threats": cdx_stats.get("threats", entry.get("threats")),
+                    "countermeasures": entry.get("countermeasures"),
+                    "scenarios": cdx_stats.get("scenarios"),
+                    "assets": cdx_stats.get("assets"),
+                    "flows": cdx_stats.get("flows"),
+                    "zones": cdx_stats.get("zones"),
+                    "inheritance_entries": entry.get("inheritance_entries"),
+                },
+                "compliance_frameworks": ["nist-800-53-r5"],
+                "relationships": edges,
+            }
+        )
 
     return {
         "catalog": {
@@ -213,9 +222,11 @@ def main() -> int:
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
     with open(args.out, "w", encoding="utf-8") as f:
         yaml.safe_dump(catalog, f, sort_keys=False, allow_unicode=True, width=100)
-    print(f"Wrote {os.path.relpath(args.out, ROOT)} "
-          f"({len(catalog['catalog']['systems'])} systems, "
-          f"{len(catalog['catalog']['skipped'])} skipped)")
+    print(
+        f"Wrote {os.path.relpath(args.out, ROOT)} "
+        f"({len(catalog['catalog']['systems'])} systems, "
+        f"{len(catalog['catalog']['skipped'])} skipped)"
+    )
     return 0
 
 
