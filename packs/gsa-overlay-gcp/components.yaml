@@ -1,6 +1,5 @@
 components:
   # ── Approved GCP services missing from community pack ────────────────────────
-
   - id: gcp-cloud-composer
     name: GCP Cloud Composer
     category: process

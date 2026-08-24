@@ -17,7 +17,6 @@ Optional flags:
 import argparse
 import json
 import os
-import sys
 from collections import Counter
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -43,10 +42,18 @@ def summary(path):
     scenarios = d.get("threats", {}).get("scenarios", [])
     threats = d.get("threats", {}).get("threats", [])
     _risks_block = d.get("risks", {})
-    risks = _risks_block.get("risks", []) if isinstance(_risks_block, dict) else _risks_block
+    risks = (
+        _risks_block.get("risks", [])
+        if isinstance(_risks_block, dict)
+        else _risks_block
+    )
     status = Counter(c.get("status") for c in controls)
-    with_nist = sum(1 for c in controls if prop(c.get("properties", []), "nist:control-id"))
-    with_crm = sum(1 for c in controls if prop(c.get("properties", []), "crm:control-id"))
+    with_nist = sum(
+        1 for c in controls if prop(c.get("properties", []), "nist:control-id")
+    )
+    with_crm = sum(
+        1 for c in controls if prop(c.get("properties", []), "crm:control-id")
+    )
     with_both = sum(
         1
         for c in controls
@@ -55,11 +62,13 @@ def summary(path):
     )
     with_evi = sum(1 for c in controls if has_evidence(c))
     scen_scored = sum(
-        1
-        for s in scenarios
-        if s.get("inherentSeverity") and s.get("residualSeverity")
+        1 for s in scenarios if s.get("inherentSeverity") and s.get("residualSeverity")
     )
-    op_threats = [t for t in threats if (t.get("name") or "").strip().lower() == "object poisoning"]
+    op_threats = [
+        t
+        for t in threats
+        if (t.get("name") or "").strip().lower() == "object poisoning"
+    ]
     op_mit = sum(len(t.get("mitigations", [])) for t in op_threats)
     return {
         "path": path,
@@ -126,21 +135,55 @@ def main():
     print(f"Ideal:    {os.path.relpath(args.b, ROOT)}")
     print()
     line("controls total", a["controls_total"], b["controls_total"])
-    line("  implemented", a["controls_by_status"].get("implemented", 0), b["controls_by_status"].get("implemented", 0))
-    line("  recommended (gap)", a["controls_by_status"].get("recommended", 0), b["controls_by_status"].get("recommended", 0))
-    line("  verified", a["controls_by_status"].get("verified", 0), b["controls_by_status"].get("verified", 0))
-    line("controls w/ nist:control-id", a["controls_with_nist_control_id"], b["controls_with_nist_control_id"])
-    line("controls w/ crm:control-id", a["controls_with_crm_control_id"], b["controls_with_crm_control_id"])
-    line("controls w/ BOTH id props", a["controls_with_both_ids"], b["controls_with_both_ids"])
-    line("controls w/ evidence", a["controls_with_evidence"], b["controls_with_evidence"])
+    line(
+        "  implemented",
+        a["controls_by_status"].get("implemented", 0),
+        b["controls_by_status"].get("implemented", 0),
+    )
+    line(
+        "  recommended (gap)",
+        a["controls_by_status"].get("recommended", 0),
+        b["controls_by_status"].get("recommended", 0),
+    )
+    line(
+        "  verified",
+        a["controls_by_status"].get("verified", 0),
+        b["controls_by_status"].get("verified", 0),
+    )
+    line(
+        "controls w/ nist:control-id",
+        a["controls_with_nist_control_id"],
+        b["controls_with_nist_control_id"],
+    )
+    line(
+        "controls w/ crm:control-id",
+        a["controls_with_crm_control_id"],
+        b["controls_with_crm_control_id"],
+    )
+    line(
+        "controls w/ BOTH id props",
+        a["controls_with_both_ids"],
+        b["controls_with_both_ids"],
+    )
+    line(
+        "controls w/ evidence", a["controls_with_evidence"], b["controls_with_evidence"]
+    )
     print()
     line("scenarios total", a["scenarios_total"], b["scenarios_total"])
     line("scenarios scored (both sev)", a["scenarios_scored"], b["scenarios_scored"])
     print()
     line("risks[]", a["risks_total"], b["risks_total"])
     print()
-    line("Object Poisoning threats", a["object_poisoning_threats"], b["object_poisoning_threats"])
-    line("Object Poisoning mitigations", a["object_poisoning_mitigations"], b["object_poisoning_mitigations"])
+    line(
+        "Object Poisoning threats",
+        a["object_poisoning_threats"],
+        b["object_poisoning_threats"],
+    )
+    line(
+        "Object Poisoning mitigations",
+        a["object_poisoning_mitigations"],
+        b["object_poisoning_mitigations"],
+    )
 
     if args.full:
         changes = diff_controls(args.a, args.b)
@@ -153,7 +196,9 @@ def main():
                 bits.append(row["status_change"])
             if row.get("gained_evidence"):
                 bits.append("+evidence")
-            print(f"  {row['bom_ref']:60s} {' '.join(bits):40s} {(row.get('name') or '')[:60]}")
+            print(
+                f"  {row['bom_ref']:60s} {' '.join(bits):40s} {(row.get('name') or '')[:60]}"
+            )
 
 
 if __name__ == "__main__":

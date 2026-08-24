@@ -18,6 +18,7 @@ import os
 import re
 import sys
 from pathlib import Path
+
 import yaml
 
 # Standard paths
@@ -25,10 +26,18 @@ HERE = Path(__file__).parent
 ROOT = HERE.parent
 DATA_CRM_TIERS = ROOT / "data" / "crm" / "tiers"
 # Resolved at runtime: sibling repo or NAMES_JSON env override
-NAMES_JSON = Path(os.environ.get(
-    "NAMES_JSON",
-    str(HERE.resolve().parents[1] / "fedramp-automation-parser" / "compliance" / "data" / "nist_sp800-53_rev5_control_names.json"),
-))
+NAMES_JSON = Path(
+    os.environ.get(
+        "NAMES_JSON",
+        str(
+            HERE.resolve().parents[1]
+            / "fedramp-automation-parser"
+            / "compliance"
+            / "data"
+            / "nist_sp800-53_rev5_control_names.json"
+        ),
+    )
+)
 
 
 def clean_text(text: str) -> str:
@@ -43,11 +52,15 @@ def redact(text: str) -> str:
     if not text:
         return ""
     # Google Docs URLs
-    text = re.sub(r"https?://docs\.google\.com/[^\s\"'>,)]*", "<INTERNAL_GOOGLE_DOC>", text)
+    text = re.sub(
+        r"https?://docs\.google\.com/[^\s\"'>,)]*", "<INTERNAL_GOOGLE_DOC>", text
+    )
     # Generic URLs
     text = re.sub(r"https?://(?!localhost)[^\s\"'>,)]+", "<REDACTED_URL>", text)
     # Email addresses
-    text = re.sub(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+", "<REDACTED_EMAIL>", text)
+    text = re.sub(
+        r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+", "<REDACTED_EMAIL>", text
+    )
     return text
 
 
@@ -73,7 +86,6 @@ def normalize_control_id(raw: str) -> str:
 
 class LiteralStr(str):
     """String that should be rendered as a literal block scalar."""
-    pass
 
 
 def literal_str_representer(dumper, data):
@@ -104,7 +116,7 @@ def convert_to_literal_strs(obj):
 def load_nist_names() -> dict:
     """Load official NIST control titles."""
     if NAMES_JSON.exists():
-        with open(NAMES_JSON, "r", encoding="utf-8") as f:
+        with open(NAMES_JSON, encoding="utf-8") as f:
             return json.load(f)
     print("Warning: NIST control names lookup file not found, titles will be blank.")
     return {}
@@ -206,7 +218,7 @@ def map_origination(raw_origins: list[str]) -> list[str]:
 def convert_file(src_path: Path, nist_names: dict):
     """Convert a single OSCAL component-definition file to a CRM tier YAML."""
     print(f"Parsing {src_path}...")
-    with open(src_path, "r", encoding="utf-8") as f:
+    with open(src_path, encoding="utf-8") as f:
         data = json.load(f)
 
     cd = data.get("component-definition", {})
@@ -240,7 +252,9 @@ def convert_file(src_path: Path, nist_names: dict):
             status_vals = _get_prop_values(props, "implementation-status")
             status = normalize_status(status_vals[0] if status_vals else "")
 
-            orig_vals = _get_prop_values(props, "control-origination") or _get_prop_values(props, "origination")
+            orig_vals = _get_prop_values(
+                props, "control-origination"
+            ) or _get_prop_values(props, "origination")
             origination = map_origination(orig_vals)
 
             can_inherit = "No"
@@ -258,7 +272,7 @@ def convert_file(src_path: Path, nist_names: dict):
                 "can_be_inherited": can_inherit,
                 "customer_responsibility": resp_text,
                 "implementation_status": status,
-                "control_origination": origination
+                "control_origination": origination,
             }
             controls.append(ctrl)
 
@@ -278,7 +292,7 @@ def convert_file(src_path: Path, nist_names: dict):
         "description": description,
         "source_sheet": f"OSCAL: {src_path.name}",
         "control_count": len(controls),
-        "controls": controls
+        "controls": controls,
     }
 
     # Format long strings using literal block scalars
@@ -288,7 +302,14 @@ def convert_file(src_path: Path, nist_names: dict):
     DATA_CRM_TIERS.mkdir(parents=True, exist_ok=True)
 
     with open(output_path, "w", encoding="utf-8") as out_f:
-        yaml.dump(tier_data_formatted, out_f, default_flow_style=False, allow_unicode=True, width=120, sort_keys=False)
+        yaml.dump(
+            tier_data_formatted,
+            out_f,
+            default_flow_style=False,
+            allow_unicode=True,
+            width=120,
+            sort_keys=False,
+        )
     print(f"Success! Wrote {len(controls)} controls to {output_path}")
 
 
@@ -296,22 +317,36 @@ def main():
     nist_names = load_nist_names()
 
     # Locate component definitions in sibling repository gsa-pages (or GSA_PAGES_COMP_DEF_DIR env override)
-    gsa_pages_comp_def_dir = Path(os.environ.get(
-        "GSA_PAGES_COMP_DEF_DIR",
-        str(Path(__file__).resolve().parents[2] / "gsa-pages" / "component-definitions"),
-    ))
+    gsa_pages_comp_def_dir = Path(
+        os.environ.get(
+            "GSA_PAGES_COMP_DEF_DIR",
+            str(
+                Path(__file__).resolve().parents[2]
+                / "gsa-pages"
+                / "component-definitions"
+            ),
+        )
+    )
 
     if not gsa_pages_comp_def_dir.exists():
-        print(f"Error: Could not locate component-definitions directory under gsa-pages sibling", file=sys.stderr)
+        print(
+            "Error: Could not locate component-definitions directory under gsa-pages sibling",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     # Find component-definition.json files recursively
     files = list(gsa_pages_comp_def_dir.glob("**/component-definition.json"))
     if not files:
-        print(f"No component-definition.json files found in {gsa_pages_comp_def_dir}", file=sys.stderr)
+        print(
+            f"No component-definition.json files found in {gsa_pages_comp_def_dir}",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
-    print(f"Found {len(files)} component-definition.json files in {gsa_pages_comp_def_dir}.")
+    print(
+        f"Found {len(files)} component-definition.json files in {gsa_pages_comp_def_dir}."
+    )
     for f in files:
         convert_file(f, nist_names)
 

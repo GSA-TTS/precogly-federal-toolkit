@@ -20,7 +20,6 @@ from datetime import UTC, datetime
 
 import yaml
 
-
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 DEFAULT_CATALOG = os.path.join(ROOT, "catalog", "index.yaml")
@@ -65,22 +64,34 @@ def build_portfolio_cdx(catalog: dict) -> dict:
             {"name": "vault:system-id", "value": entry.get("system_id") or ""},
             {"name": "stats:threats", "value": str(stats.get("threats", 0))},
             {"name": "stats:controls", "value": str(stats.get("countermeasures", 0))},
-            {"name": "stats:inheritance", "value": str(stats.get("inheritance_entries", 0))},
+            {
+                "name": "stats:inheritance",
+                "value": str(stats.get("inheritance_entries", 0)),
+            },
         ]
 
         refs = []
         if cdx_path:
-            refs.append({"type": "other", "url": cdx_path, "comment": "per-system Precogly CDX"})
-            refs.append({"type": "other", "url": entry["artifacts"]["pack"],
-                         "comment": "per-system Precogly pack"})
+            refs.append(
+                {"type": "other", "url": cdx_path, "comment": "per-system Precogly CDX"}
+            )
+            refs.append(
+                {
+                    "type": "other",
+                    "url": entry["artifacts"]["pack"],
+                    "comment": "per-system Precogly pack",
+                }
+            )
 
-        blueprints.append({
-            "bom-ref": bp_ref,
-            "name": entry.get("name") or slug,
-            "modelTypes": ["system"],
-            "properties": properties,
-            "externalReferences": refs,
-        })
+        blueprints.append(
+            {
+                "bom-ref": bp_ref,
+                "name": entry.get("name") or slug,
+                "modelTypes": ["system"],
+                "properties": properties,
+                "externalReferences": refs,
+            }
+        )
 
         deps_targets: list[str] = []
         for rel in entry.get("relationships", []):
@@ -92,18 +103,26 @@ def build_portfolio_cdx(catalog: dict) -> dict:
             deps_targets.append(_target_slug(target, known_slugs))
 
         if deps_targets:
-            dependencies.append({
-                "ref": bp_ref,
-                "dependsOn": sorted(set(f"system:{t}" if not t.startswith('external:') else t
-                                        for t in deps_targets)),
-            })
+            dependencies.append(
+                {
+                    "ref": bp_ref,
+                    "dependsOn": sorted(
+                        {
+                            f"system:{t}" if not t.startswith("external:") else t
+                            for t in deps_targets
+                        }
+                    ),
+                }
+            )
 
     for entry in catalog["catalog"].get("skipped", []):
-        external_refs.append({
-            "type": "issue-tracker",
-            "url": entry.get("vault_path", ""),
-            "comment": f"skipped: {entry.get('system')} ({entry.get('reason')})",
-        })
+        external_refs.append(
+            {
+                "type": "issue-tracker",
+                "url": entry.get("vault_path", ""),
+                "comment": f"skipped: {entry.get('system')} ({entry.get('reason')})",
+            }
+        )
 
     return {
         "specFormat": "CycloneDX",
@@ -111,14 +130,21 @@ def build_portfolio_cdx(catalog: dict) -> dict:
         "serialNumber": f"urn:uuid:{uuid.uuid4()}",
         "version": 1,
         "metadata": {
-            "timestamp": datetime.now(UTC).isoformat(timespec="milliseconds").replace("+00:00", "Z"),
+            "timestamp": datetime.now(UTC)
+            .isoformat(timespec="milliseconds")
+            .replace("+00:00", "Z"),
             "properties": [
                 {"name": "catalog:kind", "value": "system-of-systems"},
                 {"name": "adr", "value": "ADR-SSPP-004"},
-                {"name": "catalog:vault-root", "value": catalog["catalog"].get("vault_root") or ""},
+                {
+                    "name": "catalog:vault-root",
+                    "value": catalog["catalog"].get("vault_root") or "",
+                },
                 {"name": "catalog:system-count", "value": str(len(blueprints))},
-                {"name": "catalog:skipped-count",
-                 "value": str(len(catalog["catalog"].get("skipped", [])))},
+                {
+                    "name": "catalog:skipped-count",
+                    "value": str(len(catalog["catalog"].get("skipped", []))),
+                },
             ],
             "externalReferences": external_refs,
         },
@@ -144,9 +170,11 @@ def main() -> int:
     with open(args.out, "w", encoding="utf-8") as f:
         json.dump(bom, f, indent=2, ensure_ascii=False)
         f.write("\n")
-    print(f"Wrote {os.path.relpath(args.out, ROOT)} "
-          f"({len(bom['blueprints'])} blueprints, "
-          f"{len(bom['dependencies'])} dependency edges)")
+    print(
+        f"Wrote {os.path.relpath(args.out, ROOT)} "
+        f"({len(bom['blueprints'])} blueprints, "
+        f"{len(bom['dependencies'])} dependency edges)"
+    )
     return 0
 
 

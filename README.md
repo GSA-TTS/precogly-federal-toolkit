@@ -26,22 +26,22 @@ uv run python scripts/bulk_import_to_precogly.py
 
 ## Contents
 
-| Path | Purpose |
-|---|---|
-| `packs/` | Reusable Precogly technology packs (cloud.gov, FCS managed cloud service, FedRAMP overlays) |
-| `templates/generic-crm-system/` | Starter system template with Makefile + data/ scaffold |
-| `scripts/generate.py` | CRM YAML → Precogly-native CycloneDX 2.0 emitter |
-| `scripts/generate_ideal.py` | Promotes gap CDX to all-verified ideal-state CDX with mock evidence |
-| `scripts/validate.py` | Redaction gate + structural validator for generated CDX |
-| `scripts/validate_ideal.py` | Validates ideal-state CDX invariants |
-| `scripts/diff_ideal.py` | Human-readable diff between gap and ideal CDX |
-| `scripts/drift.py` | CI gate: fails if generated CDX diverges from checked-in artifact |
-| `scripts/export_fedramp_cpo.py` | Generate FedRAMP CR26 CPO JSON |
-| `scripts/export_fedramp_sdr.py` | Generate FedRAMP CR26 SDR JSON |
-| `scripts/validate_fedramp.py` | Validate CPO/SDR against CR26 schemas |
-| `scripts/scaffold_sidecars.py` | Scaffold FedRAMP sidecar YAML stubs for each system |
-| `scripts/catalog/` | OSCAL-vault ingestion, portfolio CDX, catalog builder |
-| `docs/` | Threat-model authoring guides and agent skills |
+| Path                            | Purpose                                                                     |
+| ------------------------------- | --------------------------------------------------------------------------- |
+| `packs/`                        | Reusable Precogly technology packs (cloud.gov, FCS managed cloud service, FedRAMP overlays) |
+| `templates/generic-crm-system/` | Starter system template with Makefile + data/ scaffold                      |
+| `scripts/generate.py`           | CRM YAML → Precogly-native CycloneDX 2.0 emitter                            |
+| `scripts/generate_ideal.py`     | Promotes gap CDX to all-verified ideal-state CDX with mock evidence         |
+| `scripts/validate.py`           | Redaction gate + structural validator for generated CDX                     |
+| `scripts/validate_ideal.py`     | Validates ideal-state CDX invariants                                        |
+| `scripts/diff_ideal.py`         | Human-readable diff between gap and ideal CDX                               |
+| `scripts/drift.py`              | CI gate: fails if generated CDX diverges from checked-in artifact           |
+| `scripts/export_fedramp_cpo.py` | Generate FedRAMP CR26 CPO JSON                                              |
+| `scripts/export_fedramp_sdr.py` | Generate FedRAMP CR26 SDR JSON                                              |
+| `scripts/validate_fedramp.py`   | Validate CPO/SDR against CR26 schemas                                       |
+| `scripts/scaffold_sidecars.py`  | Scaffold FedRAMP sidecar YAML stubs for each system                         |
+| `scripts/catalog/`              | OSCAL-vault ingestion, portfolio CDX, catalog builder                       |
+| `docs/`                         | Threat-model authoring guides and agent skills                              |
 
 ## Submodule usage
 

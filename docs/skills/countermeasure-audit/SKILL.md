@@ -5,16 +5,16 @@ name: countermeasure-audit
 description: "Devil's-advocate audit playbook for Example System-style CRM remediation plans. Cross-checks plan documents against countermeasures.yaml, generated CycloneDX, and live Precogly state to flag extraneous controls, silently omitted controls, status misalignment, cross-priority double-billing, PT-* dual-thread traps, and CDX property defects. Use when reviewing any docs/IMPLEMENTATION_PLAN_*.md that proposes remediation for tracked NIST controls."
 status: stable
 tier: 1
-last_updated: "2026-08-13"
-keywords: ["audit", "countermeasure", "crm", "gap-analysis", "precogly", "cyclonedx", "residual-action", "devils-advocate"]
+last_updated: '2026-08-13'
+keywords: ['audit', 'countermeasure', 'crm', 'gap-analysis', 'precogly', 'cyclonedx', 'residual-action', 'devils-advocate']
 related_files:
-  - "docs/IMPLEMENTATION_PLAN_example-system_remediation_countermeasures.md"
-  - "docs/AUDIT_IMPLEMENTATION_PLAN_example-system_remediation_countermeasures.md"
-  - "data/countermeasures/countermeasures.yaml"
-  - "data/model/evidence.yaml"
-  - "build/example-system-crm-threat-model.cdx.json"
-  - "skills/precogly-api/SKILL.md"
-  - "skills/sspp-threat-modeling/SKILL.md"
+  - 'docs/IMPLEMENTATION_PLAN_example-system_remediation_countermeasures.md'
+  - 'docs/AUDIT_IMPLEMENTATION_PLAN_example-system_remediation_countermeasures.md'
+  - 'data/countermeasures/countermeasures.yaml'
+  - 'data/model/evidence.yaml'
+  - 'build/example-system-crm-threat-model.cdx.json'
+  - 'skills/precogly-api/SKILL.md'
+  - 'skills/sspp-threat-modeling/SKILL.md'
 ---
 
 # Countermeasure Audit Skill
@@ -47,18 +47,18 @@ captures the concrete cross-check procedure used to produce
 Every plan review should look for these ten defect classes and report by
 severity (High / Medium / Low).
 
-| # | Class | What to look for |
-|---|---|---|
-| A | **Extraneous controls** | Plan lists a `control_id` not present in `countermeasures.yaml` and not in the CDX threat catalog. |
-| B | **Silently omitted controls** | `countermeasures.yaml` entry exists (typically `implemented`) but the plan never mentions it. Especially critical when the plan's P1/P2 changes could re-open the implemented posture (e.g., SA-3(2), CM-12(1)). |
-| C | **Status misalignment** | Plan proposes remediation work on a control whose current CRM status is already `implemented` (no `residual_actions`). |
-| D | **Cross-priority double-billing** | Same `control_id` claimed under multiple priorities without an owning-priority table. Blocks clean `residual_action` retirement. |
-| E | **PT-\* dual-thread trap** | Any PT-family control with **two** entries in its YAML `residual_actions[]` produces **two** CDX controls. Any retirement must remove both. |
-| F | **Missing risk areas** | Threats or scenarios present in the CDX threat catalog that the plan does not address (e.g., `Object Poisoning`, `SA-3(2)` live-data use, non-OAuth secret rotation, Delta Sharing recurring recipient review, risk scoring). |
-| G | **CDX property defect** | Controls in the CDX carrying NIST identifiers only in the free-text `name` field, missing `properties[].name: nist:control-id` or `crm:control-id`. This breaks Precogly's join between CMs and NIST families. |
-| H | **Duplicated closure procedure** | The "regenerate + reimport + attach evidence" checklist is repeated inside every priority instead of consolidated into a single appendix. |
-| I | **Build vs evidence conflation** | Task described as "capture evidence" but is actually a new-build (no existing CI/config/runbook to capture). Tag each task explicitly. |
-| J | **Sprint → residual mapping absent** | Sprint plan does not enumerate the concrete `residual_action[]` entries each sprint will close, so `make drift` cannot be a sprint exit criterion. |
+| # | Class                                | What to look for                                                                                                                                                                                                              |
+| - | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A | **Extraneous controls**              | Plan lists a `control_id` not present in `countermeasures.yaml` and not in the CDX threat catalog.                                                                                                                            |
+| B | **Silently omitted controls**        | `countermeasures.yaml` entry exists (typically `implemented`) but the plan never mentions it. Especially critical when the plan's P1/P2 changes could re-open the implemented posture (e.g., SA-3(2), CM-12(1)).              |
+| C | **Status misalignment**              | Plan proposes remediation work on a control whose current CRM status is already `implemented` (no `residual_actions`).                                                                                                        |
+| D | **Cross-priority double-billing**    | Same `control_id` claimed under multiple priorities without an owning-priority table. Blocks clean `residual_action` retirement.                                                                                              |
+| E | **PT-\* dual-thread trap**           | Any PT-family control with **two** entries in its YAML `residual_actions[]` produces **two** CDX controls. Any retirement must remove both.                                                                                   |
+| F | **Missing risk areas**               | Threats or scenarios present in the CDX threat catalog that the plan does not address (e.g., `Object Poisoning`, `SA-3(2)` live-data use, non-OAuth secret rotation, Delta Sharing recurring recipient review, risk scoring). |
+| G | **CDX property defect**              | Controls in the CDX carrying NIST identifiers only in the free-text `name` field, missing `properties[].name: nist:control-id` or `crm:control-id`. This breaks Precogly's join between CMs and NIST families.                |
+| H | **Duplicated closure procedure**     | The "regenerate + reimport + attach evidence" checklist is repeated inside every priority instead of consolidated into a single appendix.                                                                                     |
+| I | **Build vs evidence conflation**     | Task described as "capture evidence" but is actually a new-build (no existing CI/config/runbook to capture). Tag each task explicitly.                                                                                        |
+| J | **Sprint → residual mapping absent** | Sprint plan does not enumerate the concrete `residual_action[]` entries each sprint will close, so `make drift` cannot be a sprint exit criterion.                                                                            |
 
 ## Reproducible audit procedure
 
@@ -162,11 +162,11 @@ URLs land.
 The generator (`scripts/generate.py`) writes NIST identifiers on controls in
 two different property names depending on origin:
 
-| Control origin | Property emitted |
-|---|---|
-| Shared evidence control (from `EVIDENCE_NIST_IDS` mapping in `generate.py`) | `nist:control-id` |
-| One-off inline `text:` mechanism | `crm:control-id` |
-| Residual-action control | `crm:control-id` + `crm:residual: "true"` |
+| Control origin                                                              | Property emitted                          |
+| --------------------------------------------------------------------------- | ----------------------------------------- |
+| Shared evidence control (from `EVIDENCE_NIST_IDS` mapping in `generate.py`) | `nist:control-id`                         |
+| One-off inline `text:` mechanism                                            | `crm:control-id`                          |
+| Residual-action control                                                     | `crm:control-id` + `crm:residual: "true"` |
 
 Precogly's adapter accepts **either** and maps to
 `format_metadata.cyclonedx.nist_control_id` — see

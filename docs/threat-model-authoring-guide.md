@@ -1,10 +1,10 @@
 ---
 id: threat-model-authoring-guide
 type: Guide
-title: "Threat Model Authoring, Export, and Library Workflow"
+title: 'Threat Model Authoring, Export, and Library Workflow'
 status: draft
-last_updated: "2026-08-13"
-keywords: ["threat modeling", "Precogly", "CycloneDX", "libraries", "OSCAL vault", "SSPP"]
+last_updated: '2026-08-13'
+keywords: ['threat modeling', 'Precogly', 'CycloneDX', 'libraries', 'OSCAL vault', 'SSPP']
 related_files:
   - README.md
   - Makefile
@@ -33,12 +33,12 @@ DFD layout, assets, flows, zones, and library selection.
 
 ## Choose the right starting point
 
-| Goal | Start with | Result |
-|---|---|---|
-| Update the Example System CRM model | `build/example-system-crm-threat-model.cdx.json` | Revised Example System artifact plus source YAML changes |
-| Model a vault-projected GSA system | `build/systems/<slug>/<slug>.cdx.json` | Revised per-system artifact or pack proposal |
-| Create a new model from reusable services | Installed Precogly packs | New Precogly model using approved components |
-| Refresh the whole portfolio catalog | `vendor/oscal-vault` or `../oscal-vault` | Updated `build/systems/`, `catalog/index.yaml`, and docs catalog |
+| Goal                                      | Start with                               | Result                                                           |
+| ----------------------------------------- | ---------------------------------------- | ---------------------------------------------------------------- |
+| Update the Example System CRM model                 | `build/example-system-crm-threat-model.cdx.json`   | Revised Example System artifact plus source YAML changes                   |
+| Model a vault-projected GSA system        | `build/systems/<slug>/<slug>.cdx.json`   | Revised per-system artifact or pack proposal                     |
+| Create a new model from reusable services | Installed Precogly packs                 | New Precogly model using approved components                     |
+| Refresh the whole portfolio catalog       | `vendor/oscal-vault` or `../oscal-vault` | Updated `build/systems/`, `catalog/index.yaml`, and docs catalog |
 
 ## Install and use the libraries
 
@@ -68,15 +68,15 @@ In Precogly, use packs as building blocks instead of hand-copying controls:
 
 ## What to edit
 
-| Change | Edit | Command |
-|---|---|---|
-| CRM responsibility text or mappings from spreadsheets | `data/crm/*.yaml` | `make generate validate` |
-| Countermeasure wording, mechanism, gap, or residual action | `data/countermeasures/countermeasures.yaml` | `make generate validate` |
-| Shared evidence text reused across many controls | `data/model/evidence.yaml` | `make generate validate` |
-| Asset mappings, flow bindings, zones, risk scores | `data/model/architecture.yaml` | `make generate validate` |
-| Example System DFD structure and layout | Edit in Precogly, then export to `data/model/base-dfd.cdx.json` | `make reinject validate drift` |
-| Pack component, threat, or countermeasure library content | `data/packs/<pack>/` | `make pack-install-all` and test in Precogly |
-| Vault-projected system content | Source OSCAL vault, not generated `build/systems/` files | `make vault-import-all VAULT_ROOT=./vendor/oscal-vault` |
+| Change                                                     | Edit                                                            | Command                                                 |
+| ---------------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------- |
+| CRM responsibility text or mappings from spreadsheets      | `data/crm/*.yaml`                                               | `make generate validate`                                |
+| Countermeasure wording, mechanism, gap, or residual action | `data/countermeasures/countermeasures.yaml`                     | `make generate validate`                                |
+| Shared evidence text reused across many controls           | `data/model/evidence.yaml`                                      | `make generate validate`                                |
+| Asset mappings, flow bindings, zones, risk scores          | `data/model/architecture.yaml`                                  | `make generate validate`                                |
+| Example System DFD structure and layout                              | Edit in Precogly, then export to `data/model/base-dfd.cdx.json` | `make reinject validate drift`                          |
+| Pack component, threat, or countermeasure library content  | `data/packs/<pack>/`                                            | `make pack-install-all` and test in Precogly            |
+| Vault-projected system content                             | Source OSCAL vault, not generated `build/systems/` files        | `make vault-import-all VAULT_ROOT=./vendor/oscal-vault` |
 
 Avoid hand-editing generated `controls[]` or generated CRM threats directly in
 `build/example-system-crm-threat-model.cdx.json`; those edits are overwritten by

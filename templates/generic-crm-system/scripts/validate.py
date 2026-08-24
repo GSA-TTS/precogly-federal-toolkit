@@ -27,16 +27,40 @@ COMPLIANCE_DIR = os.path.join(ROOT, "pack-oscal-800-53r5")
 SHELL_CDX = os.path.join(ROOT, "build", "generic-crm-shell.cdx.json")
 
 # Enums based on Precogly core loader rules
-VALID_PACK_TYPES = {"technology", "threat", "countermeasure", "compliance", "template", "full", "taxonomy"}
-VALID_CATEGORIES = {"process", "datastore", "external_human_actor", "external_system_actor"}
-VALID_CONTROL_TYPES = {"preventive", "detective", "corrective", "deterrent", "recovery", "compensating", "procedural"}
+VALID_PACK_TYPES = {
+    "technology",
+    "threat",
+    "countermeasure",
+    "compliance",
+    "template",
+    "full",
+    "taxonomy",
+}
+VALID_CATEGORIES = {
+    "process",
+    "datastore",
+    "external_human_actor",
+    "external_system_actor",
+}
+VALID_CONTROL_TYPES = {
+    "preventive",
+    "detective",
+    "corrective",
+    "deterrent",
+    "recovery",
+    "compensating",
+    "procedural",
+}
 VALID_COSTS = {"low", "medium", "high"}
 VALID_APPLIES_TO = {"component", "flow", "both"}
 
 # Redaction rules to fail on
 FORBIDDEN = [
     (re.compile(r"https?://(?!localhost|127\.0\.0\.1)", re.IGNORECASE), "URL/URI"),
-    (re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b"), "Email address"),
+    (
+        re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b"),
+        "Email address",
+    ),
 ]
 
 
@@ -128,14 +152,18 @@ def validate_library_pack() -> None:
     for m in ct_mappings:
         comp_ref = m.get("component")
         if comp_ref not in comp_ids:
-            fail(f"joins/components-threats.yaml refers to unknown component: {comp_ref}")
+            fail(
+                f"joins/components-threats.yaml refers to unknown component: {comp_ref}"
+            )
         for t_entry in m.get("threats", []):
             t_ref = t_entry.get("threat")
             if t_ref not in threat_ids:
                 fail(f"joins/components-threats.yaml refers to unknown threat: {t_ref}")
             app = t_entry.get("applies_to", "component")
             if app not in VALID_APPLIES_TO:
-                fail(f"Invalid applies_to '{app}' for threat '{t_ref}' in component-threat joins")
+                fail(
+                    f"Invalid applies_to '{app}' for threat '{t_ref}' in component-threat joins"
+                )
 
     tc_file = os.path.join(PACK_DIR, "joins", "threats-countermeasures.yaml")
     if not os.path.exists(tc_file):
@@ -144,10 +172,14 @@ def validate_library_pack() -> None:
     for m in tc_mappings:
         t_ref = m.get("threat")
         if t_ref not in threat_ids:
-            fail(f"joins/threats-countermeasures.yaml refers to unknown threat: {t_ref}")
+            fail(
+                f"joins/threats-countermeasures.yaml refers to unknown threat: {t_ref}"
+            )
         for cm_ref in m.get("countermeasures", []):
             if cm_ref not in cm_ids:
-                fail(f"joins/threats-countermeasures.yaml refers to unknown countermeasure: {cm_ref}")
+                fail(
+                    f"joins/threats-countermeasures.yaml refers to unknown countermeasure: {cm_ref}"
+                )
 
 
 def validate_shell_cdx() -> None:
@@ -219,7 +251,9 @@ def main() -> None:
     print("Enforcing privacy/redaction gate across all artifacts...", file=sys.stderr)
     validate_redaction_gate()
 
-    print("OK - Generic CRM system template fully validated! Packs and CDX are correct and redactor-clean.")
+    print(
+        "OK - Generic CRM system template fully validated! Packs and CDX are correct and redactor-clean."
+    )
 
 
 if __name__ == "__main__":

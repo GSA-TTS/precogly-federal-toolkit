@@ -2,17 +2,17 @@
 id: skill-sspp-threat-modeling
 type: Skill
 name: sspp-threat-modeling
-description: "Example System data platform SSPP / ATO support threat-modeling workflow: Precogly CycloneDX CRM artifacts, redacted CRM YAML/CSV sources, drift/reinject validation, system-scope zone rollup, and standalone repository handoff. Use when editing docs/threat-model, TTSE-petrified-forest-sspp, Precogly exports, CRM controls, or SSPP threat-model ADRs."
+description: 'Example System data platform SSPP / ATO support threat-modeling workflow: Precogly CycloneDX CRM artifacts, redacted CRM YAML/CSV sources, drift/reinject validation, system-scope zone rollup, and standalone repository handoff. Use when editing docs/threat-model, TTSE-petrified-forest-sspp, Precogly exports, CRM controls, or SSPP threat-model ADRs.'
 status: stable
 tier: 2
-last_updated: "2026-08-06"
-keywords: ["sspp", "ato", "threat-model", "precogly", "cyclonedx", "crm", "data-platform", "redaction"]
+last_updated: '2026-08-06'
+keywords: ['sspp', 'ato', 'threat-model', 'precogly', 'cyclonedx', 'crm', 'data-platform', 'redaction']
 related_files:
-  - "docs/threat-model/AGENT_HANDOFF.md"
-  - "docs/threat-model/README.md"
-  - "docs/adrs/ADR-SSPP-001-versioned-precogly-crm-threat-model.md"
-  - "docs/adrs/ADR-SSPP-002-system-scope-crm-zone-rollup.md"
-  - "docs/adrs/ADR-SSPP-003-standalone-sspp-repository.md"
+  - 'docs/threat-model/AGENT_HANDOFF.md'
+  - 'docs/threat-model/README.md'
+  - 'docs/adrs/ADR-SSPP-001-versioned-precogly-crm-threat-model.md'
+  - 'docs/adrs/ADR-SSPP-002-system-scope-crm-zone-rollup.md'
+  - 'docs/adrs/ADR-SSPP-003-standalone-sspp-repository.md'
 ---
 
 # SSPP Threat Modeling Skill
