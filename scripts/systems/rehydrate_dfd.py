@@ -399,6 +399,7 @@ def build_report(
         "status": "changed"
         if report["summary"]["remapped_refs"]
         or report["summary"]["scrubbed_fields"]
+        or report["summary"]["notation_style_set"]
         or arch_changed
         else "clean",
         "generated_at": datetime.now(UTC).isoformat(),
