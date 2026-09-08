@@ -130,11 +130,12 @@ declared in `auth_mechanisms` inside `architecture.yaml`. Add local NIST mapping
 under `auth_mechanisms.metadata.<mechanism>.nist` when a system-specific
 mechanism should emit `resp:auth-mechanism-nist` in generated flows.
 
-`make dfd-drift` calls out added, removed, or modified zones, assets, flows,
-boundaries, and data stores, plus editor authors and broken flow endpoints. Use
-it to decide whether an export is safe to promote into `base-dfd.cdx.json`. For
-a report-only pass, run `make dfd-drift DFD_DRIFT_ADVISORY=1`. In repositories
-without this Makefile, run the same check directly with:
+`make dfd-drift` rehydrates editor exports before comparison, then calls out
+added, removed, or modified zones, assets, flows, boundaries, and data stores,
+plus editor authors and broken flow endpoints. Use it to decide whether an export
+is safe to promote into `base-dfd.cdx.json`. For a report-only pass, run
+`make dfd-drift DFD_DRIFT_ADVISORY=1`. In repositories without this Makefile, run
+the same check directly with:
 `uv run python scripts/dfd_drift.py --system <slug> --export <exported-cdx.json>`.
 
 For cloud.gov-hosted browser SSO, model the default GSA employee path as
