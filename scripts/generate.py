@@ -29,6 +29,7 @@ if HERE not in sys.path:
     sys.path.insert(0, HERE)
 
 from flow_auth import auth_mechanism_properties, load_auth_catalog, load_auth_metadata  # noqa: E402
+from flow_refs import resolve_flow_bindings, resolve_flow_overrides  # noqa: E402
 from systems.loader import DEFAULT_SYSTEM, SystemPaths, load_system  # noqa: E402
 
 # Precogly slug rule (derived empirically from an editor export):
@@ -138,7 +139,10 @@ def apply_architecture_overrides(cdx, arch):
                 asset.get("properties", []), override["properties"]
             )
     flows = {f["bom-ref"]: f for f in bp.get("flows", [])}
-    for fref, override in arch.get("flow_overrides", {}).items():
+    flow_overrides, flow_errors = resolve_flow_overrides(arch, bp)
+    if flow_errors:
+        raise KeyError("; ".join(flow_errors))
+    for fref, override in flow_overrides.items():
         if fref not in flows:
             raise KeyError(f"flow override references unknown flow: {fref}")
         flow = flows[fref]
@@ -775,12 +779,11 @@ def _write_output(
     )
 
 
-def _validate_flow_bindings(flow_bindings, cdx):
-    flow_refs = {f["bom-ref"] for f in cdx["blueprints"][0].get("flows", [])}
-    for cid, refs in flow_bindings.items():
-        unknown = sorted(set(refs) - flow_refs)
-        if unknown:
-            raise KeyError(f"{cid}: flow_bindings references unknown flows: {unknown}")
+def _resolve_flow_bindings(flow_bindings, arch, cdx):
+    resolved, errors = resolve_flow_bindings(flow_bindings, arch, cdx["blueprints"][0])
+    if errors:
+        raise KeyError("; ".join(errors))
+    return resolved
 
 
 def main():
@@ -808,7 +811,7 @@ def main():
     alias = arch["assets"]
     flow_bindings = arch.get("flow_bindings", {})
     gwt_bindings = arch.get("gwt_bindings", {})
-    _validate_flow_bindings(flow_bindings, cdx)
+    flow_bindings = _resolve_flow_bindings(flow_bindings, arch, cdx)
 
     existing_threats = cdx.get("threats", {}).get("threats", [])
     existing_scenarios = cdx.get("threats", {}).get("scenarios", [])

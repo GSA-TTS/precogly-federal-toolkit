@@ -19,6 +19,11 @@ if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 
 from flow_auth import load_auth_catalog  # noqa: E402
+from flow_refs import (  # noqa: E402
+    build_flow_alias_map,
+    first_blueprint,
+    resolve_flow_ref,
+)
 from systems.loader import DEFAULT_SYSTEM, SystemPaths, load_system  # noqa: E402
 from validate import _load_forbidden  # noqa: E402
 
@@ -130,6 +135,7 @@ def validate_architecture(
     arch: dict[str, Any],
     *,
     source: Path,
+    dfd: dict[str, Any] | None = None,
     asset_refs: set[str],
     zone_refs: set[str],
     flow_refs: set[str],
@@ -171,10 +177,18 @@ def validate_architecture(
                 f"{_rel(source)}:asset_overrides.{asset_ref}.zone references unknown zone {zone_ref}"
             )
 
+    flow_aliases: dict[str, str] = {}
+    if dfd is not None:
+        flow_aliases, flow_alias_errors = build_flow_alias_map(
+            arch, first_blueprint(dfd)
+        )
+        errors.extend(f"{_rel(source)}:{error}" for error in flow_alias_errors)
+
     allowed_auth, warning_auth = load_auth_catalog(arch=arch)
     known_auth = allowed_auth | set(warning_auth)
     for flow_ref, override in (arch.get("flow_overrides") or {}).items():
-        if flow_ref not in flow_refs:
+        resolved_flow_ref = resolve_flow_ref(flow_ref, flow_refs, flow_aliases)
+        if not resolved_flow_ref:
             errors.append(
                 f"{_rel(source)}:flow_overrides.{flow_ref} references unknown flow"
             )
@@ -194,7 +208,11 @@ def validate_architecture(
                 f"{_rel(source)}:flow_bindings.{control_id}: expected a list of flow refs"
             )
             continue
-        unknown = sorted(set(refs) - flow_refs)
+        unknown = sorted(
+            value
+            for value in refs
+            if not resolve_flow_ref(value, flow_refs, flow_aliases)
+        )
         if unknown:
             errors.append(
                 f"{_rel(source)}:flow_bindings.{control_id} references unknown flows {unknown}"
@@ -239,6 +257,7 @@ def validate_sources(paths: SystemPaths) -> tuple[list[str], list[str]]:
     arch_errors, arch_warnings = validate_architecture(
         arch,
         source=paths.model_architecture,
+        dfd=dfd,
         asset_refs=asset_refs,
         zone_refs=zone_refs,
         flow_refs=flow_refs,
