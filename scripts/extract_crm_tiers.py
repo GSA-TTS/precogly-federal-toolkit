@@ -11,7 +11,7 @@ Service tiers extracted:
   - CaaS (shares identical inheritance profile as managed cloud service, per the CRM Overview metrics)
   - Data (shares identical inheritance profile as managed cloud service, per the CRM Overview metrics)
 
-Output: data/crm/tiers/<tier-slug>.yaml
+Output: data/tiers/<tier-slug>.yaml
 """
 
 import re
@@ -25,8 +25,7 @@ from odf.text import P
 
 HERE = Path(__file__).parent
 ROOT = HERE.parent
-DATA_CRM = ROOT / "data" / "crm"
-TIERS_DIR = DATA_CRM / "tiers"
+TIERS_DIR = ROOT / "data" / "tiers"
 
 
 def get_cell_text(cell) -> str:

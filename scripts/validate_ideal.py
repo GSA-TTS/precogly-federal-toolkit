@@ -4,8 +4,7 @@ scripts/generate_ideal.py.
 
 Invariants checked (fail = non-zero exit):
 - Every control is `implemented` or `verified` (no `gap` / `recommended`).
-- Every control carries BOTH `nist:control-id` and `crm:control-id`
-  properties (Finding G).
+- Every control carries `ctrl:id` property.
 - Every control has evidence: either an `externalReferences[]` entry OR a
   `properties[].name: evidence:url` property.
 - Every scenario has `inherentSeverity` and `residualSeverity` in the
@@ -24,23 +23,14 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 DEFAULT = os.path.join(ROOT, "build", "example-system-crm-threat-model-ideal.cdx.json")
 
-ALLOWED_STATUS = {"verified"}
-SEVERITY_LEVELS = {"info", "low", "medium", "high", "critical"}
+if HERE not in sys.path:
+    sys.path.insert(0, HERE)
 
-FORBIDDEN = [
-    (re.compile(r"https?://(?!localhost|127\.0\.0\.1)", re.IGNORECASE), "URL/URI"),
-    (
-        re.compile(r"\.cloud\.data-platform\.com", re.IGNORECASE),
-        "data platform workspace host",
-    ),
-    (
-        re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b"),
-        "email / POC identifier",
-    ),
-    (re.compile(r"itplaybook\.gsa\.gov", re.IGNORECASE), "internal DocOps host"),
-    (re.compile(r"\bexample-sp-id-a|example-sp-id-b\b"), "service-principal id"),
-    (re.compile(r"\bgsaext[_-]example-system[_-]uat\b", re.IGNORECASE), "UAT share recipient"),
-]
+from systems.loader import DEFAULT_SYSTEM, load_system  # noqa: E402
+from validate import FORBIDDEN, _load_forbidden  # noqa: E402
+
+ALLOWED_STATUS = {"verified", "implemented"}
+SEVERITY_LEVELS = {"info", "low", "medium", "high", "critical"}
 
 
 def fail(msg):
@@ -59,7 +49,18 @@ def has_evidence(ctrl):
 
 
 def main():
-    path = sys.argv[1] if len(sys.argv) > 1 else DEFAULT
+    import argparse
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("path", nargs="?", default=DEFAULT)
+    parser.add_argument(
+        "--system",
+        default=os.environ.get("SYSTEM", DEFAULT_SYSTEM),
+        help="System slug under data/systems/ (default: %(default)s)",
+    )
+    args = parser.parse_args()
+    path = args.path
+    paths = load_system(args.system)
     if not os.path.exists(path):
         fail(f"missing ideal artifact: {path} — run `make generate-ideal` first")
     with open(path, encoding="utf-8") as f:
@@ -89,17 +90,16 @@ def main():
     missing_evidence = []
     for c in controls:
         props = c.get("properties", [])
-        nist = get_prop(props, "nist:control-id")
-        crm = get_prop(props, "crm:control-id")
-        if not nist or not crm:
+        ctrl_id = get_prop(props, "ctrl:id")
+        if not ctrl_id:
             missing_props.append(c["bom-ref"])
         if not has_evidence(c):
             missing_evidence.append(c["bom-ref"])
 
     if missing_props:
         fail(
-            f"{len(missing_props)} control(s) missing both nist:control-id and "
-            f"crm:control-id properties: e.g. {missing_props[:3]}"
+            f"{len(missing_props)} control(s) missing ctrl:id "
+            f"property: e.g. {missing_props[:3]}"
         )
     if missing_evidence:
         fail(
@@ -131,7 +131,8 @@ def main():
                 fail(f"Object Poisoning threat {t['bom-ref']} has no linked controls")
 
     raw = json.dumps(d)
-    for pattern, label in FORBIDDEN:
+    forbidden = _load_forbidden(paths.redaction)
+    for pattern, label in forbidden:
         m = pattern.search(raw)
         if m:
             fail(f"unredacted {label}: {m.group(0)}")

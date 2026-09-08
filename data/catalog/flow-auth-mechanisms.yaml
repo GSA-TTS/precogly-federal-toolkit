@@ -1,0 +1,36 @@
+version: 1
+allowed:
+  - GSAuth via cloud.gov UAA
+  - cloud.gov UAA OIDC
+  - login.gov application-managed authorization
+  - OAuth 2.0
+  - OIDC
+  - SAML
+  - PIV/CAC
+  - OTP
+  - mTLS
+  - client certificate
+  - JWT
+  - API key
+  - SSH key
+  - HMAC
+  - AWS IAM role
+  - session cookie
+warn:
+  Anonymous: Use only for intentionally public unauthenticated flows; document the compensating boundary control before release.
+  Basic auth: Deprecated for new flows; prefer OIDC, SAML, PIV/CAC, mTLS, or another phishing-resistant mechanism.
+defaults:
+  browser_sso: GSAuth via cloud.gov UAA
+  cloudgov_direct_proxy: cloud.gov UAA OIDC
+conditional:
+  login.gov application-managed authorization: >-
+    Use when the application or identity broker owns authorization and can map
+    the login.gov email claim to the application's username/account model.
+notes:
+  - >-
+    cloud.gov UAA federates browser authentication to GSA SecureAuth / GSAuth;
+    model this as the default GSA employee SSO path for cloud.gov-hosted apps.
+  - >-
+    login.gov is available for application-managed or broker-managed identity
+    flows where authorization decisions are made inside the app, commonly by
+    matching verified email to the local username or account record.

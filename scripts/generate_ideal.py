@@ -9,8 +9,7 @@ WHAT THIS DOES
    `build/example-system-crm-threat-model.cdx.json` (produced by `scripts/generate.py`).
 2. Applies the overlay in `data/ideal-state/overlay.yaml`:
    - Promotes every `recommended` control to `verified`.
-   - Emits both `nist:control-id` and `crm:control-id` on every control
-     (Finding G of the audit).
+   - Emits `ctrl:id` on every control.
    - Adds mock evidence URLs (localhost placeholders that satisfy the
      redaction gate) as CDX `externalReferences[]` and a duplicate
      `evidence:url` property so Precogly picks them up regardless of adapter
@@ -47,6 +46,11 @@ DATA = os.path.join(ROOT, "data")
 DEFAULT_IN = os.path.join(ROOT, "build", "example-system-crm-threat-model.cdx.json")
 DEFAULT_OUT = os.path.join(ROOT, "build", "example-system-crm-threat-model-ideal.cdx.json")
 
+if HERE not in sys.path:
+    sys.path.insert(0, HERE)
+
+from systems.loader import DEFAULT_SYSTEM, load_system  # noqa: E402
+
 SEVERITY_LEVELS = {"info", "low", "medium", "high", "critical"}
 
 # Stable UUID namespace so re-runs produce the same serialNumber.
@@ -72,15 +76,14 @@ def upsert_prop(props, name, value):
 
 
 def control_id_for(ctrl):
-    """Return the NIST id for a control. Prefers nist:control-id, falls back
-    to crm:control-id. Shared-evidence controls only carry nist:control-id
-    (mapped to their primary NIST id in scripts/generate.py)."""
+    """Return the control id for a control. Prefers ctrl:id; shared-evidence
+    controls carry ctrl:id mapped to their primary id in scripts/generate.py."""
     props = ctrl.get("properties", [])
-    return get_prop(props, "nist:control-id") or get_prop(props, "crm:control-id")
+    return get_prop(props, "ctrl:id")
 
 
 def is_residual(ctrl):
-    return get_prop(ctrl.get("properties", []), "crm:residual") == "true"
+    return get_prop(ctrl.get("properties", []), "resp:residual") == "true"
 
 
 def slug(text):
@@ -104,8 +107,7 @@ def add_evidence(ctrl, url, description=None, key=None):
 
 def promote_and_evidence(controls, overlay):
     """Promote all `recommended` controls to `verified` and attach mock
-    evidence per the overlay. Also ensure every control carries both
-    nist:control-id and crm:control-id properties."""
+    evidence per the overlay. Also ensure every control carries ctrl:id."""
     root = overlay["evidence_root"].rstrip("/")
     target_status = overlay.get("default_target_status", "verified")
     priorities = overlay["priorities"]
@@ -118,21 +120,18 @@ def promote_and_evidence(controls, overlay):
         cid = control_id_for(ctrl) or ""
         props = ctrl.setdefault("properties", [])
 
-        # (a) Normalize both property names so downstream Precogly queries
-        # work regardless of which property their adapter version prefers.
-        nist_val = get_prop(props, "nist:control-id")
-        crm_val = get_prop(props, "crm:control-id")
-        norm = nist_val or crm_val
+        # (a) Normalize ctrl:id so downstream queries work.
+        norm = get_prop(props, "ctrl:id")
         if norm:
-            upsert_prop(props, "nist:control-id", norm)
-            upsert_prop(props, "crm:control-id", norm)
+            upsert_prop(props, "ctrl:id", norm)
 
         # (b) Promote status if this is a residual / recommended entry.
-        if ctrl.get("status") == "recommended":
+        old_status = ctrl.get("status")
+        if old_status in ("recommended", "in-progress"):
             ctrl["status"] = target_status
             promoted += 1
             upsert_prop(props, "mock:promotion", "true")
-            upsert_prop(props, "mock:previous-status", "recommended")
+            upsert_prop(props, "mock:previous-status", old_status)
 
         # (c) Attach mock evidence.
         pri = control_priority_map.get(cid)
@@ -267,8 +266,7 @@ def add_object_poisoning_countermeasure(cdx, overlay, next_seq):
         "description": op_meta["description"].strip(),
         "category": op_meta.get("category", "preventive"),
         "properties": [
-            {"name": "nist:control-id", "value": "SI-10"},
-            {"name": "crm:control-id", "value": "SI-10"},
+            {"name": "ctrl:id", "value": "SI-10"},
             {"name": "mock:priority", "value": "P8"},
             {
                 "name": "mock:priority-title",
@@ -310,11 +308,11 @@ def bump_metadata(cdx):
         datetime.now(UTC).isoformat(timespec="milliseconds").replace("+00:00", "Z")
     )
     props = meta.setdefault("properties", [])
-    upsert_prop(props, "crm:profile", "ideal-state")
-    upsert_prop(props, "crm:generated-by", "scripts/generate_ideal.py")
+    upsert_prop(props, "resp:profile", "ideal-state")
+    upsert_prop(props, "resp:generated-by", "scripts/generate_ideal.py")
     upsert_prop(
         props,
-        "crm:notice",
+        "resp:notice",
         "MOCK ARTIFACT — every evidence URL is a localhost placeholder. "
         "This TM represents the desired post-remediation state, not Example System's "
         "current implementation posture.",
@@ -326,10 +324,24 @@ def main():
     ap.add_argument("--in", dest="inp", default=DEFAULT_IN)
     ap.add_argument("--out", default=DEFAULT_OUT)
     ap.add_argument(
+        "--system",
+        default=os.environ.get("SYSTEM", DEFAULT_SYSTEM),
+        help="System slug under data/systems/ (default: %(default)s)",
+    )
+    ap.add_argument(
         "--overlay",
-        default=os.path.join(DATA, "ideal-state", "overlay.yaml"),
+        default=None,
+        help="Override ideal-state overlay YAML (defaults to the resolved "
+        "per-system path from the loader).",
     )
     args = ap.parse_args()
+
+    paths = load_system(args.system)
+    overlay_path = args.overlay or (
+        str(paths.ideal_overlay)
+        if paths.ideal_overlay
+        else os.path.join(DATA, "ideal-state", "overlay.yaml")
+    )
 
     if not os.path.exists(args.inp):
         sys.exit(
@@ -340,7 +352,7 @@ def main():
 
     with open(args.inp, encoding="utf-8") as f:
         cdx = json.load(f)
-    overlay = load_yaml(args.overlay)
+    overlay = load_yaml(overlay_path)
 
     # Deep copy so we never mutate the source artifact.
     cdx = copy.deepcopy(cdx)

@@ -52,7 +52,9 @@ def build_manifest(catalog: dict) -> dict:
                 "slug": slug,
                 "name": entry.get("name") or slug,
                 "acronym": entry.get("acronym"),
-                "criticality": _criticality(entry.get("fips_199")),
+                "criticality": _criticality(
+                    entry.get("data_sensitivity") or entry.get("fips_199")
+                ),
                 "lifecycle_state": entry.get("status") or "unknown",
                 "organization": entry.get("organization") or "gsa",
                 "system_id": entry.get("system_id"),

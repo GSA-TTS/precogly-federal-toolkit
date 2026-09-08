@@ -6,8 +6,8 @@ Ingests the Precogly-native CycloneDX artifact at either
 `build/systems/<slug>/<slug>.cdx.json`, and emits a schema-valid SDR at
 `build/systems/<slug>/fedramp-sdr.json`.
 
-FRRs are loaded from `data/frr/<slug>.yaml` when present.
-KSIs are loaded from `data/ksi/<slug>.yaml` when present.
+FRRs are loaded from `data/systems/<slug>/frr.yaml` when present.
+KSIs are loaded from `data/systems/<slug>/ksi.yaml` when present.
 
 Usage:
     uv run python scripts/export_fedramp_sdr.py --system example-system
@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 from collections import defaultdict
@@ -35,14 +36,20 @@ CATALOG_INDEX = REPO_ROOT / "catalog" / "index.yaml"
 Example System_CDX = REPO_ROOT / "build" / "example-system-crm-threat-model.cdx.json"
 FRR_DIR = REPO_ROOT / "data" / "frr"
 KSI_DIR = REPO_ROOT / "data" / "ksi"
-# OSCAL POA&M files sourced from sibling repos; path resolved via POAM_DIR env
-# or the default ../gsa-pages layout.
-POAM_PATHS: dict[str, Path] = {
-    "gsa-pages-ssp-2026": Path(__file__).resolve().parent.parent.parent
-    / "gsa-pages"
-    / "plan-of-action-and-milestones"
-    / "gsa-pages"
-    / "plan-of-action-and-milestones.json",
+
+if str(REPO_ROOT / "scripts") not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT / "scripts"))
+from systems.loader import load_system  # noqa: E402
+# Open risk (POA&M) files sourced from sibling repos; base dir overridable via
+# OPEN_RISK_DIR env var (default: ../gsa-pages/plan-of-action-and-milestones/).
+_OPEN_RISK_BASE = Path(
+    os.environ.get(
+        "OPEN_RISK_DIR",
+        str(REPO_ROOT.parent / "gsa-pages" / "plan-of-action-and-milestones"),
+    )
+)
+OPEN_RISK_PATHS: dict[str, Path] = {
+    "gsa-pages-ssp-2026": _OPEN_RISK_BASE / "gsa-pages" / "plan-of-action-and-milestones.json",
 }
 
 DEFAULT_CPO_URI_TEMPLATE = "https://fedramp.gov/schemas/tbd/{slug}/cpo.json"
@@ -62,16 +69,16 @@ def load_catalog() -> dict[str, dict]:
 
 
 def load_sidecar(slug: str) -> dict:
-    path = SYSTEMS_DIR / f"{slug}.yaml"
-    if not path.exists():
+    paths = load_system(slug)
+    if not paths.sidecar:
         return {}
-    with path.open() as fh:
+    with paths.sidecar.open() as fh:
         return yaml.safe_load(fh) or {}
 
 
-def load_poam_summary(slug: str) -> dict | None:
-    """Return open/total poam-item counts from a sibling OSCAL POA&M, or None."""
-    path = POAM_PATHS.get(slug)
+def load_open_risk_summary(slug: str) -> dict | None:
+    """Return open/total open-risk item counts from a sibling OSCAL POA&M, or None."""
+    path = OPEN_RISK_PATHS.get(slug)
     if not path or not path.exists():
         return None
     try:
@@ -96,8 +103,8 @@ def load_poam_summary(slug: str) -> dict | None:
 
 
 def load_frr(slug: str) -> list[dict]:
-    path = FRR_DIR / f"{slug}.yaml"
-    if not path.exists():
+    path = load_system(slug).frr
+    if not path or not path.exists():
         return []
     with path.open() as fh:
         data = yaml.safe_load(fh) or {}
@@ -114,8 +121,8 @@ def load_frr(slug: str) -> list[dict]:
 
 
 def load_ksi(slug: str) -> list[dict]:
-    path = KSI_DIR / f"{slug}.yaml"
-    if not path.exists():
+    path = load_system(slug).ksi
+    if not path or not path.exists():
         return []
     with path.open() as fh:
         data = yaml.safe_load(fh) or {}
@@ -154,10 +161,9 @@ def get_property(properties: list, name: str) -> str | None:
 
 
 def canonical_control_id(properties: list) -> str | None:
-    for key in ("nist:control-id", "crm:control-id"):
-        val = get_property(properties, key)
-        if val and NIST_CONTROL_ID_RE.match(val):
-            return val
+    val = get_property(properties, "ctrl:id")
+    if val and NIST_CONTROL_ID_RE.match(val):
+        return val
     return None
 
 
@@ -302,7 +308,7 @@ def build_sdr(slug: str, catalog_entry: dict, sidecar: dict) -> dict:
         "portsAndProtocols": build_ports_and_protocols(sdr_side),
     }
 
-    poam = load_poam_summary(slug)
+    poam = load_open_risk_summary(slug)
     if poam is not None:
         doc["planOfActionSummary"] = poam
 

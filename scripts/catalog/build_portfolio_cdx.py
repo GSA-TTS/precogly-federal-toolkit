@@ -58,7 +58,12 @@ def build_portfolio_cdx(catalog: dict) -> dict:
         properties = [
             {"name": "catalog:slug", "value": slug},
             {"name": "catalog:name", "value": entry.get("name") or slug},
-            {"name": "vault:fips-199", "value": entry.get("fips_199") or "unknown"},
+            {
+                "name": "vault:data-sensitivity",
+                "value": entry.get("data_sensitivity")
+                or entry.get("fips_199")
+                or "unknown",
+            },
             {"name": "vault:status", "value": entry.get("status") or "unknown"},
             {"name": "vault:organization", "value": entry.get("organization") or ""},
             {"name": "vault:system-id", "value": entry.get("system_id") or ""},

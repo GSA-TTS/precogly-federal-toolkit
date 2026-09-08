@@ -25,6 +25,10 @@ SYSTEMS_DIR = REPO_ROOT / "data" / "systems"
 BUILD_SYSTEMS = REPO_ROOT / "build" / "systems"
 CATALOG_INDEX = REPO_ROOT / "catalog" / "index.yaml"
 
+if str(REPO_ROOT / "scripts") not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT / "scripts"))
+from systems.loader import load_system  # noqa: E402
+
 
 def load_catalog() -> dict[str, dict]:
     with CATALOG_INDEX.open() as fh:
@@ -33,12 +37,13 @@ def load_catalog() -> dict[str, dict]:
 
 
 def load_sidecar(slug: str) -> dict:
-    path = SYSTEMS_DIR / f"{slug}.yaml"
-    if not path.exists():
+    paths = load_system(slug)
+    if not paths.sidecar:
         raise SystemExit(
-            f"cpo: no sidecar at {path.relative_to(REPO_ROOT)} — see data/systems/README.md"
+            f"cpo: no sidecar for '{slug}' at data/systems/{slug}/sidecar.yaml "
+            f"or data/systems/{slug}.yaml — see data/systems/README.md"
         )
-    with path.open() as fh:
+    with paths.sidecar.open() as fh:
         return yaml.safe_load(fh) or {}
 
 

@@ -147,7 +147,7 @@ class ControlRecord:
         )
 
 
-def parse_control(path: str) -> ControlRecord | None:
+def parse_control(path: str, validate_schema: bool = False) -> ControlRecord | None:
     with open(path, encoding="utf-8") as f:
         text = f.read()
     front, body = split_frontmatter(text)
@@ -156,6 +156,15 @@ def parse_control(path: str) -> ControlRecord | None:
     control_id = normalize_control_id(front.get("control_id", ""))
     if not control_id:
         return None
+
+    # ADR-006 issue #21: fail-fast if required frontmatter fields are absent
+    if validate_schema:
+        missing = [f for f in ("note_type", "control_id", "implementation_status") if not front.get(f)]
+        if missing:
+            raise ValueError(
+                f"vault schema validation failed for {path}: missing fields {missing}"
+            )
+
     parts = _parse_body_parts(body)
     sections = _parse_body_sections(body)
     return ControlRecord(

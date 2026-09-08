@@ -8,9 +8,9 @@ Transforms:
   - ../gsa-pages/component-definitions/gsa_common_controls/component-definition.json
 
 Into:
-  - data/crm/tiers/gsa-pages.yaml
-  - data/crm/tiers/cloud-gov.yaml
-  - data/crm/tiers/gsa-common-controls.yaml
+  - data/tiers/gsa-pages.yaml
+  - data/tiers/cloud-gov.yaml
+  - data/tiers/gsa-common-controls.yaml
 """
 
 import json
@@ -24,7 +24,7 @@ import yaml
 # Standard paths
 HERE = Path(__file__).parent
 ROOT = HERE.parent
-DATA_CRM_TIERS = ROOT / "data" / "crm" / "tiers"
+DATA_CRM_TIERS = ROOT / "data" / "tiers"
 # Resolved at runtime: sibling repo or NAMES_JSON env override
 NAMES_JSON = Path(
     os.environ.get(

@@ -8,6 +8,7 @@ Reads:
   - build/systems/<slug>/pack/joins/inheritance.yaml
   - build/systems/<slug>/<slug>.cdx.json (for asset/threat/control counts)
   - <vault>/examples/vault/<slug>/Systems/*.md (frontmatter for owner, FIPS)
+  - data/catalog/ownership.yaml      (fallback/override for owner, isso, ao, source_doc)
 
 Writes:
   - catalog/index.yaml
@@ -28,8 +29,12 @@ import yaml
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 DEFAULT_SYSTEMS = os.path.join(ROOT, "build", "systems")
-DEFAULT_VAULT = os.path.abspath(os.path.join(ROOT, "..", "oscal-vault"))
+_private_vault = os.path.abspath(os.path.join(ROOT, "..", "oscal-vault"))
+_vendor_vault = os.path.join(ROOT, "vendor", "oscal-vault")
+DEFAULT_VAULT = _private_vault if os.path.isdir(_private_vault) else _vendor_vault
 DEFAULT_OUT = os.path.join(ROOT, "catalog", "index.yaml")
+DEFAULT_INH_OUT = os.path.join(ROOT, "catalog", "inheritance.yaml")
+OWNERSHIP_SIDECAR = os.path.join(ROOT, "data", "catalog", "ownership.yaml")
 
 
 def load_yaml(path: str) -> dict:
@@ -72,13 +77,16 @@ def harvest_system_metadata(vault_root: str, slug: str) -> dict:
         with open(os.path.join(sys_dir, name), encoding="utf-8") as f:
             fm = split_frontmatter(f.read())
         if fm.get("note_type") == "system":
+            owner_raw = fm.get("owner")
+            isso_raw = fm.get("isso")
             return {
                 "name": fm.get("name"),
                 "acronym": fm.get("acronym"),
                 "status": fm.get("status"),
-                "owner": fm.get("owner"),
+                "owner": _wiki_target(owner_raw) if owner_raw else None,
+                "isso": _wiki_target(isso_raw) if isso_raw else None,
                 "system_id": fm.get("system_id"),
-                "fips_199": fm.get("fips_199"),
+                "data_sensitivity": fm.get("fips_199") or fm.get("impact_level"),
                 "impact_level": fm.get("impact_level"),
                 "organization": _wiki_target(fm.get("organization")),
                 "last_updated": str(fm.get("last_updated") or ""),
@@ -105,30 +113,46 @@ def summarize_cdx(cdx_path: str) -> dict:
 
 def inheritance_edges(system_dir: str) -> list[dict]:
     inh = load_yaml(os.path.join(system_dir, "pack", "joins", "inheritance.yaml"))
+    consumer = inh.get("consumer_system", "")
     edges: list[dict] = []
-    seen: set[tuple[str, str]] = set()
     for entry in inh.get("entries", []):
         provider = entry.get("provider_system")
-        mode = entry.get("mode")
         if not provider:
             continue
-        key = (provider, mode or "")
-        if key in seen:
-            continue
-        seen.add(key)
         edges.append(
             {
-                "type": "depends_on",
-                "target": provider,
-                "mode": mode,
+                "consumer": consumer,
+                "provider": provider,
+                "provider_owner": entry.get("provider_owner"),
+                "control_id": entry["control_id"],
+                "mode": entry.get("mode"),
+                "direction": entry.get("direction"),
             }
         )
     return edges
 
 
+def _relationships(edges: list[dict]) -> list[dict]:
+    """Deduplicated depends_on tuples for the catalog relationships field."""
+    seen: set[tuple[str, str]] = set()
+    out: list[dict] = []
+    for e in edges:
+        key = (e["provider"], e.get("mode") or "")
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(
+            {"type": "depends_on", "target": e["provider"], "mode": e.get("mode")}
+        )
+    return out
+
+
 def build_catalog(systems_root: str, vault_root: str) -> dict:
     idx = load_yaml(os.path.join(systems_root, "index.yaml"))
     skipped = load_yaml(os.path.join(systems_root, "skipped.yaml"))
+    ownership_overrides: dict[str, dict] = (
+        load_yaml(OWNERSHIP_SIDECAR).get("systems") or {}
+    )
     systems_out: list[dict] = []
 
     listed_slugs = {entry["system"] for entry in idx.get("systems", [])}
@@ -159,6 +183,8 @@ def build_catalog(systems_root: str, vault_root: str) -> dict:
         cdx_stats = summarize_cdx(cdx_files[0]) if cdx_files else {}
         meta = harvest_system_metadata(vault_root, slug)
         edges = inheritance_edges(system_dir)
+        # ownership.yaml provides fallback/override for fields vault leaves null
+        own = ownership_overrides.get(slug) or {}
 
         systems_out.append(
             {
@@ -166,13 +192,21 @@ def build_catalog(systems_root: str, vault_root: str) -> dict:
                 "name": meta.get("name") or slug.replace("-", " ").title(),
                 "acronym": meta.get("acronym"),
                 "status": meta.get("status"),
-                "owner": meta.get("owner"),
+                "owner": meta.get("owner") or own.get("owner"),
+                "isso": meta.get("isso") or own.get("isso"),
+                "ao": own.get("ao"),
                 "system_id": meta.get("system_id"),
-                "fips_199": meta.get("fips_199"),
-                "impact_level": meta.get("impact_level"),
+                "data_sensitivity": (
+                    meta.get("fips_199")
+                    or meta.get("fips_level")
+                    or meta.get("data_sensitivity")
+                    or own.get("data_sensitivity")
+                ),
+                "impact_level": meta.get("impact_level") or own.get("impact_level"),
                 "organization": meta.get("organization"),
                 "last_updated": meta.get("last_updated"),
                 "tags": meta.get("tags") or [],
+                "source_doc": own.get("source_doc"),
                 "artifacts": {
                     "cdx": os.path.relpath(cdx_files[0], ROOT) if cdx_files else None,
                     "pack": os.path.relpath(os.path.join(system_dir, "pack"), ROOT),
@@ -191,7 +225,8 @@ def build_catalog(systems_root: str, vault_root: str) -> dict:
                     "inheritance_entries": entry.get("inheritance_entries"),
                 },
                 "compliance_frameworks": ["nist-800-53-r5"],
-                "relationships": edges,
+                "relationships": _relationships(edges),
+                "inheritance": edges,
             }
         )
 
@@ -207,11 +242,26 @@ def build_catalog(systems_root: str, vault_root: str) -> dict:
     }
 
 
+def build_inheritance_index(systems_out: list[dict]) -> dict:
+    """Flatten all per-system inheritance edges into a portfolio-level index."""
+    all_edges: list[dict] = []
+    for s in systems_out:
+        all_edges.extend(s.get("inheritance", []))
+    return {
+        "inheritance": {
+            "generated_by": "scripts/catalog/build_catalog_index.py",
+            "description": "Queryable consumer/provider/mode tuples across all vault systems",
+            "entries": all_edges,
+        }
+    }
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--systems-root", default=DEFAULT_SYSTEMS)
     ap.add_argument("--vault-root", default=DEFAULT_VAULT)
     ap.add_argument("--out", default=DEFAULT_OUT)
+    ap.add_argument("--inheritance-out", default=DEFAULT_INH_OUT)
     args = ap.parse_args()
 
     if not os.path.isdir(args.systems_root):
@@ -222,10 +272,34 @@ def main() -> int:
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
     with open(args.out, "w", encoding="utf-8") as f:
         yaml.safe_dump(catalog, f, sort_keys=False, allow_unicode=True, width=100)
+
+    inh_index = build_inheritance_index(catalog["catalog"]["systems"])
+    with open(args.inheritance_out, "w", encoding="utf-8") as f:
+        yaml.safe_dump(inh_index, f, sort_keys=False, allow_unicode=True, width=100)
+
+    import shutil
+    import subprocess
+
+    dprint_cmd = shutil.which("dprint")
+    if dprint_cmd:
+        subprocess.run(
+            [dprint_cmd, "fmt", args.out, args.inheritance_out], capture_output=True
+        )
+    elif shutil.which("mise"):
+        subprocess.run(
+            ["mise", "x", "--", "dprint", "fmt", args.out, args.inheritance_out],
+            capture_output=True,
+        )
+
+    total_edges = len(inh_index["inheritance"]["entries"])
     print(
         f"Wrote {os.path.relpath(args.out, ROOT)} "
         f"({len(catalog['catalog']['systems'])} systems, "
         f"{len(catalog['catalog']['skipped'])} skipped)"
+    )
+    print(
+        f"Wrote {os.path.relpath(args.inheritance_out, ROOT)} "
+        f"({total_edges} inheritance entries)"
     )
     return 0
 

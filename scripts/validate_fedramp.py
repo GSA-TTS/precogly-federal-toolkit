@@ -30,9 +30,15 @@ except ImportError:  # pragma: no cover
         "  uv run --with jsonschema,referencing python scripts/validate_fedramp.py"
     )
 
+try:
+    import yaml
+except ImportError:  # pragma: no cover
+    yaml = None  # type: ignore[assignment]
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SCHEMAS_DIR = REPO_ROOT / "schemas"
 BUILD_SYSTEMS = REPO_ROOT / "build" / "systems"
+DATA_SYSTEMS = REPO_ROOT / "data" / "systems"
 
 SENTINEL_RE = re.compile(r"\bTBD\b|tbd\.example\.gov|555-555-5555", re.IGNORECASE)
 
@@ -86,6 +92,28 @@ def find_sentinels(instance) -> list[str]:
     return hits
 
 
+def _is_submission_exempt(system_slug: str) -> bool:
+    """Return True when data/systems/<slug>.yaml carries submission_ready: false.
+
+    This exempts known scaffold / template sidecars from the strict sentinel
+    gate so that ``--strict`` only flags systems that are actually intended for
+    FedRAMP submission.
+    """
+    if yaml is None:
+        return False
+    # Prefer the Phase-B per-system directory (`data/systems/<slug>/sidecar.yaml`),
+    # fall back to the legacy flat path (`data/systems/<slug>.yaml`).
+    for candidate in (
+        DATA_SYSTEMS / system_slug / "sidecar.yaml",
+        DATA_SYSTEMS / f"{system_slug}.yaml",
+    ):
+        if candidate.exists():
+            with candidate.open() as fh:
+                sc = yaml.safe_load(fh) or {}
+            return sc.get("submission_ready") is False
+    return False
+
+
 def validate_one(artifact_path: Path, registry: Registry, strict: bool) -> list[str]:
     schema_file = dispatch(artifact_path)
     if schema_file is None:
@@ -105,7 +133,9 @@ def validate_one(artifact_path: Path, registry: Registry, strict: bool) -> list[
         loc = "/".join(str(x) for x in err.absolute_path) or "<root>"
         errors.append(f"  {loc}: {err.message}")
     if strict:
-        errors.extend(find_sentinels(instance))
+        system_slug = artifact_path.parent.name
+        if not _is_submission_exempt(system_slug):
+            errors.extend(find_sentinels(instance))
     return errors
 
 

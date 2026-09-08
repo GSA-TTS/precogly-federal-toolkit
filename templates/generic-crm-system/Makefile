@@ -1,6 +1,6 @@
 # Generic CRM System Template Pipeline
 
-UV := uv run python
+UV := mise exec -- uv run python
 SCRIPTS := scripts
 # Override CATALOG with the path to your NIST 800-53r5 catalog.json
 CATALOG ?= $(error CATALOG is not set. Pass CATALOG=/path/to/catalog.json)

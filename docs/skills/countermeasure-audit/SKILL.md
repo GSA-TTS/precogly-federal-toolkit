@@ -55,7 +55,7 @@ severity (High / Medium / Low).
 | D | **Cross-priority double-billing**    | Same `control_id` claimed under multiple priorities without an owning-priority table. Blocks clean `residual_action` retirement.                                                                                              |
 | E | **PT-\* dual-thread trap**           | Any PT-family control with **two** entries in its YAML `residual_actions[]` produces **two** CDX controls. Any retirement must remove both.                                                                                   |
 | F | **Missing risk areas**               | Threats or scenarios present in the CDX threat catalog that the plan does not address (e.g., `Object Poisoning`, `SA-3(2)` live-data use, non-OAuth secret rotation, Delta Sharing recurring recipient review, risk scoring). |
-| G | **CDX property defect**              | Controls in the CDX carrying NIST identifiers only in the free-text `name` field, missing `properties[].name: nist:control-id` or `crm:control-id`. This breaks Precogly's join between CMs and NIST families.                |
+| G | **CDX property defect**              | Controls in the CDX carrying identifiers only in the free-text `name` field, missing `properties[].name: ctrl:id`. This breaks Precogly's join between CMs and control families.                                              |
 | H | **Duplicated closure procedure**     | The "regenerate + reimport + attach evidence" checklist is repeated inside every priority instead of consolidated into a single appendix.                                                                                     |
 | I | **Build vs evidence conflation**     | Task described as "capture evidence" but is actually a new-build (no existing CI/config/runbook to capture). Tag each task explicitly.                                                                                        |
 | J | **Sprint → residual mapping absent** | Sprint plan does not enumerate the concrete `residual_action[]` entries each sprint will close, so `make drift` cannot be a sprint exit criterion.                                                                            |
@@ -147,7 +147,7 @@ curl -s -H "Authorization: Bearer $TOKEN" \
 import sys, json
 d = json.load(sys.stdin)
 r = d.get('results', d)
-have_nist = sum(1 for c in r if c.get('format_metadata',{}).get('cyclonedx',{}).get('nist_control_id'))
+have_nist = sum(1 for c in r if c.get('format_metadata',{}).get('cyclonedx',{}).get('ctrl_id'))
 have_evi  = sum(1 for c in r if c.get('evidence_url'))
 print(f'CMs: {len(r)}  with_nist_id: {have_nist}  with_evidence_url: {have_evi}')
 "
@@ -162,14 +162,14 @@ URLs land.
 The generator (`scripts/generate.py`) writes NIST identifiers on controls in
 two different property names depending on origin:
 
-| Control origin                                                              | Property emitted                          |
-| --------------------------------------------------------------------------- | ----------------------------------------- |
-| Shared evidence control (from `EVIDENCE_NIST_IDS` mapping in `generate.py`) | `nist:control-id`                         |
-| One-off inline `text:` mechanism                                            | `crm:control-id`                          |
-| Residual-action control                                                     | `crm:control-id` + `crm:residual: "true"` |
+| Control origin                                                              | Property emitted                    |
+| --------------------------------------------------------------------------- | ----------------------------------- |
+| Shared evidence control (from `EVIDENCE_NIST_IDS` mapping in `generate.py`) | `ctrl:id`                           |
+| One-off inline `text:` mechanism                                            | `ctrl:id`                           |
+| Residual-action control                                                     | `ctrl:id` + `resp:residual: "true"` |
 
-Precogly's adapter accepts **either** and maps to
-`format_metadata.cyclonedx.nist_control_id` — see
+Precogly's adapter accepts `ctrl:id` and maps to
+`format_metadata.cyclonedx.ctrl_id` — see
 [skills/precogly-api/SKILL.md § Vault-specific CDX properties parsed during
 step 10](../precogly-api/SKILL.md).
 
@@ -212,7 +212,7 @@ An audit produces a single Markdown file at
 
 - **Sources used** — enumerate every file, artifact, and API call.
 - **Ground truth** — table of counts (controls / implemented / gap /
-  `nist:control-id` populated / `evidence_url` populated / risks).
+  `ctrl:id` populated / `evidence_url` populated / risks).
 - **One finding section per class A–J** — even if empty, state so.
 - **Summary scorecard** — count and severity per finding.
 - **Recommended minimum edits to the plan** — numbered list, actionable.
