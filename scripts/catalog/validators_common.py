@@ -15,18 +15,6 @@ STATUSES = frozenset(
 )
 RISK_LEVELS = frozenset({"low", "medium", "high", "critical", "info"})
 
-FLOW_AUTH_MECHANISMS = frozenset(
-    {
-        "OAuth 2.0",
-        "mTLS",
-        "JWT",
-        "API key",
-        "SSH key",
-        "HMAC",
-        "AWS IAM role",
-    }
-)
-
 
 FORBIDDEN_PATTERNS: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"https?://[^\s\"'>,)\]]+", re.IGNORECASE), "URL"),
