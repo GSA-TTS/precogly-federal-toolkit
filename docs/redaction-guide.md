@@ -86,7 +86,12 @@ and the shared helper `find_ipv4_leak` in
 1. **At conversion** — `convert_crm_to_yaml.py` runs `redact()` on all CRM
    values, so re-running `make crm` re-strips automatically. The function is
    idempotent (running it on already-tokenized text is a no-op).
-2. **At validation** — `scripts/validate.py` fails closed (non-zero exit) if the
+2. **Before generation** — `make scrub-check SYSTEM=<slug>` runs before
+   `validate-sources` and fails if `model/base-dfd.cdx.json` still has
+   editor-injected `metadata.authors` or forbidden values in configured DFD text
+   fields. Run `make scrub-dfd SYSTEM=<slug>` to remove authors and redact those
+   fields in place.
+3. **At validation** — `scripts/validate.py` fails closed (non-zero exit) if the
    generated `build/*.cdx.json` contains any URL/URI, `*.cloud.data-platform.com`
    host, email, internal DocOps host, known service-principal ID, or the UAT
    share recipient. This is the regression gate.
@@ -102,7 +107,10 @@ allowed — they are not sensitive endpoints.
    the same token.
 3. Add a matching entry to `FORBIDDEN` in `validate.py` so the gate catches
    regressions.
-4. Re-run `make -C docs/threat-model all` and confirm validation passes.
+4. For DFD export fields, add optional `scrub.fields` and `scrub.patterns`
+   entries to `data/systems/<slug>/redaction.yaml` when the default fields or
+   forbidden patterns need local extensions.
+5. Re-run `make -C docs/threat-model all` and confirm validation passes.
 
 ## Reviewer guidance
 

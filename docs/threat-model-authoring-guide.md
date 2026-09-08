@@ -112,16 +112,20 @@ Use this workflow for assets, flows, trust zones, and diagram layout:
 5. Run `make dfd-drift DFD_EXPORT=<exported-cdx.json>` and review
    `build/<system>-dfd-drift.yaml`.
 6. Save the exported DFD baseline over `data/model/base-dfd.cdx.json`.
-7. If asset, zone, or flow references changed, update `data/model/architecture.yaml`.
-8. Run `make validate-sources reinject validate drift`.
+7. Run `make scrub-dfd SYSTEM=<slug>` to remove editor-injected authors and
+   redact configured DFD text fields.
+8. If asset, zone, or flow references changed, update `data/model/architecture.yaml`.
+9. Run `make validate-sources reinject validate drift`.
 
-`make validate-sources` fails before generation when the editor export injects
-`metadata.authors`, when architecture bindings reference missing assets, zones,
-or flows, or when a flow declares an unknown `authMechanism`. Shared mechanisms
-live in `data/catalog/flow-auth-mechanisms.yaml`; system-specific additions can
-be declared in `auth_mechanisms` inside `architecture.yaml`. Add local NIST
-mappings under `auth_mechanisms.metadata.<mechanism>.nist` when a system-specific
-mechanism should emit `resp:auth-mechanism-nist` in generated flows.
+`make validate-sources` runs `make scrub-check` first and fails before generation
+when the source DFD still contains editor-injected `metadata.authors` or other
+configured redaction hits, when architecture bindings reference missing assets,
+zones, or flows, or when a flow declares an unknown `authMechanism`. Shared
+mechanisms live in `data/catalog/flow-auth-mechanisms.yaml`; system-specific
+additions can be declared in `auth_mechanisms` inside `architecture.yaml`. Add
+local NIST mappings under `auth_mechanisms.metadata.<mechanism>.nist` when a
+system-specific mechanism should emit `resp:auth-mechanism-nist` in generated
+flows.
 
 `make dfd-drift` is advisory: it exits successfully after writing a YAML report
 that calls out added, removed, or modified zones, assets, and flows, plus editor
