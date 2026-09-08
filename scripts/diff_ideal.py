@@ -4,7 +4,7 @@ review what changes between the two.
 
 Categories reported:
 - Controls: count by status (before -> after), controls promoted, controls
-  gaining evidence, controls gaining nist:control-id parity.
+  gaining evidence, controls gaining ctrl:id.
 - Scenarios: count with residualSeverity populated (before -> after).
 - Risks: count of Risk objects (before -> after).
 - Object Poisoning: mitigations count (before -> after).
@@ -48,18 +48,7 @@ def summary(path):
         else _risks_block
     )
     status = Counter(c.get("status") for c in controls)
-    with_nist = sum(
-        1 for c in controls if prop(c.get("properties", []), "nist:control-id")
-    )
-    with_crm = sum(
-        1 for c in controls if prop(c.get("properties", []), "crm:control-id")
-    )
-    with_both = sum(
-        1
-        for c in controls
-        if prop(c.get("properties", []), "nist:control-id")
-        and prop(c.get("properties", []), "crm:control-id")
-    )
+    with_ctrl_id = sum(1 for c in controls if prop(c.get("properties", []), "ctrl:id"))
     with_evi = sum(1 for c in controls if has_evidence(c))
     scen_scored = sum(
         1 for s in scenarios if s.get("inherentSeverity") and s.get("residualSeverity")
@@ -74,9 +63,7 @@ def summary(path):
         "path": path,
         "controls_total": len(controls),
         "controls_by_status": dict(status),
-        "controls_with_nist_control_id": with_nist,
-        "controls_with_crm_control_id": with_crm,
-        "controls_with_both_ids": with_both,
+        "controls_with_ctrl_id": with_ctrl_id,
         "controls_with_evidence": with_evi,
         "scenarios_total": len(scenarios),
         "scenarios_scored": scen_scored,
@@ -151,19 +138,9 @@ def main():
         b["controls_by_status"].get("verified", 0),
     )
     line(
-        "controls w/ nist:control-id",
-        a["controls_with_nist_control_id"],
-        b["controls_with_nist_control_id"],
-    )
-    line(
-        "controls w/ crm:control-id",
-        a["controls_with_crm_control_id"],
-        b["controls_with_crm_control_id"],
-    )
-    line(
-        "controls w/ BOTH id props",
-        a["controls_with_both_ids"],
-        b["controls_with_both_ids"],
+        "controls w/ ctrl:id",
+        a["controls_with_ctrl_id"],
+        b["controls_with_ctrl_id"],
     )
     line(
         "controls w/ evidence", a["controls_with_evidence"], b["controls_with_evidence"]

@@ -93,61 +93,75 @@ flowchart TD
 
 ## 3. CycloneDX Import → Precogly DB (cyclonedx.py adapter)
 
+> **Fix applied (jjediny/precogly@32de8e7):** `_import_scenario()` now uses `get_or_create()` instead of `create()`. Multiple CDX scenarios referencing the same (threat, asset) pair collapse to one `ComponentInstanceThreat` row; all scenario bom-refs are accumulated in `format_metadata.cyclonedx.scenarios[]` and severity is escalated to the highest value across scenarios. Fixes vault-style CDX imports where a single NIST control has multiple attack scenarios (e.g. SR-12 with 74 scenarios).
+
 ```mermaid
 flowchart TD
     subgraph cdx_file["CDX JSON File"]
-        A1[blueprints → ThreatModel + OrgSystem]
+        A1[blueprints: assets + zones + flows]
         A2[controls array]
         A3[threats.threats array]
         A4[threats.scenarios array]
     end
 
     subgraph adapter["CycloneDXAdapter.import_data()"]
-        A1 -->|_import_threat_model| B1[ThreatModel\nname / description]
-        A1 -->|_import_orgsystem| B2[OrgSystem\ncomponent boundary]
-        A1 -->|_import_asset| B3[OrgsystemComponent\nasset-{slug}]
-
+        A1 -->|_import_threat_model| B1[ThreatModel]
+        A1 -->|_import_orgsystem| B2[OrgSystem]
+        A1 -->|_import_asset| B3[OrgsystemComponent]
         A2 -->|_import_control| B4[InstanceCountermeasure]
-        A3 -->|_import_threat| B5[ThreatLibrary\nqualified_slug unique]
-        A4 -->|_import_scenario| B6[InstanceScenario\nrisk score]
-
-        B5 -.->|_resolve_control_threat_links\nmitigations field| B4
+        A3 -->|_import_threat| B5[ThreatLibrary]
+        A4 -->|_import_scenario\nget_or_create| B6[ComponentInstanceThreat]
+        B6 -->|_merge_scenario_metadata| B7[Accumulate scenarios list\nEscalate severity to max]
+        B5 -.->|_resolve_control_threat_links| B4
+        B6 -.->|CountermeasureThreatLink| B4
     end
 
-    subgraph ic["InstanceCountermeasure fields populated"]
-        C1[countermeasure_name ← control.name]
-        C2[countermeasure_description ← control.description]
-        C3[status ← CDX_STATUS_TO_CONTROL\nrecommended→gap / implemented→implemented\nplanned→planned / in-progress→in_progress]
-        C4[control_type ← control.category]
-        C5[is_inherited ← vault:origination in inherited/shared]
-        C6[inherited_from_component_name ← vault:providing-system]
-        C7[format_metadata.cyclonedx.nist_control_id ← nist:control-id OR crm:control-id]
-        C8[format_metadata.cyclonedx.bom_ref]
+    subgraph ic["InstanceCountermeasure fields on import"]
+        C1[countermeasure_name from control.name]
+        C2[countermeasure_description from control.description]
+        C3[status: recommended to gap\nimplemented stays implemented]
+        C4[control_type from control.category]
+        C5[is_inherited from vault:origination]
+        C6[inherited_from_component_name from vault:providing-system]
+        C7[format_metadata.cyclonedx.bomRef]
+    end
+
+    subgraph ic_sync["InstanceCountermeasure fields after sync_cdx_to_precogly.py"]
+        D1[format_metadata.cyclonedx.ctrlId from nist:control-id]
+        D2[format_metadata.cyclonedx.responsibilitySource from vault:origination]
+        D3[format_metadata.cyclonedx.implementationStatement from control.description]
+    end
+
+    subgraph cit["ComponentInstanceThreat fields"]
+        E1[threat_library FK to ThreatLibrary]
+        E2[component FK to OrgsystemComponent]
+        E3[inherent_severity = max riskScore.level across all scenarios]
+        E4[format_metadata.cyclonedx.scenarios = all scenario bom-refs]
     end
 
     B4 --> ic
-
-    subgraph NOT_POPULATED["⚠ Not currently populated"]
-        D1[evidence_url]
-        D2[InstanceCountermeasureStandard\nNIST taxonomy link]
-        D3[appliesTo → OrgsystemComponent link\ndeferred but never resolved]
-        D4[statement parts a/b/c as separate objects]
-        D5[parameter values as structured fields]
-    end
+    B4 -.->|post-import sync| ic_sync
+    B6 --> cit
 ```
 
-**CA-2(1) result in DB:**
+**CA-2(1) result in DB (after import + sync):**
 
-| Field                                       | Value                                         |
-| ------------------------------------------- | --------------------------------------------- |
-| `countermeasure_name`                       | `CA-2(1) implementation - Gsa Pages Ssp 2026` |
-| `status`                                    | `gap` (recommended → gap)                     |
-| `countermeasure_description`                | 415 chars of prose including statement part a |
-| `is_inherited`                              | False                                         |
-| `format_metadata.cyclonedx.nist_control_id` | `CA-2(1)`                                     |
-| `format_metadata.cyclonedx.bom_ref`         | `control-ca-2-1-…`                            |
+| Field                                               | Value                                             |
+| --------------------------------------------------- | ------------------------------------------------- |
+| `countermeasure_name`                               | `CA-2(1) implementation - Gsa Pages Ssp 2026`     |
+| `status`                                            | `gap` (recommended → gap)                         |
+| `countermeasure_description`                        | Full prose including statement parts + parameters |
+| `is_inherited`                                      | False                                             |
+| `format_metadata.cyclonedx.ctrlId`                  | `CA-2(1)`                                         |
+| `format_metadata.cyclonedx.responsibilitySource`    | `system-specific`                                 |
+| `format_metadata.cyclonedx.implementationStatement` | Full prose                                        |
 
-The **threat** object (`CRM: CA-2-1 residual risk`) is a `ThreatLibrary` entry with its own description. The Precogly UI currently surfaces the threat name prominently but the countermeasure (with the full prose) is a separate linked record.
+**SR-12 result (74 scenarios → 1 CIT):**
+
+| Field                                 | Value                                           |
+| ------------------------------------- | ----------------------------------------------- |
+| `inherent_severity`                   | `high` (escalated from max across 74 scenarios) |
+| `format_metadata.cyclonedx.scenarios` | Array of 74 `{scenario_bom_ref: ...}` entries   |
 
 ---
 
@@ -168,18 +182,22 @@ erDiagram
     OrgsystemComponent {
         int id PK
         string name
-        string component_type
+        string category
+        json format_metadata
     }
     ThreatLibrary {
         int id PK
         string name
         string description
-        string qualified_slug
-        json properties
+        string slug
     }
-    InstanceScenario {
+    ComponentInstanceThreat {
         int id PK
-        string risk_level
+        string threat_name
+        string threat_description
+        string inherent_severity
+        string status
+        json format_metadata
     }
     InstanceCountermeasure {
         int id PK
@@ -189,23 +207,24 @@ erDiagram
         string control_type
         bool is_inherited
         string inherited_from_component_name
-        string inherited_from_zone_name
         string evidence_url
         json format_metadata
     }
-    InstanceCountermeasureStandard {
+    CountermeasureThreatLink {
         int id PK
-        string control_id
     }
 
     ThreatModel ||--o{ OrgSystem : contains
     OrgSystem ||--o{ OrgsystemComponent : has
     ThreatModel ||--o{ ThreatLibrary : owns
     ThreatModel ||--o{ InstanceCountermeasure : owns
-    ThreatLibrary ||--o{ InstanceScenario : triggers
-    InstanceCountermeasure }o--o{ ThreatLibrary : mitigates
-    InstanceCountermeasure ||--o{ InstanceCountermeasureStandard : maps_to
+    ThreatLibrary ||--o{ ComponentInstanceThreat : instantiates
+    OrgsystemComponent ||--o{ ComponentInstanceThreat : hosts
+    ComponentInstanceThreat ||--o{ CountermeasureThreatLink : linked_via
+    InstanceCountermeasure ||--o{ CountermeasureThreatLink : linked_via
 ```
+
+**Key constraint:** `ComponentInstanceThreat` has `unique_together = ["component", "threat_library"]`. One CIT per (component, threat) pair — multiple scenarios for the same pair collapse via `_merge_scenario_metadata()`.
 
 ---
 
@@ -214,31 +233,33 @@ erDiagram
 ```mermaid
 flowchart LR
     subgraph vault_source["Vault Source Fields"]
-        V1[control_id ✅]
-        V2[title ✅]
-        V3[normalized_status ✅]
-        V4[origination ✅]
-        V5[parameters list ✅ in description]
-        V6[Part a/b/c prose ✅ in description]
-        V7[inheritance provider ✅ via vault:providing-system]
-        V8[evidence keys ✅ in description]
-        V9[statement part labels a/b/c ⚠ merged not structured]
-        V10[parameter param_id / value ⚠ text only]
-        V11[NIST taxonomy link ❌ not linked]
-        V12[evidence URLs ❌ not in evidence_url field]
+        V1[control_id OK]
+        V2[title OK]
+        V3[normalized_status OK]
+        V4[origination OK]
+        V5[parameters list OK in description]
+        V6[Part a/b/c prose OK in description]
+        V7[inheritance provider OK via vault:providing-system]
+        V8[evidence keys OK in description]
+        V9[statement part labels a/b/c partial merged not structured]
+        V10[parameter param_id / value partial text only]
+        V11[NIST taxonomy link missing not linked]
+        V12[evidence URLs missing not in evidence_url field]
     end
 
-    subgraph precogly_db["Precogly DB Fields"]
-        P1[nist_control_id in format_metadata ✅]
-        P2[countermeasure_name ✅]
-        P3[status ✅]
-        P4[control_type ✅]
-        P5[is_inherited ✅]
-        P6[inherited_from_component_name ✅]
-        P7[countermeasure_description ✅ full prose]
-        P8[evidence_url ❌ not populated]
-        P9[InstanceCountermeasureStandard ❌ not created]
-        P10[appliesTo OrgsystemComponent ❌ deferred never resolved]
+    subgraph precogly_db["Precogly DB Fields (after import + sync)"]
+        P1[ctrlId in format_metadata OK via sync]
+        P2[countermeasure_name OK]
+        P3[status OK]
+        P4[control_type OK]
+        P5[is_inherited OK]
+        P6[inherited_from_component_name OK]
+        P7[countermeasure_description OK full prose]
+        P8[responsibilitySource OK via sync]
+        P9[implementationStatement OK via sync]
+        P10[ComponentInstanceThreat OK via get_or_create fix]
+        P11[evidence_url missing vault has no artifact links]
+        P12[InstanceCountermeasureStandard missing not created]
     end
 
     V1 --> P1
@@ -248,41 +269,73 @@ flowchart LR
     V4 --> P5
     V7 --> P6
     V5 & V6 & V8 --> P7
-    V12 -.->|gap| P8
-    V11 -.->|gap| P9
-    V9 -.->|gap| P10
-
-    style V9 fill:#ffe4b5
-    style V10 fill:#ffe4b5
-    style V11 fill:#ffcccc
-    style V12 fill:#ffcccc
-    style P8 fill:#ffcccc
-    style P9 fill:#ffcccc
-    style P10 fill:#ffcccc
+    V4 --> P8
+    V5 & V6 --> P9
+    V3 --> P10
+    V12 -.->|gap| P11
+    V11 -.->|gap| P12
 ```
 
-**Legend:** ✅ mapped · ⚠ partially (text only) · ❌ not populated
+**Legend:** OK = mapped and populated · partial = partially mapped (text only) · missing = not populated (tracked issues #136–#138)
 
 ---
 
-## 6. Why "CA-2-1 residual risk" shows only a control ID
+## 6. Post-Import Sync Pipeline (sync_cdx_to_precogly.py)
+
+```mermaid
+sequenceDiagram
+    participant Script as sync_cdx_to_precogly.py
+    participant CDX as build/systems/{slug}.cdx.json
+    participant API as Precogly API
+    participant DB as PostgreSQL
+
+    Script->>API: GET /api/threat-models/
+    API-->>Script: 33 ThreatModels (prefer highest ID per name)
+
+    loop for each TM
+        Script->>CDX: load controls array
+        CDX-->>Script: {name_prefix: {ctrlId, responsibilitySource, implementationStatement}}
+
+        Script->>API: GET /api/countermeasures/?threat_model={id}&page_size=200
+        API-->>Script: ICs list (camelCase keys in response)
+
+        loop for each IC
+            Script->>Script: match IC by name[:60].lower() to CDX index
+            alt needs patch
+                Script->>API: PATCH /api/countermeasures/{id}/ {formatMetadata: {cyclonedx: {...}}}
+                API->>DB: UPDATE format_metadata JSONB
+            end
+        end
+    end
+
+    Note over Script,DB: API convention: query params snake_case (?threat_model=)<br/>JSON body/response camelCase (ctrlId, responsibilitySource)
+```
+
+**Result after sync:**
+
+- 100% NIST coverage (`ctrlId` on all ICs)
+- 100% prose coverage (`implementationStatement` on all ICs)
+- Inheritance metadata (`responsibilitySource`) on all ICs
+
+---
+
+## 7. Why "CA-2-1 residual risk" shows only a control ID
 
 ```mermaid
 sequenceDiagram
     participant UI as Precogly UI
-    participant T as ThreatLibrary
-    participant CM as InstanceCountermeasure
+    participant CIT as ComponentInstanceThreat
+    participant IC as InstanceCountermeasure
     participant Meta as format_metadata
 
-    UI->>T: display threat card "CRM: CA-2-1 residual risk"
-    T-->>UI: name + description (status/origination text only)
-    note over UI,T: UI surfaces ThreatLibrary.name prominently
-    note over UI,CM: Countermeasure is a linked record, not shown inline
+    UI->>CIT: display threat card "CRM: CA-2-1 residual risk"
+    CIT-->>UI: threat_name + threat_description (status/origination text)
+    note over UI,CIT: UI surfaces ComponentInstanceThreat.threat_name prominently
 
-    UI->>CM: (linked via mitigations) CA-2(1) implementation - Gsa Pages Ssp 2026
-    CM-->>UI: countermeasure_description (415 chars of statement prose)
-    CM-->>Meta: nist_control_id = CA-2(1)
-    note over UI,CM: Full prose IS stored — it lives in the countermeasure,\nnot in the threat card the UI shows first
+    UI->>IC: (linked via CountermeasureThreatLink)
+    IC-->>UI: countermeasure_description (full prose)
+    IC-->>Meta: ctrlId = CA-2(1), responsibilitySource = system-specific
+    note over UI,IC: Full prose IS stored in IC.countermeasure_description
 ```
 
-The prose is present in the DB. The gap is that the Precogly **threat card view** shows `ThreatLibrary.description` (which only contains status/origination metadata) rather than surfacing the linked `InstanceCountermeasure.countermeasure_description` inline.
+The prose is present in the DB. The gap is that the Precogly **threat card view** shows `ComponentInstanceThreat.threat_name` (which contains the threat library name) rather than surfacing the linked `InstanceCountermeasure.countermeasure_description` inline. See [docs/DATA_PIPELINE.md](DATA_PIPELINE.md) for the full field mapping.

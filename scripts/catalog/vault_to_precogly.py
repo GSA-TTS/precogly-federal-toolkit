@@ -17,6 +17,7 @@ from datetime import UTC, datetime
 
 import yaml
 from heuristics import (
+    CRM_ORIGINATION_MAP,
     ORIGINATION_TO_CONTROL_TYPE,
     STATUS_RISK,
     STATUS_TO_CDX,
@@ -252,7 +253,7 @@ def _sort_control_key(cid: str) -> tuple[str, int, int]:
     return (m.group(1), int(m.group(2)), int(m.group(3) or 0))
 
 
-def iter_control_records(vault_root: str, system_slug: str, status_map, orig_map):
+def iter_control_records(vault_root: str, system_slug: str, status_map, orig_map, validate_schema: bool = False):
     controls_dir = os.path.join(
         vault_root, "examples", "vault", system_slug, "Controls"
     )
@@ -261,7 +262,7 @@ def iter_control_records(vault_root: str, system_slug: str, status_map, orig_map
     for name in sorted(os.listdir(controls_dir)):
         if not name.endswith(".md"):
             continue
-        record = parse_control(os.path.join(controls_dir, name))
+        record = parse_control(os.path.join(controls_dir, name), validate_schema=validate_schema)
         if record is None:
             continue
         target_status, status_remark = status_map.lookup(record.implementation_status)
@@ -287,6 +288,15 @@ def _providing_system(
     return None
 
 
+def _load_control_type_overrides(system_slug: str) -> dict[str, str]:
+    """Load optional per-system control-type override file (data/systems/<slug>-control-type-overrides.yaml)."""
+    path = os.path.join(ROOT, "data", "systems", f"{slugify(system_slug)}-control-type-overrides.yaml")
+    if os.path.exists(path):
+        with open(path, encoding="utf-8") as f:
+            return yaml.safe_load(f) or {}
+    return {}
+
+
 def build_pack(
     system_slug: str,
     records: list[tuple[ControlRecord, dict]],
@@ -310,6 +320,7 @@ def build_pack(
     ct_threats: list[dict] = []
     tc_mappings: list[dict] = []
     fw_mappings: list[dict] = []
+    ct_overrides = _load_control_type_overrides(system_slug)
 
     for record, meta in records:
         cid = record.control_id
@@ -317,8 +328,11 @@ def build_pack(
         origination = record.normalized_origination or "system-specific"
         status = record.normalized_status or "not-implemented"
         provider = _providing_system(inheritance, cid)
-        threat_id = f"{component_id}-crm-{slugify(cid)}"
-        cm_id = f"{component_id}-cm-{slugify(cid)}"
+        # Keep enhancement number distinct in ids/names — `slugify("AC-2(1)")`
+        # would otherwise collapse to `ac-21` and collide with `AC-21`.
+        cid_slug = cid.replace("(", "-").replace(")", "")
+        threat_id = f"{component_id}-crm-{slugify(cid_slug)}"
+        cm_id = f"{component_id}-cm-{slugify(cid_slug)}"
 
         parameters_block = "\n".join(
             f"- `{p.get('param_id')}` = {redact(str(p.get('value', '')))}"
@@ -341,7 +355,7 @@ def build_pack(
         threats.append(
             {
                 "id": threat_id,
-                "name": f"CRM: {cid} - {component_name}",
+                "name": f"CRM: {cid_slug} - {component_name}",
                 "description": "\n\n".join(p for p in threat_desc_parts if p).strip(),
             }
         )
@@ -352,6 +366,8 @@ def build_pack(
             _classified = classify_control_type(origination, prose)
             # TODO: map _classified → control_type when detective/corrective types are supported
             control_type = "procedural"
+        # Apply per-system manual override (issue #22)
+        control_type = ct_overrides.get(cid, control_type)
         cm_desc = [f"Fulfill CRM responsibility for {cid} on {component_name}."]
         if parameters_block:
             cm_desc.append("Parameters:\n" + parameters_block)
@@ -362,7 +378,7 @@ def build_pack(
         countermeasures.append(
             {
                 "id": cm_id,
-                "name": f"Fulfill {cid} on {component_name}",
+                "name": f"Fulfill {cid_slug} on {component_name}",
                 "description": "\n\n".join(cm_desc),
                 "control_type": control_type,
                 "cost": "medium",
@@ -488,9 +504,9 @@ def _build_inheritance_topology(inheritance, asset_ref):
                 "crosses_trust_zone": True,
                 "authenticated": mode in ("hybrid", "shared"),
                 "properties": [
-                    {"name": "nist:control-id", "value": entry.control_id},
+                    {"name": "ctrl:id", "value": entry.control_id},
                     {"name": "vault:inheritance-mode", "value": mode},
-                    {"name": "nist:control-family", "value": family},
+                    {"name": "ctrl:family", "value": family},
                     {"name": "vault:control-count", "value": str(count)},
                     {"name": "vault:boundary-crossing", "value": "true"},
                 ],
@@ -708,9 +724,13 @@ def _build_evidence_properties(record, provider, evidence_rows):
             "name": "vault:control-type",
             "value": ORIGINATION_TO_CONTROL_TYPE.get(origination) or "procedural",
         },
-        {"name": "nist:control-id", "value": cid},
+        {"name": "ctrl:id", "value": cid},
         {"name": "vault:implementation-status", "value": status},
         {"name": "vault:origination", "value": origination},
+        {
+            "name": "crm:responsibility-source",
+            "value": CRM_ORIGINATION_MAP.get(origination, "tenant"),
+        },
     ]
     if provider:
         props.append({"name": "vault:providing-system", "value": provider.provider})
@@ -718,17 +738,24 @@ def _build_evidence_properties(record, provider, evidence_rows):
     for param in record.parameters:
         pid = param.get("param_id")
         if pid:
+            val = redact(str(param.get("value", "")))
             props.append(
                 {
                     "name": f"vault:param:{pid}",
-                    "value": redact(str(param.get("value", ""))),
+                    "value": val,
+                }
+            )
+            props.append(
+                {
+                    "name": f"odp:{pid}",
+                    "value": val,
                 }
             )
     for row in evidence_rows:
-        props.append({"name": "crm:evidence-key", "value": row["key"]})
-        props.append({"name": "crm:evidence-artifact", "value": row["artifact"]})
+        props.append({"name": "resp:evidence-key", "value": row["key"]})
+        props.append({"name": "resp:evidence-artifact", "value": row["artifact"]})
         for link in row.get("links", []):
-            props.append({"name": "crm:evidence-link", "value": link})
+            props.append({"name": "resp:evidence-link", "value": link})
     first_url = next(
         (
             lnk
@@ -738,6 +765,19 @@ def _build_evidence_properties(record, provider, evidence_rows):
         ),
         None,
     )
+    # Emit vault:// for internal wiki links when no HTTP URL is available
+    if first_url is None and evidence_rows:
+        first_wiki = next(
+            (
+                lnk
+                for row in evidence_rows
+                for lnk in row.get("links", [])
+                if not lnk.startswith("http")
+            ),
+            None,
+        )
+        if first_wiki:
+            first_url = "vault://" + first_wiki.lstrip("/")
     return props, first_url
 
 
@@ -745,17 +785,24 @@ def _build_threat_properties(record, meta, provider, status, origination):
     """Build the properties list attached to a threat entry."""
     cid = record.control_id
     properties = [
-        {"name": "nist:control-id", "value": cid},
+        {"name": "ctrl:id", "value": cid},
         {"name": "vault:implementation-status", "value": status},
         {"name": "vault:origination", "value": origination},
     ]
     for param in record.parameters:
         pid = param.get("param_id")
         if pid:
+            val = redact(str(param.get("value", "")))
             properties.append(
                 {
                     "name": f"vault:param:{pid}",
-                    "value": redact(str(param.get("value", ""))),
+                    "value": val,
+                }
+            )
+            properties.append(
+                {
+                    "name": f"odp:{pid}",
+                    "value": val,
                 }
             )
     if meta.get("raw_origination"):
@@ -791,13 +838,9 @@ def _build_threat_and_scenario(
 ):
     """Build threat + scenario dicts; returns (threat|None, scenario|None)."""
     threat_desc = [
-        f"CRM responsibility for {cid} ({record.title}) on {component_name}.",
-        f"Implementation status: {status}. Origination: {origination}.",
+        f"CRM responsibility for {cid} ({record.title}) on {component_name} is unfulfilled.",
+        "A security gap exists because the tenant or shared responsibility for this NIST 800-53 control is not operational. This introduces residual risk to the system scope.",
     ]
-    if provider:
-        threat_desc.append(f"Provider: {provider.provider} ({provider.mode}).")
-    if prose:
-        threat_desc.append(prose)
     if status == "operational":
         return None, None
     threat_entry = {
@@ -809,17 +852,29 @@ def _build_threat_and_scenario(
         "mitigations": [c_ref],
     }
     emitted_parts = [p for p in record.parts if p.prose.strip()]
+    # One scenario per non-empty statement part; parts share the threat.
+    if emitted_parts:
+        scenarios_out = []
+        for part in emitted_parts:
+            scenarios_out.append(
+                {
+                    "bom-ref": f"{s_ref}-{part.part}",
+                    "threat": t_ref,
+                    "affectedAssets": [asset_ref],
+                    "riskScore": {"level": risk},
+                    "properties": [
+                        {"name": "vault:statement-part", "value": part.part}
+                    ],
+                }
+            )
+        return threat_entry, scenarios_out
     scenario_entry: dict = {
         "bom-ref": s_ref,
         "threat": t_ref,
         "affectedAssets": [asset_ref],
         "riskScore": {"level": risk},
     }
-    if emitted_parts:
-        scenario_entry["properties"] = [
-            {"name": "vault:statement-part", "value": p.part} for p in emitted_parts
-        ]
-    return threat_entry, scenario_entry
+    return threat_entry, [scenario_entry]
 
 
 def _emit_one_control_record(
@@ -842,14 +897,18 @@ def _emit_one_control_record(
         return None, None, None, seq
     prose = redact(interpolate_parameters(record.combined_prose, record.parameters))
     cid_slug = cid.replace("(", "-").replace(")", "")
+    # Use the paren-free form in human-readable names too. Precogly derives its
+    # unique `qualified_slug` from the threat name via slugify(), which strips
+    # parens — so `AC-2(1)` and `AC-21` collapse to the same slug otherwise.
+    cid_display = cid_slug
     t_ref = f"threat-{slugify(cid_slug)}-{seq}"
     s_ref = f"scenario-{slugify(cid_slug)}-{seq}"
     c_ref = f"control-{slugify(cid_slug)}-{seq}"
     provider = _providing_system(inheritance, cid)
     properties = _build_threat_properties(record, meta, provider, status, origination)
-    threat_entry, scenario_entry = _build_threat_and_scenario(
+    threat_entry, scenario_entries = _build_threat_and_scenario(
         cid,
-        cid_slug,
+        cid_display,
         record,
         component_name,
         provider,
@@ -886,7 +945,7 @@ def _emit_one_control_record(
     )
     control_entry: dict = {
         "bom-ref": c_ref,
-        "name": f"{cid} implementation - {component_name}",
+        "name": f"{cid_display} implementation - {component_name}",
         "status": STATUS_TO_CDX.get(status, "recommended"),
         "description": "\n\n".join(control_desc),
         "category": classify_control_type(origination, prose),
@@ -899,7 +958,7 @@ def _emit_one_control_record(
         control_entry["externalReferences"] = [
             {"type": "evidence", "url": first_evidence_url}
         ]
-    return threat_entry, scenario_entry, control_entry, seq
+    return threat_entry, scenario_entries, control_entry, seq
 
 
 def emit_cdx(
@@ -947,7 +1006,7 @@ def emit_cdx(
     controls: list[dict] = []
     seq = 0
     for record, meta in records:
-        threat_entry, scenario_entry, control_entry, seq = _emit_one_control_record(
+        threat_entry, scenario_entries, control_entry, seq = _emit_one_control_record(
             record,
             meta,
             inheritance,
@@ -961,8 +1020,8 @@ def emit_cdx(
             continue
         if threat_entry:
             threats.append(threat_entry)
-        if scenario_entry:
-            scenarios.append(scenario_entry)
+        if scenario_entries:
+            scenarios.extend(scenario_entries)
         controls.append(control_entry)
     ts = datetime.now(UTC).isoformat(timespec="milliseconds").replace("+00:00", "Z")
     cdx = {
@@ -1019,10 +1078,11 @@ def convert_system(
     *,
     internal: bool = False,
     merge_strategy: str = "overlay",
+    validate_schema: bool = False,
 ) -> dict:
     if merge_strategy not in {"overlay", "replace"}:
         raise ValueError(f"unsupported merge strategy: {merge_strategy}")
-    records = list(iter_control_records(vault_root, system_slug, status_map, orig_map))
+    records = list(iter_control_records(vault_root, system_slug, status_map, orig_map, validate_schema=validate_schema))
     inheritance_dir = os.path.join(
         vault_root, "examples", "vault", system_slug, "Inheritance"
     )
@@ -1074,10 +1134,29 @@ def enumerate_skipped_systems(vault_root: str) -> list[dict]:
             continue
         if os.path.isdir(os.path.join(system_dir, "Controls")):
             continue
+        # Distinguish intentionally empty vaults (Controls count 0 in Index.md)
+        # from regressions (Controls/ simply missing but index implies content).
+        index_md = os.path.join(system_dir, "Index.md")
+        skip_class = "empty-vault"
+        if os.path.isfile(index_md):
+            with open(index_md, encoding="utf-8") as fh:
+                for line in fh:
+                    if line.strip().startswith("- Controls:"):
+                        try:
+                            count = int(line.split(":", 1)[1].strip())
+                            skip_class = (
+                                "empty-vault" if count == 0 else "missing-controls-dir"
+                            )
+                        except ValueError:
+                            skip_class = "missing-controls-dir"
+                        break
+        else:
+            skip_class = "missing-controls-dir"
         skipped.append(
             {
                 "system": name,
                 "reason": "no Controls/ directory in vault",
+                "skip_class": skip_class,
                 "vault_path": os.path.relpath(system_dir, ROOT)
                 if system_dir.startswith(ROOT)
                 else system_dir,
@@ -1115,6 +1194,11 @@ def main() -> None:
         default="overlay",
         help="Vault note merge behavior for layered community/agency notes.",
     )
+    ap.add_argument(
+        "--validate-schema",
+        action="store_true",
+        help="Fail fast if required frontmatter fields are absent (ADR-006 issue #21).",
+    )
     args = ap.parse_args()
 
     vault_root = os.path.abspath(args.vault_root)
@@ -1146,6 +1230,7 @@ def main() -> None:
                 orig_map,
                 internal=args.internal,
                 merge_strategy=args.merge_strategy,
+                validate_schema=args.validate_schema,
             )
         except FileNotFoundError as exc:
             print(f"SKIP {system}: {exc}", file=sys.stderr)

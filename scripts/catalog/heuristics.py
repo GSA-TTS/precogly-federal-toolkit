@@ -71,6 +71,15 @@ ORIGINATION_TO_CONTROL_TYPE = {
     "customer-provided": "procedural",
 }
 
+CRM_ORIGINATION_MAP = {
+    "system-specific": "tenant",
+    "customer-configured": "tenant",
+    "customer-provided": "tenant",
+    "shared": "shared",
+    "hybrid": "shared",
+    "inherited": "platform-inherited",
+}
+
 STATUS_RISK = {
     "operational": "low",
     "under-development": "medium",

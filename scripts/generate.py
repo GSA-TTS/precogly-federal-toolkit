@@ -22,6 +22,15 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 DATA = os.path.join(ROOT, "data")
 
+# scripts/systems is not on PYTHONPATH when running via ``uv run python
+# scripts/generate.py``; prepend HERE so ``from systems.loader import ...``
+# resolves without requiring callers to set PYTHONPATH.
+if HERE not in sys.path:
+    sys.path.insert(0, HERE)
+
+from flow_auth import load_auth_catalog  # noqa: E402
+from systems.loader import DEFAULT_SYSTEM, SystemPaths, load_system  # noqa: E402
+
 # Precogly slug rule (derived empirically from an editor export):
 #   lowercase -> non-alphanumeric collapsed to '-' -> truncate to 40 chars
 #   (trailing '-' kept) -> prefixed 'threat-'/'control-' -> suffix '-<seq>'.
@@ -52,19 +61,13 @@ def _responsibility_source(inheritance: str) -> str:
     return "platform-inherited"
 
 
-FLOW_AUTH_MECHANISMS = {
-    "OAuth 2.0",
-    "mTLS",
-    "JWT",
-    "API key",
-    "SSH key",
-    "HMAC",
-    "AWS IAM role",
-}
-
-
 def load_yaml(*parts):
     with open(os.path.join(DATA, *parts), encoding="utf-8") as f:
+        return yaml.safe_load(f)
+
+
+def _load_yaml_path(path):
+    with open(path, encoding="utf-8") as f:
         return yaml.safe_load(f)
 
 
@@ -100,6 +103,8 @@ def merge_properties(existing, additions):
 
 def apply_architecture_overrides(cdx, arch):
     """Apply ADR-005 DFD enrichments managed outside the editor export."""
+    allowed_auth, warning_auth = load_auth_catalog(arch=arch)
+    known_auth = allowed_auth | set(warning_auth)
     bp = cdx["blueprints"][0]
     zones = {z["bom-ref"]: z for z in bp.get("zones", [])}
     for zref, override in arch.get("zone_overrides", {}).items():
@@ -140,7 +145,7 @@ def apply_architecture_overrides(cdx, arch):
             flow["protocols"] = list(override["protocols"])
         auth = override.get("authMechanism")
         if auth:
-            if auth not in FLOW_AUTH_MECHANISMS:
+            if auth not in known_auth:
                 raise ValueError(f"flow {fref} uses unsupported authMechanism: {auth}")
             flow["authMechanism"] = auth
             flow["properties"] = merge_properties(
@@ -152,7 +157,7 @@ def apply_architecture_overrides(cdx, arch):
             if val is None:
                 continue
             flow[field] = val
-            prop_name = f"crm:{field.replace('_', '-')}"
+            prop_name = f"resp:{field.replace('_', '-')}"
             flow["properties"] = merge_properties(
                 flow.get("properties", []),
                 [
@@ -212,12 +217,20 @@ def build_threat_desc(cid, mc, db):
 class ControlRegistry:
     """Deduplicates evidence-mechanism controls with monotonic bom-ref sequences."""
 
-    def __init__(self, start_seq, evidence_links=None, evidence_artifacts=None):
+    def __init__(
+        self,
+        start_seq,
+        evidence_links=None,
+        evidence_artifacts=None,
+        evidence_ids=None,
+    ):
         self.seq = start_seq
         self.by_key = {}  # evidence-key -> control dict (shared)
         self.controls = []  # ordered list of all control dicts
         self._evidence_links = evidence_links or {}
         self._evidence_artifacts = evidence_artifacts or {}
+        # Per-system overrides layer over the built-in Example System-derived map.
+        self._evidence_ids = {**EVIDENCE_NIST_IDS, **(evidence_ids or {})}
 
     def _new_ref(self, name):
         self.seq += 1
@@ -227,12 +240,10 @@ class ControlRegistry:
         """Reusable control for an evidence key; created once, linked N times."""
         ctrl = self.by_key.get(key)
         if ctrl is None:
-            props = [{"name": "crm:evidence-key", "value": key}]
-            if key in EVIDENCE_NIST_IDS:
-                props.append(
-                    {"name": "nist:control-id", "value": EVIDENCE_NIST_IDS[key]}
-                )
-            nist_id = EVIDENCE_NIST_IDS.get(key)
+            props = [{"name": "resp:evidence-key", "value": key}]
+            if key in self._evidence_ids:
+                props.append({"name": "ctrl:id", "value": self._evidence_ids[key]})
+            nist_id = self._evidence_ids.get(key)
             ctrl = {
                 "bom-ref": self._new_ref(name),
                 "name": name,
@@ -243,7 +254,9 @@ class ControlRegistry:
                 "mitigations": [],
             }
             if nist_id:
-                ctrl["satisfies"] = [{"reference": nist_id, "framework": "nist-800-53-r5"}]
+                ctrl["satisfies"] = [
+                    {"reference": nist_id, "framework": "nist-800-53-r5"}
+                ]
             url = self._evidence_links.get(key)
             if url:
                 ctrl["externalReferences"] = [{"type": "evidence", "url": url}]
@@ -262,7 +275,7 @@ class ControlRegistry:
                             ctrl.get("properties", []),
                             [
                                 {
-                                    "name": f"crm:evidence-{field.replace('_', '-')}",
+                                    "name": f"resp:evidence-{field.replace('_', '-')}",
                                     "value": str(val).lower()
                                     if isinstance(val, bool)
                                     else str(val),
@@ -300,16 +313,14 @@ class ControlRegistry:
         if implementation_statement:
             props.append(
                 {
-                    "name": "crm:implementation-statement",
+                    "name": "resp:statement",
                     "value": implementation_statement,
                 }
             )
         if responsibility_source:
-            props.append(
-                {"name": "crm:responsibility-source", "value": responsibility_source}
-            )
+            props.append({"name": "resp:source", "value": responsibility_source})
         if test_steps:
-            props.append({"name": "crm:test-steps", "value": json.dumps(test_steps)})
+            props.append({"name": "resp:test-steps", "value": json.dumps(test_steps)})
         if props:
             ctrl["properties"] = props
         if evidence_url:
@@ -396,32 +407,47 @@ def _primary_asset(cid, fam_map, default_assets, alias):
     return [all_assets[0]] if all_assets else []
 
 
-def _load_data(cdx):
+def _load_data(cdx, paths: SystemPaths):
     """Load all YAML data sources; apply architecture overrides; return dict."""
-    arch = load_yaml("model", "architecture.yaml")
+    arch = _load_yaml_path(paths.model_architecture)
     apply_architecture_overrides(cdx, arch)
-    ev = load_yaml("model", "evidence.yaml")
+    ev = _load_yaml_path(paths.model_evidence)
+    managed-cloud-service = paths.crm_source("managed-cloud-service")
+    dbx = paths.crm_source("data-platform")
+    if not (paths.crm_index and managed-cloud-service and dbx and paths.countermeasures):
+        missing = [
+            name
+            for name, p in (
+                ("crm_index", paths.crm_index),
+                ("crm/managed-cloud-service.yaml", managed-cloud-service),
+                ("crm/data-platform.yaml", dbx),
+                ("countermeasures", paths.countermeasures),
+            )
+            if not p
+        ]
+        raise FileNotFoundError(
+            f"system '{paths.slug}' is missing required CRM data: {missing}"
+        )
     return {
         "arch": arch,
         "evidence": ev["evidence"],
         "evidence_links": ev.get("evidence_links") or {},
         "evidence_artifacts": ev.get("evidence_artifacts") or {},
-        "index": load_yaml("crm", "index.yaml"),
-        "managed-cloud-service": by_id(load_yaml("crm", "managed-cloud-service.yaml")),
-        "dbx": by_id(load_yaml("crm", "data-platform.yaml")),
+        "evidence_ids": ev.get("evidence_ids") or {},
+        "index": _load_yaml_path(paths.crm_index),
+        "managed-cloud-service": by_id(_load_yaml_path(managed-cloud-service)),
+        "dbx": by_id(_load_yaml_path(dbx)),
         "cms": {
             c["control_id"]: c
-            for c in load_yaml("countermeasures", "countermeasures.yaml")[
-                "countermeasures"
-            ]
+            for c in _load_yaml_path(paths.countermeasures)["countermeasures"]
         },
     }
 
 
 def _build_threat_properties(cid, mc, db, all_affected, sources):
-    props = [{"name": "nist:control-id", "value": cid}]
+    props = [{"name": "ctrl:id", "value": cid}]
     if len(all_affected) > 1:
-        props.append({"name": "crm:affected-assets", "value": " ".join(all_affected)})
+        props.append({"name": "resp:affected-assets", "value": " ".join(all_affected)})
     if mc:
         if mc.get("baseline_low"):
             props.append({"name": "gsa:baseline-low", "value": "included"})
@@ -434,15 +460,15 @@ def _build_threat_properties(cid, mc, db, all_affected, sources):
         if db.get("implementation_status"):
             props.append(
                 {
-                    "name": "crm:implementation-status",
+                    "name": "resp:status",
                     "value": db["implementation_status"],
                 }
             )
         if db.get("inheritance"):
-            props.append({"name": "crm:inheritance", "value": db["inheritance"]})
+            props.append({"name": "resp:inheritance", "value": db["inheritance"]})
         if db.get("evidence_link") and db["evidence_link"].upper() != "N/A":
-            props.append({"name": "crm:evidence-link", "value": db["evidence_link"]})
-    props.append({"name": "crm:source", "value": "+".join(sources)})
+            props.append({"name": "resp:evidence-link", "value": db["evidence_link"]})
+    props.append({"name": "resp:source", "value": "+".join(sources)})
     return props
 
 
@@ -487,8 +513,7 @@ def _build_controls_for_threat(
                 category,
                 cdx_ctrl_status,
                 properties=[
-                    {"name": "crm:control-id", "value": cid},
-                    {"name": "nist:control-id", "value": cid},
+                    {"name": "ctrl:id", "value": cid},
                 ],
                 evidence_url=inline_evidence_url,
                 implementation_statement=impl_stmt,
@@ -506,10 +531,10 @@ def _build_controls_for_threat(
             (c for c in registry.controls if c["bom-ref"] == linked[-1]), None
         )
         if last_ctrl and not any(
-            p["name"] == "crm:test-steps" for p in last_ctrl.get("properties", [])
+            p["name"] == "resp:test-steps" for p in last_ctrl.get("properties", [])
         ):
             last_ctrl.setdefault("properties", []).append(
-                {"name": "crm:test-steps", "value": json.dumps(cm_test_steps)}
+                {"name": "resp:test-steps", "value": json.dumps(cm_test_steps)}
             )
 
     for gap in cm.get("residual_actions", []):
@@ -519,8 +544,8 @@ def _build_controls_for_threat(
             category,
             "recommended",
             properties=[
-                {"name": "crm:control-id", "value": cid},
-                {"name": "crm:residual", "value": "true"},
+                {"name": "ctrl:id", "value": cid},
+                {"name": "resp:residual", "value": "true"},
             ],
             responsibility_source=resp_src,
             nist_id=cid,
@@ -536,14 +561,12 @@ def _build_scenario(
 ):
     level = status_risk.get(impl_status, status_risk.get("", "medium"))
     inherent = "high" if level in {"high", "critical"} else "medium"
-    scenario_props = [{"name": "crm:responsibility-source", "value": resp_src}]
+    scenario_props = [{"name": "resp:source", "value": resp_src}]
     if db and db.get("impact_if_unaddressed"):
         narrative = re.split(r"\.\s*Additionally", db["impact_if_unaddressed"])[
             0
         ].strip()
-        scenario_props.append(
-            {"name": "crm:residual-risk-narrative", "value": narrative}
-        )
+        scenario_props.append({"name": "resp:residual-narrative", "value": narrative})
     return {
         "bom-ref": s_ref,
         "threat": t_ref,
@@ -624,9 +647,7 @@ def _process_control_id(
     )
     threat["mitigations"] = linked
     if mitig_text:
-        threat["properties"].append(
-            {"name": "crm:responsibility-writeup", "value": mitig_text}
-        )
+        threat["properties"].append({"name": "resp:writeup", "value": mitig_text})
     return (
         threat,
         _build_scenario(
@@ -647,7 +668,7 @@ def _link_object_poisoning(threats, all_controls):
             c
             for c in all_controls
             if any(
-                p.get("name") == "nist:control-id" and p.get("value") == "SR-3"
+                p.get("name") == "ctrl:id" and p.get("value") == "SR-3"
                 for p in (c.get("properties") or [])
             )
         ),
@@ -681,7 +702,7 @@ def _compute_control_rollup(all_controls):
     rollup: dict[str, list[str]] = {}
     for ctrl in all_controls:
         props = {p["name"]: p["value"] for p in ctrl.get("properties", [])}
-        nid = props.get("nist:control-id") or props.get("crm:control-id")
+        nid = props.get("ctrl:id")
         if not nid:
             continue
         rollup.setdefault(nid, []).append(ctrl["status"])
@@ -706,21 +727,21 @@ def _emit_metadata(cdx, controls_list, rollup_entries):
     meta.setdefault("properties", []).extend(
         [
             {
-                "name": "crm:generated-by",
+                "name": "resp:generated-by",
                 "value": "docs/threat-model/scripts/generate.py (YAML->Precogly CDX)",
             },
             {
-                "name": "crm:sources",
+                "name": "resp:sources",
                 "value": "data/crm/*.yaml + data/countermeasures + data/model",
             },
-            {"name": "crm:control-count", "value": str(len(controls_list))},
+            {"name": "resp:control-count", "value": str(len(controls_list))},
             {
-                "name": "crm:countermeasures",
+                "name": "resp:countermeasures",
                 "value": "Precogly controls[] (one per mechanism, reused m:n); "
                 "Example System data platform codebase + GSA SSO/Okta -> login.gov PIV/CAC + email-MFA identity chain",
             },
             {
-                "name": "crm:control-rollup",
+                "name": "resp:control-rollup",
                 "value": json.dumps(rollup_entries, separators=(",", ":")),
             },
         ]
@@ -764,19 +785,27 @@ def _validate_flow_bindings(flow_bindings, cdx):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument(
+        "--system",
+        default=DEFAULT_SYSTEM,
+        help="System slug to build; defaults to the Example System sources under data/systems/<slug>/ + legacy fallbacks (Phase A).",
+    )
+    ap.add_argument(
         "--out", default=os.path.join(ROOT, "build", "example-system-crm-threat-model.cdx.json")
     )
     args = ap.parse_args()
 
-    with open(os.path.join(DATA, "model", "base-dfd.cdx.json"), encoding="utf-8") as f:
+    paths = load_system(args.system)
+
+    with open(paths.model_dfd, encoding="utf-8") as f:
         cdx = json.load(f)
 
-    data = _load_data(cdx)
+    data = _load_data(cdx, paths)
     arch = data["arch"]
     fam_map = arch["family_asset_map"]
     default_assets = arch["default_assets"]
     alias = arch["assets"]
     flow_bindings = arch.get("flow_bindings", {})
+    gwt_bindings = arch.get("gwt_bindings", {})
     _validate_flow_bindings(flow_bindings, cdx)
 
     existing_threats = cdx.get("threats", {}).get("threats", [])
@@ -790,6 +819,7 @@ def main():
         _max_seq(existing_controls),
         evidence_links=data["evidence_links"],
         evidence_artifacts=data["evidence_artifacts"],
+        evidence_ids=data["evidence_ids"],
     )
     controls_list = [c["control_id"] for c in data["index"]["controls"]]
 
@@ -810,6 +840,20 @@ def main():
         )
         threats.append(threat)
         scenarios.append(scenario)
+
+    # M5 prototype: apply GWT properties to matching threats
+    for t in threats:
+        cid = next(
+            (p["value"] for p in t.get("properties", []) if p["name"] == "ctrl:id"),
+            None,
+        )
+        if cid and cid in gwt_bindings:
+            gwt = gwt_bindings[cid]
+            for key in ("given", "when", "then"):
+                if gwt.get(key):
+                    t.setdefault("properties", []).append(
+                        {"name": f"gwt.{key}", "value": gwt[key]}
+                    )
 
     cdx["threats"] = {"threats": threats, "scenarios": scenarios}
     all_controls = existing_controls + registry.controls

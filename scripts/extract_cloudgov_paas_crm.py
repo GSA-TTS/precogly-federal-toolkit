@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Extract Cloud.gov PaaS CRM from tmp/cloud.gov-CIS-Worksheet.ods into data/crm/tiers/cloud-gov-paas.yaml.
+Extract Cloud.gov PaaS CRM from tmp/cloud.gov-CIS-Worksheet.ods into data/tiers/cloud-gov-paas.yaml.
 
 Combines columns from both 'PaaS CRM' and 'CIS Worksheet' sheets, matching them 1-to-1 by Control ID:
   - 'PaaS CRM' supplies: Can Be Inherited, cloud.gov PaaS Specific Inheritance writeup.
@@ -21,7 +21,7 @@ from odf.text import P
 
 HERE = Path(__file__).parent
 ROOT = HERE.parent
-DATA_CRM_TIERS = ROOT / "data" / "crm" / "tiers"
+DATA_CRM_TIERS = ROOT / "data" / "tiers"
 # Resolved at runtime: sibling repo or NAMES_JSON env override
 NAMES_JSON = Path(
     os.environ.get(

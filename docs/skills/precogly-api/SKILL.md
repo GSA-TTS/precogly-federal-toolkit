@@ -308,7 +308,7 @@ Linked to `ThreatModel` via `ThreatModelOrgsystem` M2M join.
 | `inherited_from_zone_name`      | str           |                                                                             |
 | `evidence_url`                  | str           |                                                                             |
 | `effectiveness`                 | float 0–1     |                                                                             |
-| `format_metadata`               | JSON          | `{"cyclonedx": {"bom_ref": "...", "nist_control_id": "AC-2(1)"}}`           |
+| `format_metadata`               | JSON          | `{"cyclonedx": {"bom_ref": "...", "ctrl_id": "AC-2(1)"}}`                   |
 
 **Status → CDX mapping (import):**
 
@@ -389,12 +389,12 @@ Called by `POST /api/threat-models/import/cyclonedx/`. Runs in a single DB trans
 
 **Vault-specific CDX properties parsed during step 10:**
 
-| Property                                  | Mapped to                                   |
-| ----------------------------------------- | ------------------------------------------- |
-| `nist:control-id` OR `crm:control-id`     | `format_metadata.cyclonedx.nist_control_id` |
-| `vault:origination` ∈ {inherited, shared} | `is_inherited = True`                       |
-| `vault:providing-system`                  | `inherited_from_component_name`             |
-| `vault:implementation-status`             | stored in metadata                          |
+| Property                                  | Mapped to                           |
+| ----------------------------------------- | ----------------------------------- |
+| `ctrl:id`                                 | `format_metadata.cyclonedx.ctrl_id` |
+| `vault:origination` ∈ {inherited, shared} | `is_inherited = True`               |
+| `vault:providing-system`                  | `inherited_from_component_name`     |
+| `vault:implementation-status`             | stored in metadata                  |
 
 ### Export: `export_data(threat_model) → dict`
 
@@ -439,7 +439,7 @@ from apps.threats.models import InstanceCountermeasure
 
 cms = InstanceCountermeasure.objects.filter(threat_model=tm)
 for cm in cms:
-    nist = cm.format_metadata.get("cyclonedx", {}).get("nist_control_id", "")
+    nist = cm.format_metadata.get("cyclonedx", {}).get("ctrl_id", "")
     print(nist, cm.status, cm.countermeasure_name[:60])
 
 # Check DFDs
@@ -454,9 +454,9 @@ for d in dfds:
 for tm in ThreatModel.objects.filter(id__gte=96).order_by("id"):
     cms = InstanceCountermeasure.objects.filter(threat_model=tm)
     with_id = sum(
-        1 for c in cms if c.format_metadata.get("cyclonedx", {}).get("nist_control_id")
+        1 for c in cms if c.format_metadata.get("cyclonedx", {}).get("ctrl_id")
     )
-    print(f"{tm.id} {tm.name}: {cms.count()} CMs, {with_id} with NIST ID")
+    print(f"{tm.id} {tm.name}: {cms.count()} CMs, {with_id} with ctrl_id")
 ```
 
 ---

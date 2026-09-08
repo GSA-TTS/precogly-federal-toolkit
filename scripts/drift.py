@@ -36,6 +36,11 @@ ROOT = os.path.dirname(HERE)
 ARTIFACT = os.path.join(ROOT, "build", "example-system-crm-threat-model.cdx.json")
 GENERATE = os.path.join(HERE, "generate.py")
 
+if HERE not in sys.path:
+    sys.path.insert(0, HERE)
+
+from systems.loader import DEFAULT_SYSTEM  # noqa: E402
+
 # Volatile top-level fields we never diff (change on every regeneration).
 VOLATILE_TOP = {"serialNumber", "version"}
 
@@ -93,11 +98,19 @@ def main():
         help="regenerate the artifact from YAML source of truth",
     )
     ap.add_argument("--artifact", default=ARTIFACT)
+    ap.add_argument(
+        "--system",
+        default=DEFAULT_SYSTEM,
+        help="System slug to forward to generate.py (default: %(default)s).",
+    )
     args = ap.parse_args()
 
     if args.reinject:
         # Regenerate straight over the versioned artifact.
-        subprocess.run([sys.executable, GENERATE, "--out", args.artifact], check=True)
+        subprocess.run(
+            [sys.executable, GENERATE, "--system", args.system, "--out", args.artifact],
+            check=True,
+        )
         print(
             f"Reinjected: {os.path.relpath(args.artifact, ROOT)} rebuilt "
             "from YAML source of truth.",
@@ -117,7 +130,7 @@ def main():
         tmp_path = tmp.name
     try:
         subprocess.run(
-            [sys.executable, GENERATE, "--out", tmp_path],
+            [sys.executable, GENERATE, "--system", args.system, "--out", tmp_path],
             check=True,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,

@@ -17,6 +17,15 @@ ROOT = os.path.dirname(HERE)
 DATA = os.path.join(ROOT, "data")
 DEFAULT = os.path.join(ROOT, "build", "example-system-crm-threat-model.cdx.json")
 
+# scripts/systems is not on PYTHONPATH when running via ``uv run python
+# scripts/validate.py``; prepend HERE so ``from systems.loader import ...``
+# resolves without requiring callers to set PYTHONPATH.
+if HERE not in sys.path:
+    sys.path.insert(0, HERE)
+
+from flow_auth import load_auth_catalog  # noqa: E402
+from systems.loader import DEFAULT_SYSTEM, load_system  # noqa: E402
+
 CATEGORIES = {"preventive", "detective", "corrective"}
 STATUSES = {
     "verified",
@@ -26,42 +35,53 @@ STATUSES = {
     "in-progress",
     "planned",
 }
-FLOW_AUTH_MECHANISMS = {
-    "OAuth 2.0",
-    "mTLS",
-    "JWT",
-    "API key",
-    "SSH key",
-    "HMAC",
-    "AWS IAM role",
-}
 TRANSPORT_THREAT_RE = re.compile(
     r"\b(mitm|man[- ]in[- ]the[- ]middle|eavesdropp?ing|replay|downgrade|cleartext|transport)\b",
     re.IGNORECASE,
 )
 
-# Recon-useful patterns that MUST NOT appear in any tracked build artifact
-# (see docs/redaction-guide.md). These would aid endpoint recon/DDoS or
-# spearphishing of credential holders.
-# Exception: public github.com URLs in externalReferences are intentional
-# evidence links (issue #46) and are not recon-useful.
+# Universal recon-useful patterns that MUST NOT appear in any tracked build
+# artifact (see docs/redaction-guide.md). System-specific patterns (e.g. Example System's
+# data platform workspace host, service-principal ids, UAT share recipients) live
+# in ``data/systems/<slug>/redaction.yaml`` and are merged in at runtime by
+# ``_load_forbidden``.
 FORBIDDEN = [
     (
         re.compile(r"https?://(?!localhost|127\.0\.0\.1|github\.com)", re.IGNORECASE),
         "URL/URI",
     ),
     (
-        re.compile(r"\.cloud\.data-platform\.com", re.IGNORECASE),
-        "data platform workspace host",
-    ),
-    (
         re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b"),
         "email / POC identifier",
     ),
     (re.compile(r"itplaybook\.gsa\.gov", re.IGNORECASE), "internal DocOps host"),
-    (re.compile(r"\bexample-sp-id-a|example-sp-id-b\b"), "service-principal id"),
-    (re.compile(r"\bgsaext[_-]example-system[_-]uat\b", re.IGNORECASE), "UAT share recipient"),
 ]
+
+
+_FLAG_MAP = {
+    "IGNORECASE": re.IGNORECASE,
+    "MULTILINE": re.MULTILINE,
+    "DOTALL": re.DOTALL,
+}
+
+
+def _load_forbidden(redaction_path):
+    """Merge universal + per-system forbidden patterns."""
+    patterns = list(FORBIDDEN)
+    if not redaction_path:
+        return patterns
+    with open(redaction_path, encoding="utf-8") as f:
+        cfg = yaml.safe_load(f) or {}
+    for entry in cfg.get("forbidden_patterns", []) or []:
+        pat = entry.get("pattern")
+        label = entry.get("label", "system-specific redaction")
+        if not pat:
+            continue
+        flags = 0
+        for flag_name in entry.get("flags", []) or []:
+            flags |= _FLAG_MAP.get(flag_name.upper(), 0)
+        patterns.append((re.compile(pat, flags), label))
+    return patterns
 
 
 def fail(msg):
@@ -78,12 +98,33 @@ def same_boundary(source_zone, destination_zone):
 
 
 def main():
-    path = sys.argv[1] if len(sys.argv) > 1 else DEFAULT
+    import argparse
+
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument(
+        "artifact",
+        nargs="?",
+        default=DEFAULT,
+        help="CDX artifact to validate (default: %(default)s).",
+    )
+    ap.add_argument(
+        "--system",
+        default=DEFAULT_SYSTEM,
+        help="System slug for base-DFD / CRM index resolution (default: %(default)s).",
+    )
+    args = ap.parse_args()
+
+    paths = load_system(args.system)
+    path = args.artifact
     with open(path, encoding="utf-8") as f:
         d = json.load(f)
 
-    with open(os.path.join(DATA, "model", "base-dfd.cdx.json"), encoding="utf-8") as f:
+    with open(paths.model_dfd, encoding="utf-8") as f:
         base = json.load(f)
+    with open(paths.model_architecture, encoding="utf-8") as f:
+        arch = yaml.safe_load(f) or {}
+    allowed_auth, warning_auth = load_auth_catalog(arch=arch)
+    known_auth = allowed_auth | set(warning_auth)
 
     # --- DFD preserved from base ---
     bp, base_bp = d["blueprints"][0], base["blueprints"][0]
@@ -137,7 +178,7 @@ def main():
             if not f.get("authMechanism"):
                 fail(f"boundary-crossing flow {f['bom-ref']} missing authMechanism")
         auth = f.get("authMechanism")
-        if auth and auth not in FLOW_AUTH_MECHANISMS:
+        if auth and auth not in known_auth:
             fail(f"flow {f['bom-ref']} unsupported authMechanism {auth}")
 
     # --- base threats preserved ---
@@ -169,21 +210,22 @@ def main():
                 fail(f"control {c['bom-ref']} links missing threat {tref}")
 
     # --- CRM threats: match YAML control set + link back to controls ---
-    with open(os.path.join(DATA, "crm", "index.yaml"), encoding="utf-8") as f:
+    with open(paths.crm_index, encoding="utf-8") as f:
         idx = yaml.safe_load(f)
     expected = {c["control_id"] for c in idx["controls"]}
     seen = set()
+    base_threat_refs = {
+        bt["bom-ref"] for bt in base.get("threats", {}).get("threats", [])
+    }
     for t in threats:
+        if t.get("bom-ref") in base_threat_refs:
+            continue  # base threat (from base DFD, not CRM generated)
         cid = next(
-            (
-                p["value"]
-                for p in t.get("properties", [])
-                if p["name"] == "nist:control-id"
-            ),
+            (p["value"] for p in t.get("properties", []) if p["name"] == "ctrl:id"),
             None,
         )
         if not cid:
-            continue  # base threat (no NIST control)
+            continue  # non-CRM threat (no NIST control)
         seen.add(cid)
         mits = t.get("mitigations", [])
         if not mits:
@@ -218,7 +260,8 @@ def main():
     if "risks" in d:
         fail("gap CDX must not contain a top-level 'risks' key (ideal-state only)")
     raw = json.dumps(d)
-    for pattern, label in FORBIDDEN:
+    forbidden = _load_forbidden(paths.redaction)
+    for pattern, label in forbidden:
         m = pattern.search(raw)
         if m:
             fail(
@@ -229,7 +272,7 @@ def main():
     reusable = sum(
         1
         for c in controls
-        if any(p.get("name") == "crm:evidence-key" for p in c.get("properties", []))
+        if any(p.get("name") == "resp:evidence-key" for p in c.get("properties", []))
     )
     print(
         f"OK - DFD intact, {len(seen)} CRM threats fully formed, "

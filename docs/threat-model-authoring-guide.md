@@ -73,8 +73,8 @@ In Precogly, use packs as building blocks instead of hand-copying controls:
 | CRM responsibility text or mappings from spreadsheets      | `data/crm/*.yaml`                                               | `make generate validate`                                |
 | Countermeasure wording, mechanism, gap, or residual action | `data/countermeasures/countermeasures.yaml`                     | `make generate validate`                                |
 | Shared evidence text reused across many controls           | `data/model/evidence.yaml`                                      | `make generate validate`                                |
-| Asset mappings, flow bindings, zones, risk scores          | `data/model/architecture.yaml`                                  | `make generate validate`                                |
-| Example System DFD structure and layout                              | Edit in Precogly, then export to `data/model/base-dfd.cdx.json` | `make reinject validate drift`                          |
+| Asset mappings, flow bindings, zones, risk scores          | `data/model/architecture.yaml`                                  | `make validate-sources generate validate`               |
+| Example System DFD structure and layout                              | Edit in Precogly, then export to `data/model/base-dfd.cdx.json` | `make validate-sources reinject validate drift`         |
 | Pack component, threat, or countermeasure library content  | `data/packs/<pack>/`                                            | `make pack-install-all` and test in Precogly            |
 | Vault-projected system content                             | Source OSCAL vault, not generated `build/systems/` files        | `make vault-import-all VAULT_ROOT=./vendor/oscal-vault` |
 
@@ -111,7 +111,18 @@ Use this workflow for assets, flows, trust zones, and diagram layout:
 4. Export the model.
 5. Save the exported DFD baseline over `data/model/base-dfd.cdx.json`.
 6. If asset, zone, or flow references changed, update `data/model/architecture.yaml`.
-7. Run `make reinject validate drift`.
+7. Run `make validate-sources reinject validate drift`.
+
+`make validate-sources` fails before generation when the editor export injects
+`metadata.authors`, when architecture bindings reference missing assets, zones,
+or flows, or when a flow declares an unknown `authMechanism`. Shared mechanisms
+live in `data/catalog/flow-auth-mechanisms.yaml`; system-specific additions can
+be declared in `auth_mechanisms` inside `architecture.yaml`.
+
+For cloud.gov-hosted browser SSO, model the default GSA employee path as
+`GSAuth via cloud.gov UAA`. Use `login.gov application-managed authorization`
+when the application or an identity broker owns authorization and can match the
+login.gov email claim to the application's username or account record.
 
 Precogly preserves countermeasures when they are top-level `controls[]` linked
 bidirectionally to threats. The generator already emits that native schema.
@@ -151,6 +162,7 @@ as source; regenerate it from the CycloneDX model.
 Before committing:
 
 - Run `make validate` for the Example System model.
+- Run `make validate-sources` after any DFD export or architecture binding edit.
 - Run `make vault-validate` and `make vault-drift VAULT_ROOT=./vendor/oscal-vault`
   when catalog artifacts change.
 - Confirm no secrets, PII, internal hostnames, private URLs, or unredacted IPs

@@ -47,6 +47,8 @@ def main() -> None:
     ap.add_argument("--in", dest="in_path", default=DEFAULT_IN)
     ap.add_argument("--out", default=DEFAULT_OUT)
     ap.add_argument("--schema", default=DEFAULT_SCHEMA)
+    ap.add_argument("--strict", action="store_true",
+                    help="Validate output against OWASP TM JSON schema (M4)")
     args = ap.parse_args()
 
     with open(args.in_path, encoding="utf-8") as f:
@@ -155,6 +157,24 @@ def main() -> None:
         f.write("\n")
 
     print(f"Wrote {os.path.relpath(args.out, ROOT)}")
+
+    # M4: strict jsonschema validation against OWASP TM schema
+    if getattr(args, "strict", False):
+        try:
+            import jsonschema
+            import urllib.request
+            print(f"Fetching schema: {args.schema}")
+            with urllib.request.urlopen(args.schema, timeout=10) as resp:
+                schema = json.load(resp)
+            jsonschema.validate(instance=model, schema=schema)
+            print("Schema validation passed.")
+        except ImportError:
+            print("WARNING: jsonschema not installed; skipping strict validation (pip install jsonschema)", file=sys.stderr)
+        except jsonschema.ValidationError as exc:
+            print(f"ERROR: OWASP schema validation failed: {exc.message}", file=sys.stderr)
+            raise SystemExit(1)
+        except Exception as exc:
+            print(f"WARNING: Schema fetch/validate error (non-fatal): {exc}", file=sys.stderr)
 
 
 if __name__ == "__main__":
