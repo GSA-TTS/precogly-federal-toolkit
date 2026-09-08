@@ -110,7 +110,8 @@ Use this workflow for assets, flows, trust zones, and diagram layout:
 3. Edit only DFD-owned content in the UI.
 4. Export the model.
 5. Run `make dfd-drift DFD_EXPORT=<exported-cdx.json>` and review
-   `build/<system>-dfd-drift.yaml`.
+   `build/<system>-dfd-drift.yaml`; a non-zero exit means the export differs
+   from the checked-in DFD and needs review before promotion.
 6. Save the exported DFD baseline over `data/model/base-dfd.cdx.json`.
 7. Run `make scrub-dfd SYSTEM=<slug>` to remove editor-injected authors and
    redact configured DFD text fields.
@@ -129,11 +130,11 @@ declared in `auth_mechanisms` inside `architecture.yaml`. Add local NIST mapping
 under `auth_mechanisms.metadata.<mechanism>.nist` when a system-specific
 mechanism should emit `resp:auth-mechanism-nist` in generated flows.
 
-`make dfd-drift` is advisory: it exits successfully after writing a YAML report
-that calls out added, removed, or modified zones, assets, and flows, plus editor
-authors and broken flow endpoints. Use it to decide whether an export is safe to
-promote into `base-dfd.cdx.json`. In repositories without this Makefile, run the
-same check directly with:
+`make dfd-drift` calls out added, removed, or modified zones, assets, flows,
+boundaries, and data stores, plus editor authors and broken flow endpoints. Use
+it to decide whether an export is safe to promote into `base-dfd.cdx.json`. For
+a report-only pass, run `make dfd-drift DFD_DRIFT_ADVISORY=1`. In repositories
+without this Makefile, run the same check directly with:
 `uv run python scripts/dfd_drift.py --system <slug> --export <exported-cdx.json>`.
 
 For cloud.gov-hosted browser SSO, model the default GSA employee path as

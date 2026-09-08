@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Emit an advisory drift report for a Precogly editor DFD export.
+"""Emit a drift report for a Precogly editor DFD export.
 
 This compares a proposed editor export against the checked-in
 ``data/systems/<slug>/model/base-dfd.cdx.json`` before authors overwrite the
-baseline. Findings are warnings by design: the report should make DFD changes
-reviewable without blocking experimentation.
+baseline. By default findings are a failing drift gate; use ``--advisory`` when
+the report should make DFD changes reviewable without blocking experimentation.
 """
 
 from __future__ import annotations
@@ -31,7 +31,10 @@ SECTION_FIELDS = {
     "zones": ("name", "type", "trustLevel", "parentZone"),
     "assets": ("name", "type", "zone"),
     "flows": ("name", "source", "destination"),
+    "boundaries": ("name", "zones"),
+    "dataStores": ("name", "zone"),
 }
+DFD_SECTIONS = tuple(SECTION_FIELDS)
 
 
 def _rel(path: Path) -> str:
@@ -53,11 +56,22 @@ def first_blueprint(doc: dict[str, Any]) -> dict[str, Any]:
     return blueprints[0]
 
 
-def _index(items: list[dict[str, Any]]) -> tuple[dict[str, dict[str, Any]], list[str]]:
+def _item_ref(section: str, item: dict[str, Any]) -> str | None:
+    ref = item.get("bom-ref")
+    if ref:
+        return str(ref)
+    if section == "boundaries" and item.get("zones"):
+        return "zones:" + ",".join(sorted(str(zone) for zone in item["zones"]))
+    return None
+
+
+def _index(
+    section: str, items: list[dict[str, Any]]
+) -> tuple[dict[str, dict[str, Any]], list[str]]:
     indexed: dict[str, dict[str, Any]] = {}
     duplicates: list[str] = []
     for item in items:
-        ref = item.get("bom-ref")
+        ref = _item_ref(section, item)
         if not ref:
             duplicates.append("<missing bom-ref>")
             continue
@@ -79,8 +93,8 @@ def _diff_section(
     export_items: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
     findings: list[dict[str, Any]] = []
-    base, base_dupes = _index(base_items)
-    export, export_dupes = _index(export_items)
+    base, base_dupes = _index(section, base_items)
+    export, export_dupes = _index(section, export_items)
     for ref in base_dupes:
         findings.append(
             _finding(
@@ -185,7 +199,7 @@ def build_report(system: str, base_path: Path, export_path: Path) -> dict[str, A
             )
         )
 
-    for section in ("zones", "assets", "flows"):
+    for section in DFD_SECTIONS:
         findings.extend(
             _diff_section(
                 section,
@@ -206,16 +220,34 @@ def build_report(system: str, base_path: Path, export_path: Path) -> dict[str, A
             "findings": len(findings),
             "by_kind": dict(sorted(by_kind.items())),
             "base_counts": {
-                section: len(base_bp.get(section, []) or [])
-                for section in ("zones", "assets", "flows")
+                section: len(base_bp.get(section, []) or []) for section in DFD_SECTIONS
             },
             "export_counts": {
                 section: len(export_bp.get(section, []) or [])
-                for section in ("zones", "assets", "flows")
+                for section in DFD_SECTIONS
             },
         },
         "findings": findings,
     }
+
+
+def _format_counts(counts: dict[str, int]) -> str:
+    labels = {
+        "zones": "zones",
+        "assets": "assets",
+        "flows": "flows",
+        "boundaries": "boundaries",
+        "dataStores": "data stores",
+    }
+    return " / ".join(
+        f"{counts[section]} {labels[section]}" for section in DFD_SECTIONS
+    )
+
+
+def exit_code(report: dict[str, Any], *, advisory: bool) -> int:
+    if advisory:
+        return 0
+    return 1 if report["summary"]["findings"] else 0
 
 
 def write_report(report: dict[str, Any], out_path: Path) -> None:
@@ -235,6 +267,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--out", help="Report path (default: build/<system>-dfd-drift.yaml)"
     )
+    parser.add_argument(
+        "--advisory",
+        action="store_true",
+        help="Write the report but exit zero even when drift is detected",
+    )
     args = parser.parse_args(argv)
 
     paths = load_system(args.system)
@@ -253,10 +290,21 @@ def main(argv: list[str] | None = None) -> int:
 
     report = build_report(args.system, paths.model_dfd, export_path)
     write_report(report, out_path)
+    base_counts = _format_counts(report["summary"]["base_counts"])
+    export_counts = _format_counts(report["summary"]["export_counts"])
     print(
-        f"Wrote {_rel(out_path)} with {report['summary']['findings']} advisory DFD drift finding(s)."
+        f"Wrote {_rel(out_path)} with {report['summary']['findings']} DFD drift finding(s)."
     )
-    return 0
+    if report["summary"]["findings"]:
+        mode = "advisory" if args.advisory else "failing"
+        print(
+            "DFD drift detected "
+            f"({mode}): base has {base_counts}; editor export has {export_counts}.",
+            file=sys.stderr,
+        )
+    else:
+        print(f"OK: no DFD drift; base and editor export both have {base_counts}.")
+    return exit_code(report, advisory=args.advisory)
 
 
 if __name__ == "__main__":
