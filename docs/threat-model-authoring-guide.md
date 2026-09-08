@@ -74,7 +74,7 @@ In Precogly, use packs as building blocks instead of hand-copying controls:
 | Countermeasure wording, mechanism, gap, or residual action | `data/countermeasures/countermeasures.yaml`                     | `make generate validate`                                |
 | Shared evidence text reused across many controls           | `data/model/evidence.yaml`                                      | `make generate validate`                                |
 | Asset mappings, flow bindings, zones, risk scores          | `data/model/architecture.yaml`                                  | `make validate-sources generate validate`               |
-| Example System DFD structure and layout                              | Edit in Precogly, then export to `data/model/base-dfd.cdx.json` | `make validate-sources reinject validate drift`         |
+| Example System DFD structure and layout                              | Edit in Precogly, then compare export before replacing baseline | `make dfd-drift DFD_EXPORT=tmp/export.cdx.json`         |
 | Pack component, threat, or countermeasure library content  | `data/packs/<pack>/`                                            | `make pack-install-all` and test in Precogly            |
 | Vault-projected system content                             | Source OSCAL vault, not generated `build/systems/` files        | `make vault-import-all VAULT_ROOT=./vendor/oscal-vault` |
 
@@ -109,15 +109,24 @@ Use this workflow for assets, flows, trust zones, and diagram layout:
 2. Import `build/example-system-crm-threat-model.cdx.json`.
 3. Edit only DFD-owned content in the UI.
 4. Export the model.
-5. Save the exported DFD baseline over `data/model/base-dfd.cdx.json`.
-6. If asset, zone, or flow references changed, update `data/model/architecture.yaml`.
-7. Run `make validate-sources reinject validate drift`.
+5. Run `make dfd-drift DFD_EXPORT=<exported-cdx.json>` and review
+   `build/<system>-dfd-drift.yaml`.
+6. Save the exported DFD baseline over `data/model/base-dfd.cdx.json`.
+7. If asset, zone, or flow references changed, update `data/model/architecture.yaml`.
+8. Run `make validate-sources reinject validate drift`.
 
 `make validate-sources` fails before generation when the editor export injects
 `metadata.authors`, when architecture bindings reference missing assets, zones,
 or flows, or when a flow declares an unknown `authMechanism`. Shared mechanisms
 live in `data/catalog/flow-auth-mechanisms.yaml`; system-specific additions can
 be declared in `auth_mechanisms` inside `architecture.yaml`.
+
+`make dfd-drift` is advisory: it exits successfully after writing a YAML report
+that calls out added, removed, or modified zones, assets, and flows, plus editor
+authors and broken flow endpoints. Use it to decide whether an export is safe to
+promote into `base-dfd.cdx.json`. In repositories without this Makefile, run the
+same check directly with:
+`uv run python scripts/dfd_drift.py --system <slug> --export <exported-cdx.json>`.
 
 For cloud.gov-hosted browser SSO, model the default GSA employee path as
 `GSAuth via cloud.gov UAA`. Use `login.gov application-managed authorization`
