@@ -105,9 +105,9 @@ def build_cpo(slug: str, catalog_entry: dict, sidecar: dict) -> dict:
 
 
 def export_one(slug: str, catalog: dict[str, dict]) -> Path:
-    if slug not in catalog:
-        raise SystemExit(f"cpo({slug}): slug not present in catalog/index.yaml")
     sidecar = load_sidecar(slug)
+    if slug not in catalog:
+        catalog[slug] = {}
     if sidecar.get("system") not in (None, slug):
         raise SystemExit(
             f"cpo({slug}): sidecar 'system' key mismatch: {sidecar.get('system')!r}"
