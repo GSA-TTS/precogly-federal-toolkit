@@ -40,6 +40,7 @@ KSI_DIR = REPO_ROOT / "data" / "ksi"
 if str(REPO_ROOT / "scripts") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "scripts"))
 from systems.loader import load_system  # noqa: E402
+
 # Open risk (POA&M) files sourced from sibling repos; base dir overridable via
 # OPEN_RISK_DIR env var (default: ../gsa-pages/plan-of-action-and-milestones/).
 _OPEN_RISK_BASE = Path(
@@ -49,7 +50,9 @@ _OPEN_RISK_BASE = Path(
     )
 )
 OPEN_RISK_PATHS: dict[str, Path] = {
-    "gsa-pages-ssp-2026": _OPEN_RISK_BASE / "gsa-pages" / "plan-of-action-and-milestones.json",
+    "gsa-pages-ssp-2026": _OPEN_RISK_BASE
+    / "gsa-pages"
+    / "plan-of-action-and-milestones.json",
 }
 
 DEFAULT_CPO_URI_TEMPLATE = "https://fedramp.gov/schemas/tbd/{slug}/cpo.json"
@@ -150,6 +153,9 @@ def cdx_path_for(slug: str, catalog_entry: dict) -> Path:
     artifacts = catalog_entry.get("artifacts") or {}
     if "cdx" in artifacts:
         return REPO_ROOT / artifacts["cdx"]
+    generated_crm = REPO_ROOT / "build" / f"{slug}-crm-threat-model.cdx.json"
+    if generated_crm.exists():
+        return generated_crm
     return BUILD_SYSTEMS / slug / f"{slug}.cdx.json"
 
 
@@ -317,7 +323,12 @@ def build_sdr(slug: str, catalog_entry: dict, sidecar: dict) -> dict:
 
 def export_one(slug: str, catalog: dict[str, dict]) -> Path:
     if slug not in catalog and slug != "example-system":
-        raise SystemExit(f"sdr({slug}): slug not present in catalog/index.yaml")
+        try:
+            load_system(slug)
+        except FileNotFoundError as exc:
+            raise SystemExit(
+                f"sdr({slug}): slug not present in catalog/index.yaml"
+            ) from exc
     entry = catalog.get(slug) or {}
     sidecar = load_sidecar(slug)
     doc = build_sdr(slug, entry, sidecar)
