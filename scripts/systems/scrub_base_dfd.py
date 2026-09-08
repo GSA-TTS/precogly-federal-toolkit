@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# isort: skip_file
 """Scrub editor-injected sensitive fields from a system base DFD."""
 
 from __future__ import annotations
