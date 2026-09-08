@@ -33,7 +33,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 SYSTEMS_DIR = REPO_ROOT / "data" / "systems"
 BUILD_SYSTEMS = REPO_ROOT / "build" / "systems"
 CATALOG_INDEX = REPO_ROOT / "catalog" / "index.yaml"
-Example System_CDX = REPO_ROOT / "build" / "example-system-crm-threat-model.cdx.json"
+EXAMPLE_SYSTEM_CDX = REPO_ROOT / "build" / "example-system-crm-threat-model.cdx.json"
 FRR_DIR = REPO_ROOT / "data" / "frr"
 KSI_DIR = REPO_ROOT / "data" / "ksi"
 
@@ -145,8 +145,8 @@ def load_ksi(slug: str) -> list[dict]:
 
 
 def cdx_path_for(slug: str, catalog_entry: dict) -> Path:
-    if slug == "example-system" and Example System_CDX.exists():
-        return Example System_CDX
+    if slug == "example-system" and EXAMPLE_SYSTEM_CDX.exists():
+        return EXAMPLE_SYSTEM_CDX
     artifacts = catalog_entry.get("artifacts") or {}
     if "cdx" in artifacts:
         return REPO_ROOT / artifacts["cdx"]

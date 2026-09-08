@@ -223,63 +223,63 @@ def extract_inheritance_model_controls(doc) -> tuple[list[dict], dict]:
     return [], {}
 
 
-def extract_managed-cloud-service_tier(controls, col_idx) -> dict:
+def extract_managed_cloud_service_tier(controls, col_idx) -> dict:
     """Build managed cloud service tier from raw inheritance controls."""
-    managed-cloud-service_controls = []
+    managed_cloud_service_controls = []
     for cid, vals in controls:
-        managed-cloud-service_service = (
+        managed_cloud_service_service = (
             clean_text(vals[col_idx["managed cloud service Service"]])
             if "managed cloud service Service" in col_idx and len(vals) > col_idx["managed cloud service Service"]
             else ""
         )
-        managed-cloud-service_tenant = (
+        managed_cloud_service_tenant = (
             clean_text(vals[col_idx["managed cloud service Tenant"]])
             if "managed cloud service Tenant" in col_idx and len(vals) > col_idx["managed cloud service Tenant"]
             else ""
         )
-        managed-cloud-service_inheritance = (
+        managed_cloud_service_inheritance = (
             clean_text(vals[col_idx["managed cloud service Inhertience Source"]])
             if "managed cloud service Inhertience Source" in col_idx
             and len(vals) > col_idx["managed cloud service Inhertience Source"]
             else ""
         )
-        managed-cloud-service_tenant_inh = (
+        managed_cloud_service_tenant_inh = (
             clean_text(vals[col_idx["managed cloud service Tenant Inheritence Source"]])
             if "managed cloud service Tenant Inheritence Source" in col_idx
             and len(vals) > col_idx["managed cloud service Tenant Inheritence Source"]
             else ""
         )
 
-        if managed-cloud-service_service or managed-cloud-service_tenant:
+        if managed_cloud_service_service or managed_cloud_service_tenant:
             ctrl = {
                 "control_id": cid,
                 "name": clean_text(vals[1]) if len(vals) > 1 else "",
                 "baseline": clean_text(vals[2]) if len(vals) > 2 else "",
                 "fcs_cloud_control_type": clean_text(vals[5]) if len(vals) > 5 else "",
                 "implementation_status": clean_text(vals[6]) if len(vals) > 6 else "",
-                "managed-cloud-service_service": managed-cloud-service_service,
-                "managed-cloud-service_inheritance_source": managed-cloud-service_inheritance,
-                "managed-cloud-service_tenant": managed-cloud-service_tenant,
-                "managed-cloud-service_tenant_inheritance_source": managed-cloud-service_tenant_inh,
+                "managed-cloud-service_service": managed_cloud_service_service,
+                "managed-cloud-service_inheritance_source": managed_cloud_service_inheritance,
+                "managed-cloud-service_tenant": managed_cloud_service_tenant,
+                "managed-cloud-service_tenant_inheritance_source": managed_cloud_service_tenant_inh,
             }
-            managed-cloud-service_controls.append(ctrl)
+            managed_cloud_service_controls.append(ctrl)
 
     return {
         "tier": "managed-cloud-service",
         "name": "managed cloud service (Managed Cloud as a Service)",
         "description": "managed cloud service service and tenant control responsibilities",
         "source_sheet": "4 - FCS Inheritance Model (managed cloud service columns)",
-        "control_count": len(managed-cloud-service_controls),
-        "controls": managed-cloud-service_controls,
+        "control_count": len(managed_cloud_service_controls),
+        "controls": managed_cloud_service_controls,
     }
 
 
 def extract_cloned_tier(
-    managed-cloud-service_data: dict, slug_name: str, display_name: str, description: str
+    managed_cloud_service_data: dict, slug_name: str, display_name: str, description: str
 ) -> dict:
     """Clone managed cloud service tier data but update names/keys to map to the new tier."""
     cloned_controls = []
-    for c in managed-cloud-service_data["controls"]:
+    for c in managed_cloud_service_data["controls"]:
         cc = dict(c)
         # Re-key managed cloud service columns to the specific tier's name
         s_val = cc.pop("managed-cloud-service_service", "")
@@ -421,12 +421,12 @@ def main():
     raw_controls, col_idx = extract_inheritance_model_controls(doc)
 
     # managed cloud service (extracted from inheritance model)
-    managed-cloud-service = extract_managed-cloud-service_tier(raw_controls, col_idx)
-    write_tier_yaml(managed-cloud-service, output_dir)
+    managed_cloud_service = extract_managed_cloud_service_tier(raw_controls, col_idx)
+    write_tier_yaml(managed_cloud_service, output_dir)
 
     # EBTA (cloned from managed cloud service per CRM Overview equivalence)
     ebta = extract_cloned_tier(
-        managed-cloud-service,
+        managed_cloud_service,
         "ebta",
         "EBTA (Emerging Business Technology Application)",
         "EBTA service and tenant control responsibilities",
@@ -435,7 +435,7 @@ def main():
 
     # CaaS (cloned from managed cloud service per CRM Overview equivalence)
     caas = extract_cloned_tier(
-        managed-cloud-service,
+        managed_cloud_service,
         "caas",
         "CaaS (Container as a Service)",
         "CaaS service and tenant control responsibilities",
@@ -444,7 +444,7 @@ def main():
 
     # Data (cloned from managed cloud service per CRM Overview equivalence)
     data = extract_cloned_tier(
-        managed-cloud-service,
+        managed_cloud_service,
         "data",
         "Data (Data as a Service)",
         "Data service and tenant control responsibilities",

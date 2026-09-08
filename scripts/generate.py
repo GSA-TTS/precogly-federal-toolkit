@@ -28,7 +28,7 @@ DATA = os.path.join(ROOT, "data")
 if HERE not in sys.path:
     sys.path.insert(0, HERE)
 
-from flow_auth import load_auth_catalog  # noqa: E402
+from flow_auth import auth_mechanism_properties, load_auth_catalog, load_auth_metadata  # noqa: E402
 from systems.loader import DEFAULT_SYSTEM, SystemPaths, load_system  # noqa: E402
 
 # Precogly slug rule (derived empirically from an editor export):
@@ -104,6 +104,7 @@ def merge_properties(existing, additions):
 def apply_architecture_overrides(cdx, arch):
     """Apply ADR-005 DFD enrichments managed outside the editor export."""
     allowed_auth, warning_auth = load_auth_catalog(arch=arch)
+    auth_metadata = load_auth_metadata(arch=arch)
     known_auth = allowed_auth | set(warning_auth)
     bp = cdx["blueprints"][0]
     zones = {z["bom-ref"]: z for z in bp.get("zones", [])}
@@ -150,7 +151,7 @@ def apply_architecture_overrides(cdx, arch):
             flow["authMechanism"] = auth
             flow["properties"] = merge_properties(
                 flow.get("properties", []),
-                [{"name": "owasp:auth_mechanism", "value": auth}],
+                auth_mechanism_properties(auth, metadata=auth_metadata),
             )
         for field in ("encrypted", "crosses_trust_zone", "data_classification"):
             val = override.get(field)
@@ -412,14 +413,14 @@ def _load_data(cdx, paths: SystemPaths):
     arch = _load_yaml_path(paths.model_architecture)
     apply_architecture_overrides(cdx, arch)
     ev = _load_yaml_path(paths.model_evidence)
-    managed-cloud-service = paths.crm_source("managed-cloud-service")
+    managed_cloud_service = paths.crm_source("managed-cloud-service")
     dbx = paths.crm_source("data-platform")
-    if not (paths.crm_index and managed-cloud-service and dbx and paths.countermeasures):
+    if not (paths.crm_index and managed_cloud_service and dbx and paths.countermeasures):
         missing = [
             name
             for name, p in (
                 ("crm_index", paths.crm_index),
-                ("crm/managed-cloud-service.yaml", managed-cloud-service),
+                ("crm/managed-cloud-service.yaml", managed_cloud_service),
                 ("crm/data-platform.yaml", dbx),
                 ("countermeasures", paths.countermeasures),
             )
@@ -435,7 +436,7 @@ def _load_data(cdx, paths: SystemPaths):
         "evidence_artifacts": ev.get("evidence_artifacts") or {},
         "evidence_ids": ev.get("evidence_ids") or {},
         "index": _load_yaml_path(paths.crm_index),
-        "managed-cloud-service": by_id(_load_yaml_path(managed-cloud-service)),
+        "managed-cloud-service": by_id(_load_yaml_path(managed_cloud_service)),
         "dbx": by_id(_load_yaml_path(dbx)),
         "cms": {
             c["control_id"]: c
@@ -582,7 +583,7 @@ def _build_scenario(
 def _process_control_id(
     cid,
     seq,
-    managed-cloud-service,
+    managed_cloud_service,
     dbx,
     cms,
     evidence,
@@ -594,7 +595,7 @@ def _process_control_id(
     status_risk,
 ):
     """Process one control-id; return (threat, scenario, new_seq)."""
-    mc, db = managed-cloud-service.get(cid), dbx.get(cid)
+    mc, db = managed_cloud_service.get(cid), dbx.get(cid)
     sources = [s for s, present in (("managed cloud service", mc), ("data platform", db)) if present]
     name = (db and db.get("name")) or (mc and mc.get("name")) or cid
     all_affected = _assets_for(cid, fam_map, default_assets, alias)
@@ -749,13 +750,13 @@ def _emit_metadata(cdx, controls_list, rollup_entries):
 
 
 def _write_output(
-    cdx, out_path, controls_list, managed-cloud-service, dbx, threats, scenarios, registry
+    cdx, out_path, controls_list, managed_cloud_service, dbx, threats, scenarios, registry
 ):
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(cdx, f, indent=2, ensure_ascii=False)
         f.write("\n")
-    both = sum(1 for c in controls_list if c in managed-cloud-service and c in dbx)
+    both = sum(1 for c in controls_list if c in managed_cloud_service and c in dbx)
     reusable, one_off = (
         len(registry.by_key),
         len(registry.controls) - len(registry.by_key),
@@ -763,7 +764,7 @@ def _write_output(
     print(f"Wrote {os.path.relpath(out_path, ROOT)}", file=sys.stderr)
     print(
         f"Controls (NIST): {len(controls_list)} (both: {both}, "
-        f"managed cloud service-only: {len(managed-cloud-service) - both}, data platform-only: {len(dbx) - both})",
+        f"managed cloud service-only: {len(managed_cloud_service) - both}, data platform-only: {len(dbx) - both})",
         file=sys.stderr,
     )
     print(
@@ -790,7 +791,8 @@ def main():
         help="System slug to build; defaults to the Example System sources under data/systems/<slug>/ + legacy fallbacks (Phase A).",
     )
     ap.add_argument(
-        "--out", default=os.path.join(ROOT, "build", "example-system-crm-threat-model.cdx.json")
+        "--out",
+        default=os.path.join(ROOT, "build", "example-system-crm-threat-model.cdx.json"),
     )
     args = ap.parse_args()
 

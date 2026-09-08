@@ -3,22 +3,113 @@ allowed:
   - GSAuth via cloud.gov UAA
   - cloud.gov UAA OIDC
   - login.gov application-managed authorization
+  - PIV/CAC (Login.gov IAL2)
+  - SAML 2.0
   - OAuth 2.0
   - OIDC
   - SAML
+  - Kerberos
   - PIV/CAC
+  - Email OTP
   - OTP
   - mTLS
+  - Client cert (X.509)
   - client certificate
   - JWT
   - API key
   - SSH key
   - HMAC
+  - Signed webhook (HMAC)
   - AWS IAM role
+  - OS user session
+  - Session cookie
   - session cookie
 warn:
   Anonymous: Use only for intentionally public unauthenticated flows; document the compensating boundary control before release.
   Basic auth: Deprecated for new flows; prefer OIDC, SAML, PIV/CAC, mTLS, or another phishing-resistant mechanism.
+  Basic auth (deprecated): Deprecated for new flows; prefer OIDC, SAML, PIV/CAC, mTLS, or another phishing-resistant mechanism.
+metadata:
+  GSAuth via cloud.gov UAA:
+    description: Browser SSO through cloud.gov UAA federated to GSA SecureAuth / GSAuth.
+    nist: [IA-2, IA-8]
+  cloud.gov UAA OIDC:
+    description: Direct OIDC client integration with cloud.gov UAA for Cloud Foundry apps or auth proxies.
+    nist: [IA-2, IA-8]
+  login.gov application-managed authorization:
+    description: Login.gov authentication where the application or identity broker owns authorization by mapping verified email claims to local users.
+    nist: [IA-2, IA-8]
+  PIV/CAC (Login.gov IAL2):
+    description: Login.gov IAL2 authentication with PIV/CAC-backed identity proofing for eligible users.
+    nist: [IA-2(12), IA-8(1)]
+  SAML 2.0:
+    description: Browser SSO through a SAML 2.0 federation or enterprise identity provider.
+    nist: [IA-2, IA-8]
+  OAuth 2.0:
+    description: OAuth 2.0 delegated authorization flow used with a trusted authorization server.
+    nist: [IA-2, IA-8]
+  OIDC:
+    description: OpenID Connect authentication flow layered on OAuth 2.0.
+    nist: [IA-2, IA-8]
+  SAML:
+    description: SAML federation, retained as a shorthand for SAML 2.0 where the source architecture uses the shorter label.
+    nist: [IA-2, IA-8]
+  Kerberos:
+    description: Ticket-based enterprise authentication for managed internal systems.
+    nist: [IA-2, IA-5]
+  PIV/CAC:
+    description: PIV/CAC-backed authenticator for workforce or federated-user authentication.
+    nist: [IA-2(12), IA-8(1)]
+  Email OTP:
+    description: Email-delivered one-time passcode, usually as a supplemental or recovery factor.
+    nist: [IA-2(1)]
+  OTP:
+    description: One-time passcode authentication factor.
+    nist: [IA-2(1)]
+  mTLS:
+    description: Mutual TLS with both parties authenticating using certificates.
+    nist: [IA-3, SC-17]
+  Client cert (X.509):
+    description: X.509 client certificate authentication.
+    nist: [IA-3, SC-17]
+  client certificate:
+    description: Client certificate authentication, retained as a shorthand for X.509 client certificates.
+    nist: [IA-3, SC-17]
+  JWT:
+    description: Signed token assertion from a trusted issuer.
+    nist: [IA-2, IA-5]
+  API key:
+    description: Shared application credential or token used to authenticate API calls.
+    nist: [IA-5]
+  SSH key:
+    description: Public-key SSH authentication for administrative or automation flows.
+    nist: [IA-2, IA-5]
+  HMAC:
+    description: Shared-secret message authentication for signed requests.
+    nist: [IA-5, SC-8]
+  Signed webhook (HMAC):
+    description: Webhook request signed with an HMAC shared secret.
+    nist: [IA-5, SC-8]
+  AWS IAM role:
+    description: AWS identity-based role assumption for service-to-service authorization.
+    nist: [IA-2, AC-3]
+  OS user session:
+    description: Operating-system authenticated user session inherited by a local process or desktop application.
+    nist: [IA-2, AC-3]
+  Session cookie:
+    description: Server- or proxy-issued browser session cookie after successful upstream authentication.
+    nist: [IA-2, AC-12]
+  session cookie:
+    description: Session cookie, retained as a lowercase shorthand for existing architecture files.
+    nist: [IA-2, AC-12]
+  Anonymous:
+    description: Intentionally unauthenticated public access.
+    nist: [AC-14]
+  Basic auth:
+    description: Password-based HTTP Basic authentication; deprecated for new flows.
+    nist: [IA-2]
+  Basic auth (deprecated):
+    description: Password-based HTTP Basic authentication; deprecated for new flows.
+    nist: [IA-2]
 defaults:
   browser_sso: GSAuth via cloud.gov UAA
   cloudgov_direct_proxy: cloud.gov UAA OIDC
