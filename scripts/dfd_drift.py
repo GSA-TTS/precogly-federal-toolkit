@@ -10,6 +10,7 @@ the report should make DFD changes reviewable without blocking experimentation.
 from __future__ import annotations
 
 import argparse
+import copy
 import json
 import sys
 from collections import Counter
@@ -26,6 +27,10 @@ if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 
 from systems.loader import DEFAULT_SYSTEM, load_system  # noqa: E402
+from systems.rehydrate_dfd import (  # noqa: E402
+    DEFAULT_MERGE_TYPES,
+    rehydrate_dfd,
+)
 
 SECTION_FIELDS = {
     "zones": ("name", "type", "trustLevel", "parentZone"),
@@ -47,6 +52,10 @@ def _rel(path: Path) -> str:
 def load_json(path: Path) -> dict[str, Any]:
     with path.open(encoding="utf-8") as f:
         return json.load(f)
+
+
+def _counts(blueprint: dict[str, Any]) -> dict[str, int]:
+    return {section: len(blueprint.get(section, []) or []) for section in DFD_SECTIONS}
 
 
 def first_blueprint(doc: dict[str, Any]) -> dict[str, Any]:
@@ -182,14 +191,26 @@ def _endpoint_findings(export_bp: dict[str, Any]) -> list[dict[str, Any]]:
     return findings
 
 
-def build_report(system: str, base_path: Path, export_path: Path) -> dict[str, Any]:
+def build_report(
+    system: str,
+    base_path: Path,
+    export_path: Path,
+    *,
+    redaction_path: Path | None = None,
+) -> dict[str, Any]:
     base = load_json(base_path)
-    export = load_json(export_path)
+    raw_export = load_json(export_path)
+    export, normalization = rehydrate_dfd(
+        copy.deepcopy(raw_export),
+        redaction_path=redaction_path,
+        merge_types=set(DEFAULT_MERGE_TYPES),
+    )
     base_bp = first_blueprint(base)
     export_bp = first_blueprint(export)
+    raw_export_bp = first_blueprint(raw_export)
 
     findings: list[dict[str, Any]] = []
-    if (export.get("metadata") or {}).get("authors"):
+    if (raw_export.get("metadata") or {}).get("authors"):
         findings.append(
             _finding(
                 "metadata",
@@ -219,13 +240,10 @@ def build_report(system: str, base_path: Path, export_path: Path) -> dict[str, A
         "summary": {
             "findings": len(findings),
             "by_kind": dict(sorted(by_kind.items())),
-            "base_counts": {
-                section: len(base_bp.get(section, []) or []) for section in DFD_SECTIONS
-            },
-            "export_counts": {
-                section: len(export_bp.get(section, []) or [])
-                for section in DFD_SECTIONS
-            },
+            "base_counts": _counts(base_bp),
+            "export_counts": _counts(export_bp),
+            "raw_export_counts": _counts(raw_export_bp),
+            "normalization": normalization["summary"],
         },
         "findings": findings,
     }
@@ -288,7 +306,9 @@ def main(argv: list[str] | None = None) -> int:
     if not out_path.is_absolute():
         out_path = ROOT / out_path
 
-    report = build_report(args.system, paths.model_dfd, export_path)
+    report = build_report(
+        args.system, paths.model_dfd, export_path, redaction_path=paths.redaction
+    )
     write_report(report, out_path)
     base_counts = _format_counts(report["summary"]["base_counts"])
     export_counts = _format_counts(report["summary"]["export_counts"])
@@ -303,7 +323,10 @@ def main(argv: list[str] | None = None) -> int:
             file=sys.stderr,
         )
     else:
-        print(f"OK: no DFD drift; base and editor export both have {base_counts}.")
+        print(
+            "OK: no DFD drift after rehydrating editor export; "
+            f"base and normalized export both have {base_counts}."
+        )
     return exit_code(report, advisory=args.advisory)
 
 
