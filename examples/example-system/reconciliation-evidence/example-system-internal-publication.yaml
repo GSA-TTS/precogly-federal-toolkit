@@ -1,0 +1,9 @@
+schema_version: 1
+proposal: data/systems/example-system/reconciliation-proposal.yaml
+proposal_id: example-system-internal-publication
+source_sha256: '0000000000000000000000000000000000000000000000000000000000000000'
+canonical_sha256: 'dae7c83da95ca5fa725d1d4146b96dc43329aa7218ab365394d224e3e4169d65'
+validation_status: passed
+decision: approved
+conflict_disposition: none
+break_glass_backport: not-used

@@ -27,7 +27,7 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent.parent
 DATA = ROOT / "data"
 SYSTEMS_DIR = DATA / "systems"
-SCHEMA_PATH = ROOT / "schemas-local" / "system-directory.schema.json"
+SCHEMA_PATH = ROOT / "schemas" / "system-directory.schema.json"
 
 # System that Phase A keeps as the implicit default so existing invocations of
 # ``make generate`` / ``python scripts/generate.py`` stay byte-identical.
@@ -59,6 +59,7 @@ class SystemPaths:
     seed: Path | None
     responses: Path | None
     redaction: Path | None
+    cui: Path | None
 
     def crm_source(self, name: str) -> Path | None:
         """Resolve a per-source CRM YAML (e.g. ``managed-cloud-service``, ``data-platform``)."""
@@ -114,6 +115,7 @@ def load_system(slug: str) -> SystemPaths:
     seed = _first_existing(root / "seed.yaml")
     responses = _first_existing(root / "responses.yaml")
     redaction = _first_existing(root / "redaction.yaml")
+    cui = _first_existing(root / "cui.yaml")
 
     return SystemPaths(
         slug=slug,
@@ -132,6 +134,7 @@ def load_system(slug: str) -> SystemPaths:
         seed=seed,
         responses=responses,
         redaction=redaction,
+        cui=cui,
     )
 
 

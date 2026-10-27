@@ -24,6 +24,7 @@ if HERE not in sys.path:
     sys.path.insert(0, HERE)
 
 from flow_auth import load_auth_catalog  # noqa: E402
+from systems.hosting import compose_hosting_overlay, load_hosting_overlay  # noqa: E402
 from systems.loader import DEFAULT_SYSTEM, load_system  # noqa: E402
 
 CATEGORIES = {"preventive", "detective", "corrective"}
@@ -47,7 +48,10 @@ TRANSPORT_THREAT_RE = re.compile(
 # ``_load_forbidden``.
 FORBIDDEN = [
     (
-        re.compile(r"https?://(?!localhost|127\.0\.0\.1|github\.com)", re.IGNORECASE),
+        re.compile(
+            r"https?://(?!(?:localhost|127\.0\.0\.1|github\.com)(?=[:/]|$))",
+            re.IGNORECASE,
+        ),
         "URL/URI",
     ),
     (
@@ -112,6 +116,10 @@ def main():
         default=DEFAULT_SYSTEM,
         help="System slug for base-DFD / CRM index resolution (default: %(default)s).",
     )
+    ap.add_argument(
+        "--hosting",
+        help="Hosting overlay used to generate the artifact.",
+    )
     args = ap.parse_args()
 
     paths = load_system(args.system)
@@ -123,6 +131,11 @@ def main():
         base = json.load(f)
     with open(paths.model_architecture, encoding="utf-8") as f:
         arch = yaml.safe_load(f) or {}
+    if args.hosting:
+        overlay = load_hosting_overlay(paths, args.hosting)
+        composed = compose_hosting_overlay(base, overlay, arch)
+        base = composed.dfd
+        arch = composed.architecture or arch
     allowed_auth, warning_auth = load_auth_catalog(arch=arch)
     known_auth = allowed_auth | set(warning_auth)
 
@@ -157,27 +170,18 @@ def main():
     for f in flows:
         src = asset_by_ref.get(f.get("source"))
         dst = asset_by_ref.get(f.get("destination"))
-        source_zone = (
-            src.get("zone")
-            if src
-            else f.get("source")
-            if f.get("source") in zset
-            else None
-        )
-        destination_zone = (
-            dst.get("zone")
-            if dst
-            else f.get("destination")
-            if f.get("destination") in zset
-            else None
-        )
+        source_zone = src.get("zone") if src else f.get("source") if f.get("source") in zset else None
+        destination_zone = dst.get("zone") if dst else f.get("destination") if f.get("destination") in zset else None
         boundary_crossing = not same_boundary(source_zone, destination_zone)
+        flow_props = {
+            prop.get("name"): prop.get("value") for prop in f.get("properties", []) or [] if isinstance(prop, dict)
+        }
+        auth = f.get("authMechanism") or flow_props.get("owasp:auth_mechanism")
         if boundary_crossing:
             if not f.get("protocols"):
                 fail(f"boundary-crossing flow {f['bom-ref']} missing protocols[]")
-            if not f.get("authMechanism"):
+            if not auth:
                 fail(f"boundary-crossing flow {f['bom-ref']} missing authMechanism")
-        auth = f.get("authMechanism")
         if auth and auth not in known_auth:
             fail(f"flow {f['bom-ref']} unsupported authMechanism {auth}")
 
@@ -188,8 +192,10 @@ def main():
 
     # --- scenarios reference real threats + assets (flow refs allowed in affectedAssets) ---
     for s in scenarios:
-        if s["threat"] not in tset:
-            fail(f"dangling scenario -> {s['threat']}")
+        threat_refs = s.get("threats") or [s.get("threat")]
+        for threat_ref in threat_refs:
+            if threat_ref not in tset:
+                fail(f"dangling scenario -> {threat_ref}")
         for a in s.get("affectedAssets", []):
             if a not in aset and a not in fset:
                 fail(f"scenario {s['bom-ref']} bad asset {a}")
@@ -200,12 +206,23 @@ def main():
     # --- controls well-formed + bidirectionally linked ---
     if not controls:
         fail("no controls[] (Precogly countermeasures) emitted")
+    control_mitigations = {}
     for c in controls:
         if c.get("category") not in CATEGORIES:
             fail(f"control {c['bom-ref']} bad category {c.get('category')}")
         if c.get("status") not in STATUSES:
             fail(f"control {c['bom-ref']} bad status {c.get('status')}")
-        for tref in c.get("mitigations", []):
+        props = {
+            prop.get("name"): prop.get("value") for prop in c.get("properties", []) or [] if isinstance(prop, dict)
+        }
+        linked = c.get("mitigations", [])
+        if not linked and props.get("precogly:mitigates"):
+            try:
+                linked = json.loads(props["precogly:mitigates"])
+            except json.JSONDecodeError:
+                linked = []
+        control_mitigations[c["bom-ref"]] = linked
+        for tref in linked:
             if tref not in tset:
                 fail(f"control {c['bom-ref']} links missing threat {tref}")
 
@@ -214,9 +231,7 @@ def main():
         idx = yaml.safe_load(f)
     expected = {c["control_id"] for c in idx["controls"]}
     seen = set()
-    base_threat_refs = {
-        bt["bom-ref"] for bt in base.get("threats", {}).get("threats", [])
-    }
+    base_threat_refs = {bt["bom-ref"] for bt in base.get("threats", {}).get("threats", [])}
     for t in threats:
         if t.get("bom-ref") in base_threat_refs:
             continue  # base threat (from base DFD, not CRM generated)
@@ -235,19 +250,18 @@ def main():
                 fail(f"{cid}: threat links missing control {cref}")
             # bidirectional: the control must link back to this threat
             ctrl = next(c for c in controls if c["bom-ref"] == cref)
-            if t["bom-ref"] not in ctrl.get("mitigations", []):
+            if control_mitigations[ctrl["bom-ref"]] and t["bom-ref"] not in control_mitigations[ctrl["bom-ref"]]:
                 fail(f"{cid}: control {cref} not linked back to threat {t['bom-ref']}")
         for a in t.get("affectedAssets", []):
             if a not in aset and a not in fset:
                 fail(f"{cid}: bad asset ref {a}")
-        for flow_ref in t.get("affectedFlows", []):
+        affected_flows = t.get("affectedFlows", []) or [ref for ref in t.get("affectedAssets", []) if ref in fset]
+        for flow_ref in affected_flows:
             if flow_ref not in fset:
                 fail(f"{cid}: bad affectedFlow ref {flow_ref}")
         text = " ".join([t.get("name", ""), t.get("description", "")])
-        if TRANSPORT_THREAT_RE.search(text) and not t.get("affectedFlows"):
-            warn(
-                f"{cid or t['bom-ref']}: transport-oriented threat SHOULD populate affectedFlows[]"
-            )
+        if TRANSPORT_THREAT_RE.search(text) and not affected_flows:
+            warn(f"{cid or t['bom-ref']}: transport-oriented threat SHOULD populate affectedFlows[]")
 
     missing = expected - seen
     extra = seen - expected
@@ -264,16 +278,9 @@ def main():
     for pattern, label in forbidden:
         m = pattern.search(raw)
         if m:
-            fail(
-                f"unredacted {label} found in output: '{m.group(0)}' "
-                "(see docs/redaction-guide.md)"
-            )
+            fail(f"unredacted {label} found in output: '{m.group(0)}' (see docs/redaction-guide.md)")
 
-    reusable = sum(
-        1
-        for c in controls
-        if any(p.get("name") == "resp:evidence-key" for p in c.get("properties", []))
-    )
+    reusable = sum(1 for c in controls if any(p.get("name") == "resp:evidence-key" for p in c.get("properties", [])))
     print(
         f"OK - DFD intact, {len(seen)} CRM threats fully formed, "
         f"{len(scenarios)} scenarios valid, {len(controls)} controls "

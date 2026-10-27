@@ -1,0 +1,23 @@
+schema_version: 1
+system_slug: example-system
+determination_status: approved
+classification:
+  cui_category: not_cui
+  cui_marking: not_cui
+  authority: example training artifact
+  review_cadence: annual
+ingestion_approval:
+  approved_by_role: example-system-owner
+  approval_date: '2026-09-21'
+  approval_ref: example-approval-record
+source_documents:
+  - source_doc_ref: example-system-template
+    sha256: '0000000000000000000000000000000000000000000000000000000000000000'
+    source_type: manual-source
+downstream_artifacts:
+  - build/example-system-crm-threat-model.cdx.json
+  - build/systems/example-system/example-system.cdx.json
+retention:
+  retention_period: retain while example fixture remains in repo
+  decontrol_condition: example fixture removed or replaced
+notes: Example-only sidecar demonstrating schema shape without live CUI or source-document references.

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Reconciliation decision evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "proposal",
+    "proposal_id",
+    "source_sha256",
+    "canonical_sha256",
+    "validation_status",
+    "decision",
+    "conflict_disposition",
+    "break_glass_backport"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "proposal": { "type": "string", "pattern": "^data/systems/[a-z0-9][a-z0-9-]*/reconciliation-proposal.yaml$" },
+    "proposal_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+    "source_sha256": { "type": "string", "pattern": "^[a-fA-F0-9]{64}$" },
+    "canonical_sha256": { "type": "string", "pattern": "^[a-fA-F0-9]{64}$" },
+    "validation_status": { "const": "passed" },
+    "decision": { "enum": ["approved", "rejected", "blocked"] },
+    "conflict_disposition": { "enum": ["none", "manual-review-required", "rejected"] },
+    "break_glass_backport": { "enum": ["not-used", "required", "completed"] }
+  }
+}

@@ -1,0 +1,156 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gsa.gov/tts/ttse-petrified-forest-sspp/schemas/cui-provenance.schema.json",
+  "title": "CUI provenance sidecar",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "system_slug",
+    "determination_status",
+    "classification",
+    "source_documents",
+    "downstream_artifacts",
+    "retention"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "system_slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$"
+    },
+    "determination_status": {
+      "type": "string",
+      "enum": ["pending", "approved"]
+    },
+    "classification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["review_cadence"],
+      "properties": {
+        "cui_category": {
+          "type": "string",
+          "pattern": "^(not_cui|[A-Z][A-Z0-9_-]*)$"
+        },
+        "cui_marking": {
+          "type": "string",
+          "minLength": 3
+        },
+        "authority": {
+          "type": "string",
+          "minLength": 3
+        },
+        "review_cadence": {
+          "type": "string",
+          "enum": ["quarterly", "semiannual", "annual", "per-source-update"]
+        }
+      }
+    },
+    "ingestion_approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["approved_by_role", "approval_date", "approval_ref"],
+      "properties": {
+        "approved_by_role": {
+          "type": "string",
+          "minLength": 2
+        },
+        "approval_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "approval_ref": {
+          "type": "string",
+          "minLength": 3
+        }
+      }
+    },
+    "source_documents": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["source_doc_ref", "sha256", "source_type"],
+        "properties": {
+          "source_doc_ref": {
+            "type": "string",
+            "minLength": 3
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-fA-F0-9]{64}$"
+          },
+          "source_type": {
+            "type": "string",
+            "enum": ["ssp-docx", "poam-xlsx", "control-workbook", "manual-source", "other"]
+          }
+        }
+      }
+    },
+    "downstream_artifacts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 3
+      }
+    },
+    "retention": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["retention_period", "decontrol_condition"],
+      "properties": {
+        "retention_period": {
+          "type": "string",
+          "minLength": 3
+        },
+        "decontrol_condition": {
+          "type": "string",
+          "minLength": 3
+        }
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "determination_status": { "const": "approved" } },
+        "required": ["determination_status"]
+      },
+      "then": {
+        "required": ["ingestion_approval"],
+        "properties": {
+          "classification": {
+            "required": ["cui_category", "cui_marking", "authority", "review_cadence"]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "determination_status": { "const": "pending" } },
+        "required": ["determination_status"]
+      },
+      "then": {
+        "not": { "required": ["ingestion_approval"] },
+        "properties": {
+          "classification": {
+            "not": {
+              "anyOf": [
+                { "required": ["cui_category"] },
+                { "required": ["cui_marking"] },
+                { "required": ["authority"] }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ]
+}

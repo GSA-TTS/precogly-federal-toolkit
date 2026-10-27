@@ -25,7 +25,21 @@ pack:
   pack_type: technology
   precogly_schema_version: '2.0'
   maturity: Draft
-  icon_map: []
+  icon_map:
+    - component: fcs-core
+      icon: server
+    - component: managed-cloud-service-platform
+      icon: cloud
+    - component: managed-cloud-service-caas
+      icon: containers
+    - component: managed-cloud-service-vpcaas
+      icon: network
+    - component: managed-cloud-service-data
+      icon: database
+    - component: managed-cloud-service-ebta
+      icon: flask
+    - component: managed-cloud-service-data-platform
+      icon: analytics
   tags:
     - gsa
     - fcs
@@ -36,4 +50,4 @@ pack:
     - federal
     - all
   repository_url: https://github.com/GSA/oscal-vault
-  documentation_url: https://insite.gsa.gov/employee-resources/information-technology/do-it-yourself-self-help/cloud-infrastructure-and-services/cloud-computing/federal-collaboration-space
+  documentation_url: https://example.invalid/internal-documentation

@@ -3,26 +3,29 @@
 Reusable Precogly/CycloneDX scaffolding, packs, scripts, and guides for federal
 system security plans. Extracted from the TTSE Petrified Forest SSPP repository.
 
-## Quick-start — new system threat model
+## Quick-start — new generic CRM pack
 
 ```bash
 # 1. Copy the starter template
 cp -r templates/generic-crm-system my-system
 cd my-system
 
-# 2. Fill in your control data
-#    Edit: data/crm/index.yaml, data/crm/platform.yaml, data/countermeasures/countermeasures.yaml
-#    Edit: data/model/architecture.yaml, data/model/evidence.yaml
-
-# 3. Generate the CycloneDX threat model
-uv run python scripts/generate.py --out build/threat-model.cdx.json
-
-# 4. Validate (redaction gate + structure)
-uv run python scripts/validate.py build/threat-model.cdx.json
-
-# 5. Import into local Precogly
-uv run python scripts/bulk_import_to_precogly.py
+# 2. Generate and validate the generic CRM shell.
+# CATALOG: NIST 800-53 r5 catalog.json; OSCAL_SOURCES: one or more
+#   component-definition.json files (see templates/generic-crm-system/README.md).
+make all CATALOG=/path/to/catalog.json OSCAL_SOURCES='/path/to/component-definition.json'
 ```
+
+The root `scripts/generate.py` and FedRAMP exporters are library tools for a
+private system repository that supplies its own `data/systems/<system-slug>/`,
+catalog, and authorized system records. They are not runnable against this
+public toolkit alone, which intentionally contains no system-specific source
+data. Use `templates/private-system-repository/README.md` to establish that
+boundary before invoking those tools.
+
+FedRAMP export defaults are schema-oriented scaffolding. A submission-ready
+SDR requires system-owned sidecars with real, authorized values and must pass
+the strict FedRAMP validator; placeholder values are intentionally rejected.
 
 ## Contents
 

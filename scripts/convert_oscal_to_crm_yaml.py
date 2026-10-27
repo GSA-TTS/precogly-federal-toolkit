@@ -21,6 +21,11 @@ from pathlib import Path
 
 import yaml
 
+try:
+    from scripts.control_identity import canonical_control_id
+except ModuleNotFoundError:  # Support direct invocation as a script.
+    from control_identity import canonical_control_id
+
 # Standard paths
 HERE = Path(__file__).parent
 ROOT = HERE.parent
@@ -65,23 +70,18 @@ def redact(text: str) -> str:
 
 
 def normalize_control_id(raw: str) -> str:
-    """Normalize control ID: ac-6.5 -> AC-6(5), ac-1 -> AC-1."""
-    if not raw:
-        return ""
-    s = raw.strip()
-    m = re.match(r"^([A-Za-z]{2})-?0*(\d+)\s*(?:\(0*(\d+)\))?", s)
-    if not m:
-        # Check decimal point control like ac-6.5 -> AC-6(5)
-        m_dec = re.match(r"^([A-Za-z]{2})-?0*(\d+)\.(\d+)", s)
-        if m_dec:
-            fam, num, enh = m_dec.group(1).upper(), int(m_dec.group(2)), m_dec.group(3)
-            return f"{fam}-{num}({enh})"
-        return s.strip()
-    fam, num, enh = m.group(1).upper(), int(m.group(2)), m.group(3)
-    cid = f"{fam}-{num}"
-    if enh is not None:
-        cid = f"{cid}({int(enh)})"
-    return cid
+    """Return the shared canonical representation for a control ID."""
+    return canonical_control_id(raw) if raw and raw.strip() else ""
+
+
+def reject_duplicate_controls(controls: list[dict]) -> None:
+    """Fail before writing a tier when canonical IDs collide."""
+    seen: set[str] = set()
+    for control in controls:
+        cid = control["control_id"]
+        if cid in seen:
+            raise ValueError(f"duplicate canonical control ID: {cid}")
+        seen.add(cid)
 
 
 class LiteralStr(str):
@@ -285,6 +285,7 @@ def convert_file(src_path: Path, nist_names: dict):
         return (m.group(1), int(m.group(2)), int(m.group(3) or 0))
 
     controls.sort(key=sort_key)
+    reject_duplicate_controls(controls)
 
     tier_data = {
         "tier": slug,

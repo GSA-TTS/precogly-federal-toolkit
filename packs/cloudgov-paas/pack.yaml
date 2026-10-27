@@ -23,7 +23,23 @@ pack:
   pack_type: technology
   precogly_schema_version: '2.0'
   maturity: Draft
-  icon_map: []
+  icon_map:
+    - component: cloudgov-platform
+      icon: cloud
+    - component: cloudgov-apps
+      icon: application
+    - component: cloudgov-rds
+      icon: database
+    - component: cloudgov-s3
+      icon: storage
+    - component: cloudgov-redis
+      icon: cache
+    - component: cloudgov-elasticsearch
+      icon: search
+    - component: cloudgov-cdn
+      icon: globe
+    - component: cloudgov-pages
+      icon: static-site
   tags:
     - gsa
     - cloudgov
