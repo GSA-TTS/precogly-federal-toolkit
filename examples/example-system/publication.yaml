@@ -1,0 +1,14 @@
+schema_version: 1
+system_slug: example-system
+source_sha256: '0000000000000000000000000000000000000000000000000000000000000000'
+canonical_sha256: dae7c83da95ca5fa725d1d4146b96dc43329aa7218ab365394d224e3e4169d65
+canonical_artifact: vault/example-system.canonical.json
+cui_sidecar: data/systems/example-system/cui.yaml
+redaction_status: passed
+publication_scope: internal-community
+concurrence:
+  system_owner_role: example-system-owner
+  reviewer_role: example-security-reviewer
+  decision_ref: example-publication-decision
+  decision_date: '2026-10-07'
+revalidate_by: '2027-10-07'

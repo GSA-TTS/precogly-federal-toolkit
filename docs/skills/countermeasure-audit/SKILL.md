@@ -35,9 +35,9 @@ captures the concrete cross-check procedure used to produce
 
 ## Load first
 
-- [docs/IMPLEMENTATION_PLAN_example-system_remediation_countermeasures.md](../../docs/IMPLEMENTATION_PLAN_example-system_remediation_countermeasures.md)
-- [data/countermeasures/countermeasures.yaml](../../data/countermeasures/countermeasures.yaml)
-- [data/model/evidence.yaml](../../data/model/evidence.yaml)
+- [docs/plans/archived/IMPLEMENTATION_PLAN_example-system_remediation_countermeasures.md](../../docs/plans/archived/IMPLEMENTATION_PLAN_example-system_remediation_countermeasures.md)
+- [data/systems/example-system/countermeasures.yaml](../../data/systems/example-system/countermeasures.yaml)
+- [data/systems/example-system/model/evidence.yaml](../../data/systems/example-system/model/evidence.yaml)
 - [build/example-system-crm-threat-model.cdx.json](../../build/example-system-crm-threat-model.cdx.json)
 - [skills/precogly-api/SKILL.md](../precogly-api/SKILL.md) (§ CycloneDX 2.0 Adapter, § Common Shell Queries)
 - [skills/sspp-threat-modeling/SKILL.md](../sspp-threat-modeling/SKILL.md) (§ Precogly Round Trip, § Redaction Gate)

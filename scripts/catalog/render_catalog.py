@@ -41,6 +41,18 @@ def _fmt(value) -> str:
 def render(catalog: dict) -> str:
     systems = catalog["catalog"]["systems"]
     skipped = catalog["catalog"].get("skipped", [])
+    # Artifact paths in catalog/index.yaml are repo-root-relative; the rendered
+    # page lives in docs/catalog/, so rewrite them relative to that directory.
+    out_dir = os.path.dirname(DEFAULT_OUT)
+
+    def _rel_to_page(p: str) -> str:
+        if not p or "://" in p:
+            return p
+        return os.path.relpath(os.path.join(ROOT, p), out_dir)
+
+    def _exists(p: str) -> bool:
+        return bool(p) and os.path.exists(os.path.join(ROOT, p))
+
     lines: list[str] = [HEADER, ""]
     lines.append(f"- **Systems imported:** {len(systems)}")
     lines.append(f"- **Systems skipped:** {len(skipped)}")
@@ -56,8 +68,9 @@ def render(catalog: dict) -> str:
     for s in sorted(systems, key=lambda e: e["slug"]):
         stats = s.get("stats") or {}
         art = s.get("artifacts") or {}
-        cdx = art.get("cdx")
-        pack = art.get("pack")
+        # Only link artifacts that are actually present on disk.
+        cdx = _rel_to_page(art.get("cdx")) if _exists(art.get("cdx")) else None
+        pack = _rel_to_page(art.get("pack")) if _exists(art.get("pack")) else None
         art_cell_parts: list[str] = []
         if cdx:
             art_cell_parts.append(f"[cdx]({cdx})")

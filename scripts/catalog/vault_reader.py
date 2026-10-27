@@ -17,13 +17,18 @@ from __future__ import annotations
 import dataclasses
 import os
 import re
+import sys
 from collections.abc import Iterable
+from pathlib import Path
 
 import yaml
 
-CONTROL_ID_RE = re.compile(
-    r"^\s*([A-Za-z]{2})-?0*(\d+)(?:\s*[.(]\s*0*(\d+)\s*\)?)?\s*$"
-)
+try:
+    from scripts.control_identity import canonical_control_id
+except ModuleNotFoundError:  # Support direct invocation from this directory.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from control_identity import canonical_control_id
+
 INLINE_META_RE = re.compile(r"^\s*([a-z_][a-z0-9_]*)::\s*(.*)$", re.IGNORECASE)
 PART_HEADING_RE = re.compile(r"^##\s+Part\s+([A-Za-z0-9]+)\s*$")
 SECTION_HEADING_RE = re.compile(r"^#\s+(.+?)\s*$")
@@ -33,19 +38,8 @@ INHERITANCE_ROW_RE = re.compile(
 
 
 def normalize_control_id(raw: str) -> str:
-    """Return AC-2 or AC-6(5) from ac-02 / ac-06(05) / ac-6.5."""
-    if not raw:
-        return ""
-    match = CONTROL_ID_RE.match(raw)
-    if not match:
-        return raw.strip()
-    fam = match.group(1).upper()
-    base = int(match.group(2))
-    enh = match.group(3)
-    cid = f"{fam}-{base}"
-    if enh is not None:
-        cid = f"{cid}({int(enh)})"
-    return cid
+    """Return the shared canonical representation of a control ID."""
+    return canonical_control_id(raw) if raw and raw.strip() else ""
 
 
 def split_frontmatter(text: str) -> tuple[dict, str]:
@@ -147,7 +141,14 @@ class ControlRecord:
         )
 
 
-def parse_control(path: str, validate_schema: bool = False) -> ControlRecord | None:
+def parse_control(
+    path: str,
+    validate_schema: bool = False,
+    *,
+    status_map: StatusMap | None = None,
+    origination_map: OriginationMap | None = None,
+) -> ControlRecord | None:
+    """Parse one control, deriving omitted normalized fields from mapping tables."""
     with open(path, encoding="utf-8") as f:
         text = f.read()
     front, body = split_frontmatter(text)
@@ -159,11 +160,24 @@ def parse_control(path: str, validate_schema: bool = False) -> ControlRecord | N
 
     # ADR-006 issue #21: fail-fast if required frontmatter fields are absent
     if validate_schema:
-        missing = [f for f in ("note_type", "control_id", "implementation_status") if not front.get(f)]
+        missing = [
+            f
+            for f in ("note_type", "control_id", "implementation_status")
+            if not front.get(f)
+        ]
         if missing:
             raise ValueError(
                 f"vault schema validation failed for {path}: missing fields {missing}"
             )
+
+    implementation_status = (front.get("implementation_status") or "").strip()
+    origination = [str(v).strip() for v in (front.get("origination") or []) if v]
+    normalized_status = (front.get("normalized_status") or "").strip()
+    normalized_origination = (front.get("normalized_origination") or "").strip()
+    if not normalized_status and status_map is not None:
+        normalized_status, _ = status_map.lookup(implementation_status)
+    if not normalized_origination and origination_map is not None:
+        normalized_origination, _, _ = origination_map.lookup(origination)
 
     parts = _parse_body_parts(body)
     sections = _parse_body_sections(body)
@@ -171,10 +185,10 @@ def parse_control(path: str, validate_schema: bool = False) -> ControlRecord | N
         control_id=control_id,
         title=(front.get("title") or "").strip(),
         family=(front.get("family") or control_id.split("-", 1)[0]).upper(),
-        implementation_status=(front.get("implementation_status") or "").strip(),
-        origination=[str(v).strip() for v in (front.get("origination") or []) if v],
-        normalized_status=(front.get("normalized_status") or "").strip(),
-        normalized_origination=(front.get("normalized_origination") or "").strip(),
+        implementation_status=implementation_status,
+        origination=origination,
+        normalized_status=normalized_status,
+        normalized_origination=normalized_origination,
         parameters=list(front.get("parameters") or []),
         statements=list(front.get("statements") or []),
         parts=parts,
@@ -295,16 +309,18 @@ def parse_inheritance(path: str) -> list[InheritanceEntry]:
 
 
 def _first_control_id(text: str) -> str:
-    match = re.search(r"([A-Za-z]{2})[-\s]?0*(\d+)(?:\s*\(\s*0*(\d+)\s*\))?", text)
+    match = re.search(
+        r"([A-Za-z]{2})[-\s]?0*(\d+)"
+        r"(?:\s*(?:\(\s*0*(\d+)\s*\)|\.\s*0*(\d+)))?",
+        text,
+    )
     if not match:
         return ""
-    fam = match.group(1).upper()
-    base = int(match.group(2))
-    enh = match.group(3)
-    cid = f"{fam}-{base}"
-    if enh is not None:
-        cid = f"{cid}({int(enh)})"
-    return cid
+    raw = f"{match.group(1)}-{match.group(2)}"
+    enhancement = match.group(3) or match.group(4)
+    if enhancement:
+        raw += f"({enhancement})"
+    return normalize_control_id(raw)
 
 
 def load_status_and_origination(vault_root: str) -> tuple[StatusMap, OriginationMap]:

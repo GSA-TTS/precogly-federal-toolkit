@@ -3,15 +3,20 @@ title: 'CRM Threat-Model — Redaction Guide'
 description: 'Policy and mechanism for redacting recon-useful identifiers (URIs/URLs, endpoint hostnames, resource IDs, and POC identifiers) from the tracked threat-model artifacts to mitigate reconnaissance, endpoint DoS/DDoS, and spearphishing'
 status: draft
 tier: 2
-last_updated: '2026-08-06'
-nist_controls: ['AC-3', 'AU-3', 'SC-7', 'SI-12', 'PT-3', 'RA-5', 'SR-3']
+last_updated: '2026-09-22'
+nist_controls: ['AC-3', 'AU-3', 'SC-7', 'SI-12', 'PT-3', 'RA-5', 'SR-3', 'PL-2']
 frameworks: ['NIST SP 800-53 Rev 5.2', 'OWASP Top 10 LLM 2025']
 audience: 'security'
-keywords: ['redaction', 'reconnaissance', 'ddos', 'spearphishing', 'pii', 'endpoint', 'uri', 'poc', 'opsec']
+keywords: ['redaction', 'reconnaissance', 'ddos', 'spearphishing', 'pii', 'endpoint', 'uri', 'poc', 'opsec', 'cui']
 related_files:
   - 'threat-model/scripts/convert_crm_to_yaml.py'
   - 'threat-model/scripts/validate.py'
   - 'threat-model/data/model/evidence.yaml'
+  - '../scripts/validate_cui_contracts.py'
+  - '../schemas/cui-provenance.schema.json'
+  - 'docs/adrs/ADR-SSPP-020-cui-classification-sidecar.md'
+  - 'cui-guidance-summary.md'
+  - '.betterleaks.toml'
 ---
 
 <!-- AI-GENERATED DRAFT — requires ISSO / ISSM review. -->
@@ -35,6 +40,49 @@ attack surface:
 > spreadsheet / Google Sheet (access-controlled). This repo tracks the
 > _structure_ of the model, not the live target data.
 
+## CUI classification (policy layer, tracked separately from tokenization)
+
+The tokenization mechanism below (URL/email/IP/resource-ID redaction) is an
+OPSEC/recon-hygiene control. It is **not** a CUI marking or handling
+determination, and until now this guide did not distinguish the two.
+
+A live check of the NARA CUI Registry (2026-09-18, see issue #230 and
+[ADR-SSPP-020](adrs/ADR-SSPP-020-cui-classification-sidecar.md)) found that
+**Information Systems Vulnerability Information (ISVI)** — banner marking
+`CUI` / `CUI//ISVI`, authority 44 U.S.C. §3554 (per OMB M-24-04) and
+§3555(f) — is a generally-applicable FISMA category, **not** limited to
+DHS, whose scope (information whose disclosure could adversely affect an
+information system: infrastructure inventories, interconnections,
+enterprise architecture models) plausibly covers SSPP infrastructure and
+vulnerability content of the kind this pipeline extracts.
+
+This means:
+
+- **Tokenizing a value in a generated artifact does not resolve a CUI
+  determination for the source `.docx`.** The source document may still
+  require a CUI marking and handling controls even where every downstream
+  derivative is fully redacted.
+- Every system with `.docx`-derived content (parsed controls,
+  countermeasures, DFD/architecture model) should have a
+  `data/systems/<slug>/cui.yaml` classification sidecar
+  (schema: [schemas/cui-provenance.schema.json](../schemas/cui-provenance.schema.json)),
+  recording the candidate `cui_category`, citing `authority`, and pointing
+  to an actual `approved_by` / `approval_ref` sign-off from an
+  ISSO/ISSM/GSA CUI Program Office reviewer — not just a redaction pass.
+  In the parent SSPP repository, run `make cui-contracts` to check sidecar
+  schema compliance and `make cui-coverage` to list systems that have
+  `.docx`-derived content but no sidecar yet. In a private system repository
+  that vendors the toolkit, run
+  `uv run --with jsonschema --with pyyaml python vendor/precogly-federal-toolkit/scripts/validate_cui_contracts.py --systems-root data/systems --require-all`
+  (add `--coverage` to list systems with no sidecar yet).
+- This redaction gate remains the mitigation for the classes of value it
+  already covers (URLs, POC emails, resource IDs). It is not, by itself, a
+  substitute for the CUI classification/approval sidecar, and a
+  `cui_category` of `ISVI` on a system does **not** automatically mean this
+  gate's existing token list is sufficient handling — see the CUI redaction
+  policy work tracked in issue #231, which reviews `.betterleaks.toml`
+  against actual NARA CUI guidance rather than only recon-hygiene patterns.
+
 ## What gets redacted
 
 The source CSVs under `data/raw/` are **manually redacted before commit** (they
@@ -55,11 +103,12 @@ slips through. Patterns run specific-first, generic catch-all last:
 Authored (non-CSV-derived) files are redacted by hand and use descriptive
 tokens so the prose still reads clearly:
 
-| Real value                                 | Token                   | Files                                 |
-| ------------------------------------------ | ----------------------- | ------------------------------------- |
-| deployer / GraphQL service-principal UUIDs | `<DEPLOYER_SP_ID>`      | `evidence.yaml`, `recommendations.md` |
-| Delta Share name `example-system_uat_share`          | `<UAT_SHARE_NAME>`      | `evidence.yaml`                       |
-| Delta Share recipient `gsaext_example-system_uat`    | `<UAT_SHARE_RECIPIENT>` | `evidence.yaml`, `recommendations.md` |
+| Real value                                 | Token                   | Files                                    |
+| ------------------------------------------ | ----------------------- | ---------------------------------------- |
+| deployer / GraphQL service-principal UUIDs | `<DEPLOYER_SP_ID>`      | `evidence.yaml`, `recommendations.md`    |
+| Delta Share name `example-system_uat_share`          | `<UAT_SHARE_NAME>`      | `evidence.yaml`                          |
+| Delta Share recipient `gsaext_example-system_uat`    | `<UAT_SHARE_RECIPIENT>` | `evidence.yaml`, `recommendations.md`    |
+| data platform SQL Warehouse identifier        | `<SQL_WAREHOUSE_ID>`    | `analyses/58-example-system-software-inventory.md` |
 
 ### Vault-projected systems (`build/systems/**`)
 
@@ -99,6 +148,30 @@ and the shared helper `find_ipv4_leak` in
 `localhost` / `127.0.0.1` (Precogly local URLs in the README) are explicitly
 allowed — they are not sensitive endpoints.
 
+## CUI provenance coupling
+
+Any system that ingests SSP/docx-derived or otherwise classified source material
+must record provenance in `data/systems/<slug>/cui.yaml`. Validate sidecars with:
+
+```bash
+# Parent SSPP repository
+make cui-contracts
+
+# Private system repository that vendors the toolkit
+uv run --with jsonschema --with pyyaml python \
+   vendor/precogly-federal-toolkit/scripts/validate_cui_contracts.py \
+   --systems-root data/systems --require-all
+```
+
+The CUI sidecar records classification, approval, source document hashes,
+downstream artifacts, and retention/decontrol expectations. It is intentionally
+metadata-only: do not commit the source document itself.
+
+If `classification.cui_category` is anything other than `not_cui`, the system
+must also define a non-empty `data/systems/<slug>/redaction.yaml`
+`forbidden_patterns` list. This makes the redaction policy explicit before any
+classified source material is projected into generated artifacts.
+
 ## Adding a new redaction
 
 1. Add a `(regex, token)` pair to `REDACTIONS` in `convert_crm_to_yaml.py`
@@ -110,7 +183,10 @@ allowed — they are not sensitive endpoints.
 4. For DFD export fields, add optional `scrub.fields` and `scrub.patterns`
    entries to `data/systems/<slug>/redaction.yaml` when the default fields or
    forbidden patterns need local extensions.
-5. Re-run `make -C docs/threat-model all` and confirm validation passes.
+5. If the system has a CUI sidecar with a category other than `not_cui`, confirm
+   `redaction.yaml` has non-empty `forbidden_patterns` and run `make
+   cui-contracts`.
+6. Re-run `make validate` and confirm validation passes.
 
 ## Reviewer guidance
 
@@ -119,6 +195,34 @@ allowed — they are not sensitive endpoints.
 - If you spot a concrete endpoint, resource ID, or personal name in a tracked
   artifact that is not tokenized, treat it as a finding and extend the
   redaction (steps above) before merge.
+
+## Betterleaks baseline governance (draft)
+
+The `.betterleaks-baseline.json` file is an exception register for findings
+that are understood and intentionally retained. It is not an approval to
+publish sensitive content and it must not be used to make a failing redaction
+gate green without review.
+
+Until the policy work in issue #231 is approved, apply these minimum rules:
+
+1. Do not baseline CUI banner markings, credentials, tokens, private URLs,
+   email addresses, account identifiers, service-principal identifiers, or
+   sensitive diagrams. Remove or redact the content instead.
+2. A baseline entry must correspond to a deterministic, non-sensitive fixture
+   or an independently reviewed false positive. Include the rule, path, and
+   reason in the pull request description or review record; do not paste the
+   matched sensitive value into that record.
+3. Baseline changes require security-reviewer approval and must be kept in the
+   same pull request as the content or rule change that necessitates them.
+4. Review baseline entries whenever the matching rule, path, or generated
+   artifact changes, and remove entries that no longer reproduce.
+5. A baseline entry does not waive the generated-artifact validator,
+   `make scrub-check`, CUI sidecar validation, or any system-specific
+   redaction gate.
+
+This is process guidance, not a final CUI handling determination. The CUI
+Program Office, ISSO/ISSM, and system owner remain the authorities for
+classification, dissemination, decontrol, and publication decisions.
 
 > **Control Mapping:** SC-7 (Boundary Protection), AU-3 (Content of Audit
 > Records — no sensitive data in records), SI-12 (Information Management),

@@ -253,7 +253,13 @@ def _sort_control_key(cid: str) -> tuple[str, int, int]:
     return (m.group(1), int(m.group(2)), int(m.group(3) or 0))
 
 
-def iter_control_records(vault_root: str, system_slug: str, status_map, orig_map, validate_schema: bool = False):
+def iter_control_records(
+    vault_root: str,
+    system_slug: str,
+    status_map,
+    orig_map,
+    validate_schema: bool = False,
+):
     controls_dir = os.path.join(
         vault_root, "examples", "vault", system_slug, "Controls"
     )
@@ -262,7 +268,12 @@ def iter_control_records(vault_root: str, system_slug: str, status_map, orig_map
     for name in sorted(os.listdir(controls_dir)):
         if not name.endswith(".md"):
             continue
-        record = parse_control(os.path.join(controls_dir, name), validate_schema=validate_schema)
+        record = parse_control(
+            os.path.join(controls_dir, name),
+            validate_schema=validate_schema,
+            status_map=status_map,
+            origination_map=orig_map,
+        )
         if record is None:
             continue
         target_status, status_remark = status_map.lookup(record.implementation_status)
@@ -290,7 +301,9 @@ def _providing_system(
 
 def _load_control_type_overrides(system_slug: str) -> dict[str, str]:
     """Load optional per-system control-type override file (data/systems/<slug>-control-type-overrides.yaml)."""
-    path = os.path.join(ROOT, "data", "systems", f"{slugify(system_slug)}-control-type-overrides.yaml")
+    path = os.path.join(
+        ROOT, "data", "systems", f"{slugify(system_slug)}-control-type-overrides.yaml"
+    )
     if os.path.exists(path):
         with open(path, encoding="utf-8") as f:
             return yaml.safe_load(f) or {}
@@ -859,8 +872,11 @@ def _build_threat_and_scenario(
             scenarios_out.append(
                 {
                     "bom-ref": f"{s_ref}-{part.part}",
+                    "name": f"{cid_display} residual risk ({part.part})",
                     "threat": t_ref,
                     "affectedAssets": [asset_ref],
+                    "inherentSeverity": "high",
+                    "residualSeverity": risk,
                     "riskScore": {"level": risk},
                     "properties": [
                         {"name": "vault:statement-part", "value": part.part}
@@ -870,8 +886,11 @@ def _build_threat_and_scenario(
         return threat_entry, scenarios_out
     scenario_entry: dict = {
         "bom-ref": s_ref,
+        "name": f"{cid_display} residual risk",
         "threat": t_ref,
         "affectedAssets": [asset_ref],
+        "inherentSeverity": "high",
+        "residualSeverity": risk,
         "riskScore": {"level": risk},
     }
     return threat_entry, [scenario_entry]
@@ -1082,7 +1101,15 @@ def convert_system(
 ) -> dict:
     if merge_strategy not in {"overlay", "replace"}:
         raise ValueError(f"unsupported merge strategy: {merge_strategy}")
-    records = list(iter_control_records(vault_root, system_slug, status_map, orig_map, validate_schema=validate_schema))
+    records = list(
+        iter_control_records(
+            vault_root,
+            system_slug,
+            status_map,
+            orig_map,
+            validate_schema=validate_schema,
+        )
+    )
     inheritance_dir = os.path.join(
         vault_root, "examples", "vault", system_slug, "Inheritance"
     )
@@ -1125,6 +1152,34 @@ def enumerate_systems(vault_root: str) -> list[str]:
     )
 
 
+# Repo-relative location of the vault submodule. Matches ``vault_root`` in
+# build_catalog_index.py and the tracked skipped.yaml / catalog index entries.
+VAULT_SUBMODULE_PATH = "vendor/oscal-vault"
+
+
+def _vault_reference(system_dir: str) -> str:
+    """Return a portable reference for a vault system directory.
+
+    Catalogs may be generated from an external vault checkout.  Persisting the
+    invocation-specific absolute path would expose workstation layout in a
+    generated, potentially publishable catalog.  The vault-relative suffix is
+    sufficient to identify a skipped system in every checkout, and is rooted at
+    the submodule path so the output is identical for in-repo and external
+    checkouts.
+    """
+    normalized = os.path.abspath(system_dir)
+    marker = f"{os.sep}examples{os.sep}vault{os.sep}"
+    # rfind: the system directory is the last examples/vault/ segment, even if an
+    # ancestor directory happens to share that name.
+    marker_at = normalized.rfind(marker)
+    suffix = (
+        normalized[marker_at + 1 :].replace(os.sep, "/")
+        if marker_at >= 0
+        else "examples/vault/<unresolved-system>"
+    )
+    return f"{VAULT_SUBMODULE_PATH}/{suffix}"
+
+
 def enumerate_skipped_systems(vault_root: str) -> list[dict]:
     root = os.path.join(vault_root, "examples", "vault")
     skipped: list[dict] = []
@@ -1157,9 +1212,7 @@ def enumerate_skipped_systems(vault_root: str) -> list[dict]:
                 "system": name,
                 "reason": "no Controls/ directory in vault",
                 "skip_class": skip_class,
-                "vault_path": os.path.relpath(system_dir, ROOT)
-                if system_dir.startswith(ROOT)
-                else system_dir,
+                "vault_path": _vault_reference(system_dir),
             }
         )
     return skipped

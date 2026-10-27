@@ -14,6 +14,10 @@ import yaml
 HERE = Path(__file__).resolve().parent
 SCRIPTS = HERE.parent
 ROOT = SCRIPTS.parent
+ASSETS_START = "<!-- system-profile:assets:start -->"
+ASSETS_END = "<!-- system-profile:assets:end -->"
+ROLES_START = "<!-- system-profile:roles:start -->"
+ROLES_END = "<!-- system-profile:roles:end -->"
 
 if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
@@ -217,15 +221,79 @@ def build_profile(paths) -> str:
     return render_markdown(paths.slug, system_assets(dfd, arch), user_roles(arch))
 
 
+def _replace_section(text: str, start: str, end: str, content: str) -> str:
+    if text.count(start) != 1 or text.count(end) != 1:
+        raise ValueError(f"document must contain exactly one {start} / {end} pair")
+    before, remainder = text.split(start, 1)
+    _, after = remainder.split(end, 1)
+    return f"{before}{start}\n\n{content}\n\n{end}{after}"
+
+
+def _section(text: str, start: str, end: str) -> str:
+    if text.count(start) != 1 or text.count(end) != 1:
+        raise ValueError(f"document must contain exactly one {start} / {end} pair")
+    return text.split(start, 1)[1].split(end, 1)[0].strip()
+
+
+def _normalize_table(table: str) -> list[list[str]]:
+    rows = [
+        [cell.strip() for cell in line.strip().strip("|").split("|")]
+        for line in table.splitlines()
+        if line.strip().startswith("|")
+    ]
+    if len(rows) > 1 and all(set(cell) <= {"-", ":"} for cell in rows[1]):
+        rows[1] = ["---"] * len(rows[1])
+    return rows
+
+
+def sync_document(text: str, profile: str) -> str:
+    assets_and_roles = profile.split("## System Assets\n\n", 1)[1]
+    assets, roles = assets_and_roles.split("\n\n## User Roles and Privileges\n\n", 1)
+    text = _replace_section(text, ASSETS_START, ASSETS_END, assets)
+    return _replace_section(text, ROLES_START, ROLES_END, roles.rstrip())
+
+
+def document_is_current(text: str, profile: str) -> bool:
+    assets_and_roles = profile.split("## System Assets\n\n", 1)[1]
+    assets, roles = assets_and_roles.split("\n\n## User Roles and Privileges\n\n", 1)
+    return _normalize_table(
+        _section(text, ASSETS_START, ASSETS_END)
+    ) == _normalize_table(assets) and _normalize_table(
+        _section(text, ROLES_START, ROLES_END)
+    ) == _normalize_table(roles)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("system", nargs="?", default=DEFAULT_SYSTEM)
     parser.add_argument(
         "--out", help="Output path (default: build/<system>-system-profile.md)"
     )
+    parser.add_argument(
+        "--sync-doc", type=Path, help="Update marked tables in a document"
+    )
+    parser.add_argument(
+        "--check-doc", type=Path, help="Fail when marked tables differ from sources"
+    )
     args = parser.parse_args(argv)
 
     paths = load_system(args.system)
+    if args.sync_doc or args.check_doc:
+        doc = args.sync_doc or args.check_doc
+        if not doc.is_absolute():
+            doc = ROOT / doc
+        current = doc.read_text(encoding="utf-8")
+        profile = build_profile(paths)
+        if args.check_doc:
+            if not document_is_current(current, profile):
+                print(f"FAIL: {_rel(doc)} profile tables are stale", file=sys.stderr)
+                return 1
+            print(f"OK - {_rel(doc)} profile tables match source data.")
+            return 0
+        updated = sync_document(current, profile)
+        doc.write_text(updated, encoding="utf-8")
+        print(f"Updated {_rel(doc)}")
+        return 0
     out = (
         Path(args.out)
         if args.out

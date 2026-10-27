@@ -1,0 +1,6 @@
+schema_uri: https://raw.githubusercontent.com/OWASP/www-project-threat-model-library/v1.0.2/schemas/threat-model.schema.json
+strict_local_validation: true
+notes: >-
+  Pin the OWASP threat-model schema URI used by the one-way export layer.
+  The repository exporter owns camelCase to snake_case mapping and can run
+  deterministic local validation without network access.

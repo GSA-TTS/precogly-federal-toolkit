@@ -29,7 +29,7 @@ jobs:
               (re.compile(r'dbdde48f|58339e26'), 'service-principal id'),
           ]
           EXTS = {'.py', '.yaml', '.yml', '.json', '.md'}
-          SKIP = {'.git', '__pycache__', 'node_modules'}
+          SKIP = {'.git', '.github', '__pycache__', 'node_modules'}
 
           root = pathlib.Path('.')
           hits = []

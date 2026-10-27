@@ -1,0 +1,100 @@
+---
+name: mirror-integrity
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  validate-release-state:
+    name: Validate released toolkit state
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Check for forbidden private markers
+        run: |
+          python3 - <<'PY'
+          import pathlib
+          import re
+          import sys
+
+          forbidden = [
+              (re.compile(r"\bf" r"pdf\b", re.IGNORECASE), "private system name"),
+              (re.compile(r"\bdata" r"bricks\b", re.IGNORECASE), "private platform name"),
+              (re.compile(r"\bmc" r"aas\b", re.IGNORECASE), "private platform name"),
+              (
+                re.compile(r"gsaext_f" r"pdf_uat|gsaext-f" r"pdf-uat", re.IGNORECASE),
+                  "UAT share recipient",
+              ),
+              (re.compile(r"dbdde" r"48f|58339" r"e26"), "service-principal ID"),
+          ]
+          extensions = {".py", ".yaml", ".yml", ".json", ".md"}
+          skip = {".git", ".github", "__pycache__", "node_modules"}
+          root = pathlib.Path(".")
+          hits = []
+          scanned = 0
+          for file_path in root.rglob("*"):
+              if any(part in file_path.parts for part in skip):
+                  continue
+              if not file_path.is_file() or file_path.suffix not in extensions:
+                  continue
+              scanned += 1
+              text = file_path.read_text(errors="replace")
+              for pattern, label in forbidden:
+                  if pattern.search(text):
+                      hits.append(f"{file_path}: contains {label}")
+                      break
+          if hits:
+              print("FAIL: private markers found in toolkit:")
+              print("\n".join(f"  {hit}" for hit in hits))
+              sys.exit(1)
+          print(f"OK: scanned {scanned} files — no private markers")
+          PY
+
+      - name: Exercise synthetic reconciliation contract
+        run: |
+          consumer_repository="$(mktemp -d)"
+          trap 'rm -rf "$consumer_repository"' EXIT
+          mkdir -p "$consumer_repository/data/systems" "$consumer_repository/vault"
+          cp -R examples/example-system \
+            "$consumer_repository/data/systems/example-system"
+          printf '{"synthetic": true}\n' \
+            > "$consumer_repository/vault/example-system.canonical.json"
+          python3 - "$consumer_repository" <<'PY'
+          import hashlib
+          import pathlib
+          import sys
+
+          repository = pathlib.Path(sys.argv[1])
+          artifact = repository / "vault/example-system.canonical.json"
+          digest = hashlib.sha256(artifact.read_bytes()).hexdigest()
+          fixture_digest = "dae7c83da95ca5fa725d1d4146b96dc43329aa7218ab365394d224e3e4169d65"
+          for manifest in (repository / "data/systems/example-system").rglob("*.yaml"):
+              text = manifest.read_text(encoding="utf-8")
+              manifest.write_text(text.replace(fixture_digest, digest), encoding="utf-8")
+          PY
+          uv run --with pyyaml --with jsonschema --with referencing \
+            python scripts/reconciliation_check.py \
+            --repository "$consumer_repository"
+
+      - name: Write summary
+        if: success()
+        run: |
+          {
+            echo "## Mirror integrity"
+            echo
+            echo "Validated release commit \`${GITHUB_SHA}\`."
+            echo
+            echo "- Private-marker scan passed."
+            echo "- Synthetic consumer reconciliation contract passed."
+            echo "- No cross-repository writes were performed."
+          } >> "$GITHUB_STEP_SUMMARY"

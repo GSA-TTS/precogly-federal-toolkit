@@ -14,9 +14,18 @@ import os
 import re
 import sys
 import uuid
-from datetime import UTC, datetime
+from pathlib import Path
 
 import yaml
+
+try:
+    from scripts.control_identity import canonical_control_id
+    from scripts.tmbom_standards import project_nist_standard
+    from scripts.tmbom_topology import project_tmbom_topology
+except ModuleNotFoundError:  # Support direct invocation as a script.
+    from control_identity import canonical_control_id
+    from tmbom_standards import project_nist_standard
+    from tmbom_topology import project_tmbom_topology
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -30,7 +39,14 @@ if HERE not in sys.path:
 
 from flow_auth import auth_mechanism_properties, load_auth_catalog, load_auth_metadata  # noqa: E402
 from flow_refs import resolve_flow_bindings, resolve_flow_overrides  # noqa: E402
+from systems.hosting import (  # noqa: E402
+    compose_hosting_overlay,
+    load_hosting_overlay,
+)
 from systems.loader import DEFAULT_SYSTEM, SystemPaths, load_system  # noqa: E402
+
+_CDX_UUID_NS = uuid.UUID("f9d1dea1-0000-4000-8000-000000000002")
+_STABLE_TIMESTAMP = "1970-01-01T00:00:00.000Z"
 
 # Precogly slug rule (derived empirically from an editor export):
 #   lowercase -> non-alphanumeric collapsed to '-' -> truncate to 40 chars
@@ -82,7 +98,14 @@ def family(cid):
 
 
 def by_id(doc):
-    return {c["control_id"]: c for c in doc.get("controls", [])}
+    result = {}
+    for control in doc.get("controls", []):
+        cid = canonical_control_id(control["control_id"])
+        if cid in result:
+            raise ValueError(f"duplicate canonical control ID: {cid}")
+        control["control_id"] = cid
+        result[cid] = control
+    return result
 
 
 def merge_properties(existing, additions):
@@ -116,14 +139,10 @@ def apply_architecture_overrides(cdx, arch):
         if override.get("parentZone"):
             parent = override["parentZone"]
             if parent not in zones:
-                raise KeyError(
-                    f"zone {zref} parentZone references unknown zone: {parent}"
-                )
+                raise KeyError(f"zone {zref} parentZone references unknown zone: {parent}")
             zone["parentZone"] = parent
         if override.get("properties"):
-            zone["properties"] = merge_properties(
-                zone.get("properties", []), override["properties"]
-            )
+            zone["properties"] = merge_properties(zone.get("properties", []), override["properties"])
     assets = {a["bom-ref"]: a for a in bp.get("assets", [])}
     for aref, override in arch.get("asset_overrides", {}).items():
         if aref not in assets:
@@ -135,9 +154,7 @@ def apply_architecture_overrides(cdx, arch):
                 raise KeyError(f"asset {aref} zone references unknown zone: {zref}")
             asset["zone"] = zref
         if override.get("properties"):
-            asset["properties"] = merge_properties(
-                asset.get("properties", []), override["properties"]
-            )
+            asset["properties"] = merge_properties(asset.get("properties", []), override["properties"])
     flows = {f["bom-ref"]: f for f in bp.get("flows", [])}
     flow_overrides, flow_errors = resolve_flow_overrides(arch, bp)
     if flow_errors:
@@ -191,9 +208,7 @@ def build_mitigation_text(cid, mc, db):
             if db.get(k)
         ]
         if five_w:
-            blocks.append(
-                "== data platform Tenant Implementation ==\n" + "\n".join(five_w)
-            )
+            blocks.append("== data platform Tenant Implementation ==\n" + "\n".join(five_w))
         if db.get("assessment_objective"):
             ao = re.split(r"\.\s*Additionally", db["assessment_objective"])[0].strip()
             blocks.append(f"== Assessment Objective ==\n{ao}")
@@ -228,6 +243,7 @@ class ControlRegistry:
         evidence_links=None,
         evidence_artifacts=None,
         evidence_ids=None,
+        evidence_roles=None,
     ):
         self.seq = start_seq
         self.by_key = {}  # evidence-key -> control dict (shared)
@@ -236,6 +252,7 @@ class ControlRegistry:
         self._evidence_artifacts = evidence_artifacts or {}
         # Per-system overrides layer over the built-in Example System-derived map.
         self._evidence_ids = {**EVIDENCE_NIST_IDS, **(evidence_ids or {})}
+        self._evidence_roles = evidence_roles or {}
 
     def _new_ref(self, name):
         self.seq += 1
@@ -246,22 +263,22 @@ class ControlRegistry:
         ctrl = self.by_key.get(key)
         if ctrl is None:
             props = [{"name": "resp:evidence-key", "value": key}]
+            evidence_role = self._evidence_roles.get(key, "implementation")
+            props.append({"name": "resp:evidence-role", "value": evidence_role})
             if key in self._evidence_ids:
                 props.append({"name": "ctrl:id", "value": self._evidence_ids[key]})
             nist_id = self._evidence_ids.get(key)
             ctrl = {
                 "bom-ref": self._new_ref(name),
                 "name": name,
-                "status": "verified",
+                "status": "recommended" if evidence_role == "observation" else "verified",
                 "description": description,
                 "category": category,
                 "properties": props,
                 "mitigations": [],
             }
             if nist_id:
-                ctrl["satisfies"] = [
-                    {"reference": nist_id, "framework": "nist-800-53-r5"}
-                ]
+                ctrl["satisfies"] = [{"reference": nist_id, "framework": "nist-800-53-r5"}]
             url = self._evidence_links.get(key)
             if url:
                 ctrl["externalReferences"] = [{"type": "evidence", "url": url}]
@@ -281,9 +298,7 @@ class ControlRegistry:
                             [
                                 {
                                     "name": f"resp:evidence-{field.replace('_', '-')}",
-                                    "value": str(val).lower()
-                                    if isinstance(val, bool)
-                                    else str(val),
+                                    "value": str(val).lower() if isinstance(val, bool) else str(val),
                                 }
                             ],
                         )
@@ -412,39 +427,56 @@ def _primary_asset(cid, fam_map, default_assets, alias):
     return [all_assets[0]] if all_assets else []
 
 
-def _load_data(cdx, paths: SystemPaths):
+def _index_references_source(index, source: str) -> bool:
+    """True if any control in a CRM index lists ``source`` (legacy ``sources`` or baseline ``crm_sources``)."""
+    for row in (index or {}).get("controls") or []:
+        if not isinstance(row, dict):
+            continue
+        for key in ("sources", "crm_sources"):
+            listed = row.get(key)
+            if isinstance(listed, list) and source in listed:
+                return True
+    return False
+
+
+def _load_data(cdx, paths: SystemPaths, architecture=None):
     """Load all YAML data sources; apply architecture overrides; return dict."""
-    arch = _load_yaml_path(paths.model_architecture)
+    arch = architecture or _load_yaml_path(paths.model_architecture)
     apply_architecture_overrides(cdx, arch)
-    ev = _load_yaml_path(paths.model_evidence)
+    # Evidence snippets are optional, and so is the data platform CRM, but only for
+    # a system whose CRM index never references data platform (for example
+    # Example System-Sync). If the index lists data platform as a source, crm/data-platform.yaml
+    # is required, so dropping it fails instead of silently producing a model
+    # with no data platform responsibilities. A countermeasure that references a
+    # missing evidence key still fails with a clear KeyError.
+    ev = _load_yaml_path(paths.model_evidence) if paths.model_evidence else {}
     managed_cloud_service = paths.crm_source("managed-cloud-service")
     dbx = paths.crm_source("data-platform")
-    if not (paths.crm_index and managed_cloud_service and dbx and paths.countermeasures):
+    needs_dbx = bool(paths.crm_index) and _index_references_source(_load_yaml_path(paths.crm_index), "data-platform")
+    if not (paths.crm_index and managed_cloud_service and paths.countermeasures and (dbx or not needs_dbx)):
         missing = [
             name
             for name, p in (
                 ("crm_index", paths.crm_index),
                 ("crm/managed-cloud-service.yaml", managed_cloud_service),
-                ("crm/data-platform.yaml", dbx),
+                ("crm/data-platform.yaml (referenced by the CRM index)", dbx if needs_dbx else True),
                 ("countermeasures", paths.countermeasures),
             )
             if not p
         ]
-        raise FileNotFoundError(
-            f"system '{paths.slug}' is missing required CRM data: {missing}"
-        )
+        raise FileNotFoundError(f"system '{paths.slug}' is missing required CRM data: {missing}")
     return {
         "arch": arch,
-        "evidence": ev["evidence"],
+        "evidence": ev.get("evidence") or {},
         "evidence_links": ev.get("evidence_links") or {},
         "evidence_artifacts": ev.get("evidence_artifacts") or {},
         "evidence_ids": ev.get("evidence_ids") or {},
+        "evidence_roles": ev.get("evidence_roles") or {},
         "index": _load_yaml_path(paths.crm_index),
         "managed-cloud-service": by_id(_load_yaml_path(managed_cloud_service)),
-        "dbx": by_id(_load_yaml_path(dbx)),
+        "dbx": by_id(_load_yaml_path(dbx)) if dbx else {},
         "cms": {
-            c["control_id"]: c
-            for c in _load_yaml_path(paths.countermeasures)["countermeasures"]
+            canonical_control_id(c["control_id"]): c for c in _load_yaml_path(paths.countermeasures)["countermeasures"]
         },
     }
 
@@ -532,12 +564,8 @@ def _build_controls_for_threat(
         linked.append(ctrl["bom-ref"])
 
     if cm_test_steps and not has_text_mech and linked:
-        last_ctrl = next(
-            (c for c in registry.controls if c["bom-ref"] == linked[-1]), None
-        )
-        if last_ctrl and not any(
-            p["name"] == "resp:test-steps" for p in last_ctrl.get("properties", [])
-        ):
+        last_ctrl = next((c for c in registry.controls if c["bom-ref"] == linked[-1]), None)
+        if last_ctrl and not any(p["name"] == "resp:test-steps" for p in last_ctrl.get("properties", [])):
             last_ctrl.setdefault("properties", []).append(
                 {"name": "resp:test-steps", "value": json.dumps(cm_test_steps)}
             )
@@ -561,16 +589,12 @@ def _build_controls_for_threat(
     return linked
 
 
-def _build_scenario(
-    s_ref, t_ref, affected, flows, impl_status, status_risk, db, resp_src
-):
+def _build_scenario(s_ref, t_ref, affected, flows, impl_status, status_risk, db, resp_src):
     level = status_risk.get(impl_status, status_risk.get("", "medium"))
     inherent = "high" if level in {"high", "critical"} else "medium"
     scenario_props = [{"name": "resp:source", "value": resp_src}]
     if db and db.get("impact_if_unaddressed"):
-        narrative = re.split(r"\.\s*Additionally", db["impact_if_unaddressed"])[
-            0
-        ].strip()
+        narrative = re.split(r"\.\s*Additionally", db["impact_if_unaddressed"])[0].strip()
         scenario_props.append({"name": "resp:residual-narrative", "value": narrative})
     return {
         "bom-ref": s_ref,
@@ -655,9 +679,7 @@ def _process_control_id(
         threat["properties"].append({"name": "resp:writeup", "value": mitig_text})
     return (
         threat,
-        _build_scenario(
-            s_ref, t_ref, affected, flows, impl_status, status_risk, db, resp_src
-        ),
+        _build_scenario(s_ref, t_ref, affected, flows, impl_status, status_risk, db, resp_src),
         seq,
     )
 
@@ -672,10 +694,7 @@ def _link_object_poisoning(threats, all_controls):
         (
             c
             for c in all_controls
-            if any(
-                p.get("name") == "ctrl:id" and p.get("value") == "SR-3"
-                for p in (c.get("properties") or [])
-            )
+            if any(p.get("name") == "ctrl:id" and p.get("value") == "SR-3" for p in (c.get("properties") or []))
         ),
         None,
     )
@@ -690,16 +709,16 @@ def _link_object_poisoning(threats, all_controls):
 
 
 def _aggregate_status(statuses):
-    ranks = [_STATUS_RANK.get(s, 0) for s in statuses]
-    hi = max(ranks)
-    lo = min(ranks)
-    if hi == lo:
-        return statuses[0]
-    if hi >= 3 and lo == 0:
-        return "in-progress"  # partially implemented
-    if hi >= 3:
-        return "implemented"
-    return "in-progress"
+    """Return the weakest required countermeasure status for a NIST control."""
+    if not statuses:
+        raise ValueError("cannot aggregate an empty status list")
+    required = [status for status in statuses if status != "rejected"]
+    if not required:
+        return "rejected"
+    unknown = sorted(set(required) - set(_STATUS_RANK))
+    if unknown:
+        raise ValueError(f"unknown control statuses: {unknown}")
+    return min(required, key=_STATUS_RANK.__getitem__)
 
 
 def _compute_control_rollup(all_controls):
@@ -722,13 +741,16 @@ def _compute_control_rollup(all_controls):
 
 
 def _emit_metadata(cdx, controls_list, rollup_entries):
-    """Stamp serialNumber, version, timestamp, and metadata properties."""
-    cdx["serialNumber"] = f"urn:uuid:{uuid.uuid4()}"
+    """Stamp deterministic metadata so source-only regeneration is stable."""
+    stable_payload = {
+        "blueprints": cdx.get("blueprints", []),
+        "threats": cdx.get("threats", {}),
+        "controls": cdx.get("controls", []),
+    }
+    cdx["serialNumber"] = f"urn:uuid:{uuid.uuid5(_CDX_UUID_NS, json.dumps(stable_payload, sort_keys=True))}"
     cdx["version"] = int(cdx.get("version", 1)) + 1
     meta = cdx.setdefault("metadata", {})
-    meta["timestamp"] = (
-        datetime.now(UTC).isoformat(timespec="milliseconds").replace("+00:00", "Z")
-    )
+    meta["timestamp"] = _STABLE_TIMESTAMP
     meta.setdefault("properties", []).extend(
         [
             {
@@ -753,9 +775,7 @@ def _emit_metadata(cdx, controls_list, rollup_entries):
     )
 
 
-def _write_output(
-    cdx, out_path, controls_list, managed_cloud_service, dbx, threats, scenarios, registry
-):
+def _write_output(cdx, out_path, controls_list, managed_cloud_service, dbx, threats, scenarios, registry):
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(cdx, f, indent=2, ensure_ascii=False)
@@ -779,6 +799,31 @@ def _write_output(
     )
 
 
+def _write_hosting_summary(cdx, out_path, overlay):
+    blueprint = cdx["blueprints"][0]
+    threats = cdx.get("threats") or {}
+    summary = {
+        "system": overlay.slug,
+        "parent_system": overlay.parent_system,
+        "hosting_overlay": overlay.name,
+        "lifecycle": overlay.lifecycle,
+        "authorization_state": overlay.authorization_state,
+        "feasibility_status": overlay.feasibility["status"],
+        "artifact": Path(out_path).name,
+        "statistics": {
+            "zones": len(blueprint.get("zones") or []),
+            "assets": len(blueprint.get("assets") or []),
+            "flows": len(blueprint.get("flows") or []),
+            "threats": len(threats.get("threats") or []),
+            "scenarios": len(threats.get("scenarios") or []),
+            "controls": len(cdx.get("controls") or []),
+            "visualizations": len(blueprint.get("visualizations") or []),
+        },
+    }
+    summary_path = Path(out_path).with_name("import-summary.yaml")
+    summary_path.write_text(yaml.safe_dump(summary, sort_keys=False), encoding="utf-8")
+
+
 def _resolve_flow_bindings(flow_bindings, arch, cdx):
     resolved, errors = resolve_flow_bindings(flow_bindings, arch, cdx["blueprints"][0])
     if errors:
@@ -795,7 +840,11 @@ def main():
     )
     ap.add_argument(
         "--out",
-        default=os.path.join(ROOT, "build", "example-system-crm-threat-model.cdx.json"),
+        default=None,
+    )
+    ap.add_argument(
+        "--hosting",
+        help="Explicit hosting overlay name under data/systems/<system>/hosting/.",
     )
     args = ap.parse_args()
 
@@ -804,7 +853,44 @@ def main():
     with open(paths.model_dfd, encoding="utf-8") as f:
         cdx = json.load(f)
 
-    data = _load_data(cdx, paths)
+    architecture = _load_yaml_path(paths.model_architecture)
+    hosting_overlay = None
+    if args.hosting:
+        hosting_overlay = load_hosting_overlay(paths, args.hosting)
+        composed = compose_hosting_overlay(cdx, hosting_overlay, architecture)
+        cdx = composed.dfd
+        architecture = composed.architecture or architecture
+        cdx["blueprints"][0]["name"] = hosting_overlay.title or hosting_overlay.slug
+        cdx.setdefault("metadata", {}).setdefault("properties", []).extend(
+            [
+                {"name": "resp:parent-system", "value": paths.slug},
+                {"name": "resp:hosting-overlay", "value": hosting_overlay.name},
+                {"name": "resp:lifecycle", "value": hosting_overlay.lifecycle},
+                {
+                    "name": "resp:authorization-state",
+                    "value": hosting_overlay.authorization_state,
+                },
+                {
+                    "name": "resp:feasibility-status",
+                    "value": str(hosting_overlay.feasibility["status"]),
+                },
+            ]
+        )
+    out_path = args.out
+    if out_path is None:
+        out_path = (
+            os.path.join(
+                ROOT,
+                "build",
+                "systems",
+                hosting_overlay.slug,
+                f"{hosting_overlay.slug}.cdx.json",
+            )
+            if hosting_overlay
+            else os.path.join(ROOT, "build", "example-system-crm-threat-model.cdx.json")
+        )
+
+    data = _load_data(cdx, paths, architecture)
     arch = data["arch"]
     fam_map = arch["family_asset_map"]
     default_assets = arch["default_assets"]
@@ -825,6 +911,7 @@ def main():
         evidence_links=data["evidence_links"],
         evidence_artifacts=data["evidence_artifacts"],
         evidence_ids=data["evidence_ids"],
+        evidence_roles=data["evidence_roles"],
     )
     controls_list = [c["control_id"] for c in data["index"]["controls"]]
 
@@ -856,19 +943,20 @@ def main():
             gwt = gwt_bindings[cid]
             for key in ("given", "when", "then"):
                 if gwt.get(key):
-                    t.setdefault("properties", []).append(
-                        {"name": f"gwt.{key}", "value": gwt[key]}
-                    )
+                    t.setdefault("properties", []).append({"name": f"gwt.{key}", "value": gwt[key]})
 
     cdx["threats"] = {"threats": threats, "scenarios": scenarios}
     all_controls = existing_controls + registry.controls
     _link_object_poisoning(threats, all_controls)
     cdx["controls"] = all_controls
 
+    project_nist_standard(cdx)
+    project_tmbom_topology(cdx)
+
     _emit_metadata(cdx, controls_list, _compute_control_rollup(all_controls))
     _write_output(
         cdx,
-        args.out,
+        out_path,
         controls_list,
         data["managed-cloud-service"],
         data["dbx"],
@@ -876,6 +964,8 @@ def main():
         scenarios,
         registry,
     )
+    if hosting_overlay:
+        _write_hosting_summary(cdx, out_path, hosting_overlay)
 
 
 if __name__ == "__main__":

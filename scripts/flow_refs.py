@@ -131,10 +131,18 @@ def resolve_flow_bindings(
             errors.append(f"flow_bindings.{control_id}: expected a list of flow refs")
             continue
         control_refs: list[str] = []
+        seen_refs: set[str] = set()
         unknown: list[str] = []
         for value in refs:
             flow_ref = resolve_flow_ref(value, flow_refs, aliases)
             if flow_ref:
+                if flow_ref in seen_refs:
+                    errors.append(
+                        f"flow_bindings.{control_id} contains duplicate resolved "
+                        f"flow {flow_ref}"
+                    )
+                    continue
+                seen_refs.add(flow_ref)
                 control_refs.append(flow_ref)
             else:
                 unknown.append(value)

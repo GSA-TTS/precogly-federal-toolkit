@@ -49,16 +49,25 @@ templates/generic-crm-system/
 
 ## How to Run
 
-Requirements: `uv` and PyYAML installed.
+Requirements: `uv` (PyYAML is pulled in automatically; set `UV=...` to use a
+different runner).
+
+The `Makefile` requires two inputs, and `make` stops with an error if either is
+missing:
+
+- `CATALOG` — path to a NIST 800-53 r5 OSCAL `catalog.json`.
+- `OSCAL_SOURCES` — space-separated paths to one or more OSCAL
+  `component-definition.json` files, one per CRM source.
 
 From this directory (`templates/generic-crm-system/`):
 
 ```bash
 # Run the entire pipeline (oscal convert -> shell build -> validate)
-make all
+make all CATALOG=/path/to/catalog.json \
+  OSCAL_SOURCES='/path/to/a/component-definition.json /path/to/b/component-definition.json'
 
 # Step-by-step
-make pack        # Parses the 3 local OSCAL files and populates packs/
+make pack CATALOG=... OSCAL_SOURCES=...   # Parses the OSCAL files and populates pack/
 make shell-cdx   # Generates the integrated visual CycloneDX shell
 make validate    # Asserts enums, linkages, and runs the privacy filter
 ```

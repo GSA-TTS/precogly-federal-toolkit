@@ -16,7 +16,6 @@ Invariants checked (fail = non-zero exit):
 
 import json
 import os
-import re
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -27,7 +26,7 @@ if HERE not in sys.path:
     sys.path.insert(0, HERE)
 
 from systems.loader import DEFAULT_SYSTEM, load_system  # noqa: E402
-from validate import FORBIDDEN, _load_forbidden  # noqa: E402
+from validate import _load_forbidden  # noqa: E402
 
 ALLOWED_STATUS = {"verified", "implemented"}
 SEVERITY_LEVELS = {"info", "low", "medium", "high", "critical"}
@@ -77,6 +76,9 @@ def main():
     if not controls:
         fail("no controls[] emitted")
 
+    control_refs = {
+        str(control["bom-ref"]) for control in controls if control.get("bom-ref")
+    }
     bad_status = [
         c["bom-ref"] for c in controls if c.get("status") not in ALLOWED_STATUS
     ]
@@ -129,6 +131,12 @@ def main():
         for t in op:
             if not t.get("mitigations"):
                 fail(f"Object Poisoning threat {t['bom-ref']} has no linked controls")
+            unknown_mitigations = sorted(set(t["mitigations"]) - control_refs)
+            if unknown_mitigations:
+                fail(
+                    f"Object Poisoning threat {t['bom-ref']} references unknown "
+                    f"control(s): {unknown_mitigations[:3]}"
+                )
 
     raw = json.dumps(d)
     forbidden = _load_forbidden(paths.redaction)
