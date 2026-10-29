@@ -46,8 +46,13 @@ def validate_repository(repository: Path) -> list[str]:
                 import yaml
                 from compliance.lib.reconciliation import validate_overlay
 
-                data = yaml.safe_load(automation_overlay.read_text(encoding="utf-8")) or {}
-                errors.extend(f"{automation_overlay}: {error}" for error in validate_overlay(data, require_ready=False))
+                data = (
+                    yaml.safe_load(automation_overlay.read_text(encoding="utf-8")) or {}
+                )
+                errors.extend(
+                    f"{automation_overlay}: {error}"
+                    for error in validate_overlay(data, require_ready=False)
+                )
     errors.extend(validate_chain(systems_dir, repository=repository))
     return errors
 

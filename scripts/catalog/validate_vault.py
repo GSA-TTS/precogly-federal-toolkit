@@ -73,10 +73,13 @@ def validate_cdx(system: str, cdx_path: str) -> tuple[int, int, int]:
     assets = bp.get("assets", [])
     zones = bp.get("zones", [])
     flows = bp.get("flows", [])
-    # flows are addressable assets; threats/scenarios may reference either
-    aset = {a["bom-ref"] for a in assets} | {
-        f["bom-ref"] for f in flows if "bom-ref" in f
-    }
+    # Flows are addressable; threats/scenarios may reference either. Data stores are components
+    # (flow endpoints and scenario targets) just like assets.
+    aset = (
+        {a["bom-ref"] for a in assets}
+        | {s["bom-ref"] for s in bp.get("dataStores", []) if "bom-ref" in s}
+        | {f["bom-ref"] for f in flows if "bom-ref" in f}
+    )
     zset = {z["bom-ref"] for z in zones}
 
     if not aset:

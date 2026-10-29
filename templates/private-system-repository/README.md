@@ -1,5 +1,10 @@
 # Private System Repository Template
 
+[← Repository README](../../README.md) · [Documentation index](../../docs/index.md) ·
+[Open Work Tracker](../../docs/OPEN_WORK.md) (Workstream 6) ·
+[Redaction guide](../../docs/redaction-guide.md) ·
+[Generic CRM template](../generic-crm-system/README.md)
+
 Use this template for a system owner repository that contains source documents,
 vault notes, canonical sidecars, evidence, and publication approvals. The
 repository consumes a pinned community toolkit but remains the system-content

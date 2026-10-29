@@ -58,7 +58,9 @@ def _load_yaml(path: Path) -> dict[str, Any]:
         return yaml.safe_load(f) or {}
 
 
-def _schema_errors(payload: dict[str, Any], schema_name: str, source: Path) -> list[str]:
+def _schema_errors(
+    payload: dict[str, Any], schema_name: str, source: Path
+) -> list[str]:
     schema_path = SCHEMAS / schema_name
     if not schema_path.is_file():
         return []
@@ -71,17 +73,23 @@ def _schema_errors(payload: dict[str, Any], schema_name: str, source: Path) -> l
         schema = json.load(f)
     validator = jsonschema.Draft202012Validator(schema)
     errors = []
-    for error in sorted(validator.iter_errors(payload), key=lambda item: list(item.path)):
+    for error in sorted(
+        validator.iter_errors(payload), key=lambda item: list(item.path)
+    ):
         at = "/".join(str(part) for part in error.path) or "<root>"
         errors.append(f"{_rel(source)}:{at}: {error.message}")
     return errors
 
 
-def validate_dfd(dfd: dict[str, Any], *, source: Path) -> tuple[set[str], set[str], set[str], list[str]]:
+def validate_dfd(
+    dfd: dict[str, Any], *, source: Path
+) -> tuple[set[str], set[str], set[str], list[str]]:
     errors: list[str] = []
     metadata = dfd.get("metadata") or {}
     if isinstance(metadata, dict) and metadata.get("authors"):
-        errors.append(f"{_rel(source)}: metadata.authors must be stripped before generation")
+        errors.append(
+            f"{_rel(source)}: metadata.authors must be stripped before generation"
+        )
 
     blueprints = dfd.get("blueprints") or []
     asset_refs: set[str] = set()
@@ -100,9 +108,7 @@ def validate_dfd(dfd: dict[str, Any], *, source: Path) -> tuple[set[str], set[st
         boundaries = blueprint.get("boundaries") or []
         data_stores = blueprint.get("dataStores") or []
         flows = blueprint.get("flows") or []
-        blueprint_zone_refs = {
-            zone["bom-ref"] for zone in zones if zone.get("bom-ref")
-        }
+        blueprint_zone_refs = {zone["bom-ref"] for zone in zones if zone.get("bom-ref")}
 
         for zone in zones:
             ref = zone.get("bom-ref")
@@ -170,17 +176,25 @@ def validate_dfd(dfd: dict[str, Any], *, source: Path) -> tuple[set[str], set[st
             for field in ("source", "destination"):
                 target = flow.get(field)
                 if target not in endpoints:
-                    errors.append(f"{prefix}: flow {ref} {field} references unknown DFD node {target}")
+                    errors.append(
+                        f"{prefix}: flow {ref} {field} references unknown DFD node {target}"
+                    )
 
     for ref in sorted(asset_refs & flow_refs):
-        errors.append(f"{_rel(source)}: bom-ref {ref} is used by both an asset and a flow")
+        errors.append(
+            f"{_rel(source)}: bom-ref {ref} is used by both an asset and a flow"
+        )
     for ref in sorted(zone_refs & flow_refs):
-        errors.append(f"{_rel(source)}: bom-ref {ref} is used by both a zone and a flow")
+        errors.append(
+            f"{_rel(source)}: bom-ref {ref} is used by both a zone and a flow"
+        )
 
     return asset_refs, zone_refs, flow_refs, errors
 
 
-def _check_aliases(errors: list[str], source: Path, field: str, aliases: Any, known_aliases: set[str]) -> None:
+def _check_aliases(
+    errors: list[str], source: Path, field: str, aliases: Any, known_aliases: set[str]
+) -> None:
     if not isinstance(aliases, list):
         errors.append(f"{_rel(source)}:{field}: expected a list of asset aliases")
         return
@@ -205,7 +219,9 @@ def validate_architecture(
 
     for alias, asset_ref in aliases.items():
         if asset_ref not in asset_refs:
-            errors.append(f"{_rel(source)}:assets.{alias} references unknown asset {asset_ref}")
+            errors.append(
+                f"{_rel(source)}:assets.{alias} references unknown asset {asset_ref}"
+            )
 
     parent_zones: dict[str, str] = {}
 
@@ -221,12 +237,18 @@ def validate_architecture(
 
     for zone_ref, override in (arch.get("zone_overrides") or {}).items():
         if zone_ref not in zone_refs:
-            errors.append(f"{_rel(source)}:zone_overrides.{zone_ref} references unknown zone")
+            errors.append(
+                f"{_rel(source)}:zone_overrides.{zone_ref} references unknown zone"
+            )
         parent = (override or {}).get("parentZone")
         if parent and parent not in zone_refs:
-            errors.append(f"{_rel(source)}:zone_overrides.{zone_ref}.parentZone references unknown zone {parent}")
+            errors.append(
+                f"{_rel(source)}:zone_overrides.{zone_ref}.parentZone references unknown zone {parent}"
+            )
         if parent == zone_ref:
-            errors.append(f"{_rel(source)}:zone_overrides.{zone_ref}.parentZone cannot reference itself")
+            errors.append(
+                f"{_rel(source)}:zone_overrides.{zone_ref}.parentZone cannot reference itself"
+            )
         elif parent and parent in zone_refs and zone_ref in zone_refs:
             parent_zones[zone_ref] = parent
 
@@ -250,14 +272,20 @@ def validate_architecture(
 
     for asset_ref, override in (arch.get("asset_overrides") or {}).items():
         if asset_ref not in asset_refs:
-            errors.append(f"{_rel(source)}:asset_overrides.{asset_ref} references unknown asset")
+            errors.append(
+                f"{_rel(source)}:asset_overrides.{asset_ref} references unknown asset"
+            )
         zone_ref = (override or {}).get("zone")
         if zone_ref and zone_ref not in zone_refs:
-            errors.append(f"{_rel(source)}:asset_overrides.{asset_ref}.zone references unknown zone {zone_ref}")
+            errors.append(
+                f"{_rel(source)}:asset_overrides.{asset_ref}.zone references unknown zone {zone_ref}"
+            )
 
     flow_aliases: dict[str, str] = {}
     if dfd is not None:
-        flow_aliases, flow_alias_errors = build_flow_alias_map(arch, first_blueprint(dfd))
+        flow_aliases, flow_alias_errors = build_flow_alias_map(
+            arch, first_blueprint(dfd)
+        )
         errors.extend(f"{_rel(source)}:{error}" for error in flow_alias_errors)
 
     allowed_auth, warning_auth = load_auth_catalog(arch=arch)
@@ -266,7 +294,9 @@ def validate_architecture(
     for flow_ref, override in (arch.get("flow_overrides") or {}).items():
         resolved_flow_ref = resolve_flow_ref(flow_ref, flow_refs, flow_aliases)
         if not resolved_flow_ref:
-            errors.append(f"{_rel(source)}:flow_overrides.{flow_ref} references unknown flow")
+            errors.append(
+                f"{_rel(source)}:flow_overrides.{flow_ref} references unknown flow"
+            )
         elif resolved_flow_ref in resolved_flow_overrides:
             errors.append(
                 f"{_rel(source)}:flow_overrides.{flow_ref} resolves to duplicate "
@@ -276,13 +306,19 @@ def validate_architecture(
             resolved_flow_overrides.add(resolved_flow_ref)
         auth = (override or {}).get("authMechanism")
         if auth and auth not in known_auth:
-            errors.append(f"{_rel(source)}:flow_overrides.{flow_ref}.authMechanism unsupported value {auth}")
+            errors.append(
+                f"{_rel(source)}:flow_overrides.{flow_ref}.authMechanism unsupported value {auth}"
+            )
         elif auth in warning_auth:
-            warnings.append(f"{_rel(source)}:flow_overrides.{flow_ref}.authMechanism {auth}: {warning_auth[auth]}")
+            warnings.append(
+                f"{_rel(source)}:flow_overrides.{flow_ref}.authMechanism {auth}: {warning_auth[auth]}"
+            )
 
     for control_id, refs in (arch.get("flow_bindings") or {}).items():
         if not isinstance(refs, list):
-            errors.append(f"{_rel(source)}:flow_bindings.{control_id}: expected a list of flow refs")
+            errors.append(
+                f"{_rel(source)}:flow_bindings.{control_id}: expected a list of flow refs"
+            )
             continue
         resolved_refs: set[str] = set()
         unknown: list[str] = []
@@ -299,13 +335,21 @@ def validate_architecture(
                 resolved_refs.add(resolved_flow_ref)
         unknown.sort()
         if unknown:
-            errors.append(f"{_rel(source)}:flow_bindings.{control_id} references unknown flows {unknown}")
+            errors.append(
+                f"{_rel(source)}:flow_bindings.{control_id} references unknown flows {unknown}"
+            )
 
     for group, group_aliases in (arch.get("asset_groups") or {}).items():
-        _check_aliases(errors, source, f"asset_groups.{group}", group_aliases, known_aliases)
+        _check_aliases(
+            errors, source, f"asset_groups.{group}", group_aliases, known_aliases
+        )
     for family, family_aliases in (arch.get("family_asset_map") or {}).items():
-        _check_aliases(errors, source, f"family_asset_map.{family}", family_aliases, known_aliases)
-    _check_aliases(errors, source, "default_assets", arch.get("default_assets"), known_aliases)
+        _check_aliases(
+            errors, source, f"family_asset_map.{family}", family_aliases, known_aliases
+        )
+    _check_aliases(
+        errors, source, "default_assets", arch.get("default_assets"), known_aliases
+    )
 
     return errors, warnings
 
@@ -320,14 +364,18 @@ def validate_sources(paths: SystemPaths) -> tuple[list[str], list[str]]:
             document = build_provider_workload(paths.slug)
         except ProviderWorkloadError as exc:
             return [str(exc)], warnings
-        errors.extend(_schema_errors(document, "model-dfd.schema.json", workload_source))
+        errors.extend(
+            _schema_errors(document, "model-dfd.schema.json", workload_source)
+        )
         forbidden = _load_forbidden(paths.redaction)
         for source in (paths.manifest, workload_source):
             text = source.read_text(encoding="utf-8")
             for pattern, label in forbidden:
                 match = pattern.search(text)
                 if match:
-                    errors.append(f"{_rel(source)}: unredacted {label} found before generation: {match.group(0)!r}")
+                    errors.append(
+                        f"{_rel(source)}: unredacted {label} found before generation: {match.group(0)!r}"
+                    )
         errors.extend(validate_example_system_options())
         return errors, warnings
     if not paths.model_dfd:
@@ -340,15 +388,25 @@ def validate_sources(paths: SystemPaths) -> tuple[list[str], list[str]]:
     dfd = _load_json(paths.model_dfd)
     arch = _load_yaml(paths.model_architecture)
     errors.extend(_schema_errors(dfd, "model-dfd.schema.json", paths.model_dfd))
-    errors.extend(_schema_errors(arch, "architecture.schema.json", paths.model_architecture))
+    errors.extend(
+        _schema_errors(arch, "architecture.schema.json", paths.model_architecture)
+    )
     if paths.responses:
         responses = _load_yaml(paths.responses)
-        errors.extend(_schema_errors(responses, "system-responses.schema.json", paths.responses))
+        errors.extend(
+            _schema_errors(responses, "system-responses.schema.json", paths.responses)
+        )
     docx_source = paths.root / "docx.yaml"
     if docx_source.is_file():
-        errors.extend(_schema_errors(_load_yaml(docx_source), "system-docx.schema.json", docx_source))
+        errors.extend(
+            _schema_errors(
+                _load_yaml(docx_source), "system-docx.schema.json", docx_source
+            )
+        )
 
-    asset_refs, zone_refs, flow_refs, dfd_errors = validate_dfd(dfd, source=paths.model_dfd)
+    asset_refs, zone_refs, flow_refs, dfd_errors = validate_dfd(
+        dfd, source=paths.model_dfd
+    )
     errors.extend(dfd_errors)
     arch_errors, arch_warnings = validate_architecture(
         arch,
@@ -376,7 +434,9 @@ def validate_sources(paths: SystemPaths) -> tuple[list[str], list[str]]:
             errors.append(f"{paths.slug}/{overlay_paths.name}: {exc}")
             continue
         errors.extend(_schema_errors(composed, "model-dfd.schema.json", overlay.source))
-        overlay_assets, overlay_zones, overlay_flows, overlay_dfd_errors = validate_dfd(composed, source=overlay.source)
+        overlay_assets, overlay_zones, overlay_flows, overlay_dfd_errors = validate_dfd(
+            composed, source=overlay.source
+        )
         errors.extend(overlay_dfd_errors)
         overlay_arch_errors, overlay_arch_warnings = validate_architecture(
             composed_arch,
@@ -386,8 +446,14 @@ def validate_sources(paths: SystemPaths) -> tuple[list[str], list[str]]:
             zone_refs=overlay_zones,
             flow_refs=overlay_flows,
         )
-        errors.extend(f"{paths.slug}/{overlay_paths.name}: {error}" for error in overlay_arch_errors)
-        warnings.extend(f"{paths.slug}/{overlay_paths.name}: {warning}" for warning in overlay_arch_warnings)
+        errors.extend(
+            f"{paths.slug}/{overlay_paths.name}: {error}"
+            for error in overlay_arch_errors
+        )
+        warnings.extend(
+            f"{paths.slug}/{overlay_paths.name}: {warning}"
+            for warning in overlay_arch_warnings
+        )
 
     forbidden = _load_forbidden(paths.redaction)
     overlay_sources = tuple(item.overlay for item in overlays)
@@ -396,7 +462,9 @@ def validate_sources(paths: SystemPaths) -> tuple[list[str], list[str]]:
         for pattern, label in forbidden:
             match = pattern.search(text)
             if match:
-                errors.append(f"{_rel(source)}: unredacted {label} found before generation: {match.group(0)!r}")
+                errors.append(
+                    f"{_rel(source)}: unredacted {label} found before generation: {match.group(0)!r}"
+                )
 
     return errors, warnings
 

@@ -170,11 +170,25 @@ def main():
     for f in flows:
         src = asset_by_ref.get(f.get("source"))
         dst = asset_by_ref.get(f.get("destination"))
-        source_zone = src.get("zone") if src else f.get("source") if f.get("source") in zset else None
-        destination_zone = dst.get("zone") if dst else f.get("destination") if f.get("destination") in zset else None
+        source_zone = (
+            src.get("zone")
+            if src
+            else f.get("source")
+            if f.get("source") in zset
+            else None
+        )
+        destination_zone = (
+            dst.get("zone")
+            if dst
+            else f.get("destination")
+            if f.get("destination") in zset
+            else None
+        )
         boundary_crossing = not same_boundary(source_zone, destination_zone)
         flow_props = {
-            prop.get("name"): prop.get("value") for prop in f.get("properties", []) or [] if isinstance(prop, dict)
+            prop.get("name"): prop.get("value")
+            for prop in f.get("properties", []) or []
+            if isinstance(prop, dict)
         }
         auth = f.get("authMechanism") or flow_props.get("owasp:auth_mechanism")
         if boundary_crossing:
@@ -213,7 +227,9 @@ def main():
         if c.get("status") not in STATUSES:
             fail(f"control {c['bom-ref']} bad status {c.get('status')}")
         props = {
-            prop.get("name"): prop.get("value") for prop in c.get("properties", []) or [] if isinstance(prop, dict)
+            prop.get("name"): prop.get("value")
+            for prop in c.get("properties", []) or []
+            if isinstance(prop, dict)
         }
         linked = c.get("mitigations", [])
         if not linked and props.get("precogly:mitigates"):
@@ -231,7 +247,9 @@ def main():
         idx = yaml.safe_load(f)
     expected = {c["control_id"] for c in idx["controls"]}
     seen = set()
-    base_threat_refs = {bt["bom-ref"] for bt in base.get("threats", {}).get("threats", [])}
+    base_threat_refs = {
+        bt["bom-ref"] for bt in base.get("threats", {}).get("threats", [])
+    }
     for t in threats:
         if t.get("bom-ref") in base_threat_refs:
             continue  # base threat (from base DFD, not CRM generated)
@@ -250,18 +268,25 @@ def main():
                 fail(f"{cid}: threat links missing control {cref}")
             # bidirectional: the control must link back to this threat
             ctrl = next(c for c in controls if c["bom-ref"] == cref)
-            if control_mitigations[ctrl["bom-ref"]] and t["bom-ref"] not in control_mitigations[ctrl["bom-ref"]]:
+            if (
+                control_mitigations[ctrl["bom-ref"]]
+                and t["bom-ref"] not in control_mitigations[ctrl["bom-ref"]]
+            ):
                 fail(f"{cid}: control {cref} not linked back to threat {t['bom-ref']}")
         for a in t.get("affectedAssets", []):
             if a not in aset and a not in fset:
                 fail(f"{cid}: bad asset ref {a}")
-        affected_flows = t.get("affectedFlows", []) or [ref for ref in t.get("affectedAssets", []) if ref in fset]
+        affected_flows = t.get("affectedFlows", []) or [
+            ref for ref in t.get("affectedAssets", []) if ref in fset
+        ]
         for flow_ref in affected_flows:
             if flow_ref not in fset:
                 fail(f"{cid}: bad affectedFlow ref {flow_ref}")
         text = " ".join([t.get("name", ""), t.get("description", "")])
         if TRANSPORT_THREAT_RE.search(text) and not affected_flows:
-            warn(f"{cid or t['bom-ref']}: transport-oriented threat SHOULD populate affectedFlows[]")
+            warn(
+                f"{cid or t['bom-ref']}: transport-oriented threat SHOULD populate affectedFlows[]"
+            )
 
     missing = expected - seen
     extra = seen - expected
@@ -278,9 +303,15 @@ def main():
     for pattern, label in forbidden:
         m = pattern.search(raw)
         if m:
-            fail(f"unredacted {label} found in output: '{m.group(0)}' (see docs/redaction-guide.md)")
+            fail(
+                f"unredacted {label} found in output: '{m.group(0)}' (see docs/redaction-guide.md)"
+            )
 
-    reusable = sum(1 for c in controls if any(p.get("name") == "resp:evidence-key" for p in c.get("properties", [])))
+    reusable = sum(
+        1
+        for c in controls
+        if any(p.get("name") == "resp:evidence-key" for p in c.get("properties", []))
+    )
     print(
         f"OK - DFD intact, {len(seen)} CRM threats fully formed, "
         f"{len(scenarios)} scenarios valid, {len(controls)} controls "

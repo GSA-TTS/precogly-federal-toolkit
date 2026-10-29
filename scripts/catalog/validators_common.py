@@ -1,76 +1,22 @@
-"""Shared validation primitives for the Example System and vault-projected artifacts.
+"""Threat-model validation primitives, provided by the vendored oscal-vault-core.
 
-Extracted from scripts/validate.py and scripts/catalog/validate_vault.py so
-that both entrypoints agree on redaction, enum sets, and cross-ref lint
-behavior. New callers should import from here rather than duplicating.
+Re-exports ``compliance/lib/threat_model_checks.py`` so ``validate_vault`` and ``validate`` keep
+one import path.
 """
 
 from __future__ import annotations
 
-import re
+import sys
+from pathlib import Path
 
-CATEGORIES = frozenset({"preventive", "detective", "corrective"})
-STATUSES = frozenset(
-    {"implemented", "recommended", "verified", "rejected", "planned", "in-progress"}
-)
-RISK_LEVELS = frozenset({"low", "medium", "high", "critical", "info"})
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+import vault_core
 
-
-FORBIDDEN_PATTERNS: list[tuple[re.Pattern[str], str]] = [
-    (re.compile(r"https?://[^\s\"'>,)\]]+", re.IGNORECASE), "URL"),
-    (re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b"), "email"),
-]
-
-_IPV4_RE = re.compile(
-    r"(?<![\w.])"
-    r"(?:25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)"
-    r"(?:\.(?:25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}"
-    r"(?:/\d{1,2})?"
-    r"(?![\w.])"
-)
-_SECTION_CTX_RE = re.compile(r"(?i)(?:section|sections|§|para\.?|paragraph)\s+$")
-
-
-def find_ipv4_leak(text: str) -> re.Match[str] | None:
-    """Return the first non-NIST-section-cited IPv4 in ``text`` (or None)."""
-    for m in _IPV4_RE.finditer(text):
-        preceding = text[max(0, m.start() - 40) : m.start()]
-        if _SECTION_CTX_RE.search(preceding):
-            continue
-        return m
-    return None
-
-
-def find_leaks(text: str) -> list[tuple[str, str]]:
-    """Return (label, matched_substring) for every recon-useful leak."""
-    findings: list[tuple[str, str]] = []
-    for pattern, label in FORBIDDEN_PATTERNS:
-        m = pattern.search(text)
-        if m:
-            findings.append((label, m.group(0)))
-    m = find_ipv4_leak(text)
-    if m:
-        findings.append(("IPv4", m.group(0)))
-    return findings
-
-
-def bidirectional_control_threat_errors(
-    threats: list[dict], controls: list[dict]
-) -> list[str]:
-    """Return a list of human-readable messages for broken threat<->control links."""
-    control_by_ref = {c["bom-ref"]: c for c in controls}
-    errors: list[str] = []
-    for t in threats:
-        for cref in t.get("mitigations", []) or []:
-            ctrl = control_by_ref.get(cref)
-            if ctrl is None:
-                continue
-            # CycloneDX 2.0 defines this relationship on the threat. Enforce
-            # symmetry only for legacy artifacts that still emit the retired
-            # control-side mitigations extension.
-            control_links = ctrl.get("mitigations")
-            if control_links is not None and t["bom-ref"] not in control_links:
-                errors.append(
-                    f"bidirectional link broken: control {cref} does not link back to threat {t['bom-ref']}"
-                )
-    return errors
+_checks = vault_core.load("threat_model_checks")
+CATEGORIES = _checks.CATEGORIES
+STATUSES = _checks.STATUSES
+RISK_LEVELS = _checks.RISK_LEVELS
+FORBIDDEN_PATTERNS = _checks.FORBIDDEN_PATTERNS
+find_ipv4_leak = _checks.find_ipv4_leak
+find_leaks = _checks.find_leaks
+bidirectional_control_threat_errors = _checks.bidirectional_control_threat_errors

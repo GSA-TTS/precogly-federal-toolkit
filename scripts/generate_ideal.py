@@ -180,8 +180,14 @@ def score_scenarios(scenarios, controls, overlay):
         s["inherentSeverity"] = inherent
         s["residualSeverity"] = "low"
         # Also stamp the priority (helpful for filtering in Precogly).
-        threat_ref = s.get("threat")
-        linked = [c for c in controls if threat_ref in c.get("mitigations", [])]
+        scenario_threats = s.get("threats") or (
+            [s["threat"]] if s.get("threat") else []
+        )
+        linked = [
+            c
+            for c in controls
+            if any(ref in c.get("mitigations", []) for ref in scenario_threats)
+        ]
         pri = None
         for c in linked:
             pri = get_prop(c.get("properties", []), "mock:priority")

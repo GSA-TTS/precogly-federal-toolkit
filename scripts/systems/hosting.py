@@ -79,7 +79,9 @@ def _contained_file(root: Path, candidate: Path) -> Path:
         resolved_root = root.resolve(strict=True)
         resolved_candidate = candidate.resolve(strict=True)
     except FileNotFoundError as exc:
-        raise HostingOverlayError(f"missing hosting overlay path: {exc.filename}") from exc
+        raise HostingOverlayError(
+            f"missing hosting overlay path: {exc.filename}"
+        ) from exc
     if not resolved_candidate.is_relative_to(resolved_root):
         raise HostingOverlayError(f"{candidate} resolves outside hosting root {root}")
     if not resolved_candidate.is_file():
@@ -122,7 +124,9 @@ def load_hosting_overlay(system: SystemPaths, name: str) -> HostingOverlay:
         resolved_system_root = system.root.resolve(strict=True)
         resolved_overlay_root = overlay_root.resolve(strict=True)
     except FileNotFoundError as exc:
-        raise HostingOverlayError(f"missing hosting overlay path: {exc.filename}") from exc
+        raise HostingOverlayError(
+            f"missing hosting overlay path: {exc.filename}"
+        ) from exc
     if not resolved_overlay_root.is_relative_to(resolved_system_root):
         raise HostingOverlayError(f"{overlay_root} resolves outside {system.root}")
     source = _contained_file(overlay_root, overlay_root / "overlay.yaml")
@@ -132,9 +136,13 @@ def load_hosting_overlay(system: SystemPaths, name: str) -> HostingOverlay:
         jsonschema.validate(document, schema)
     except jsonschema.ValidationError as exc:
         location = ".".join(str(part) for part in exc.absolute_path) or "<root>"
-        raise HostingOverlayError(f"{source}: schema error at {location}: {exc.message}") from exc
+        raise HostingOverlayError(
+            f"{source}: schema error at {location}: {exc.message}"
+        ) from exc
     if document["name"] != name:
-        raise HostingOverlayError(f"{source}: overlay name {document['name']!r} does not match directory {name!r}")
+        raise HostingOverlayError(
+            f"{source}: overlay name {document['name']!r} does not match directory {name!r}"
+        )
     if document["parent_system"] != system.slug:
         raise HostingOverlayError(
             f"{source}: parent_system {document['parent_system']!r} does not match loaded system {system.slug!r}"
@@ -169,7 +177,9 @@ def _index(items: list[dict[str, Any]], kind: str) -> dict[str, int]:
             duplicates.add(ref)
         index[ref] = position
     if duplicates:
-        raise HostingCompositionError(f"duplicate {kind} refs: {', '.join(sorted(duplicates))}")
+        raise HostingCompositionError(
+            f"duplicate {kind} refs: {', '.join(sorted(duplicates))}"
+        )
     return index
 
 
@@ -191,11 +201,15 @@ def _replace(
         target = replacement["target_ref"]
         index = _index(items, kind)
         if target not in index:
-            raise HostingCompositionError(f"cannot replace missing {kind} ref {target!r}")
+            raise HostingCompositionError(
+                f"cannot replace missing {kind} ref {target!r}"
+            )
         value = copy.deepcopy(replacement["value"])
         new_ref = value["bom-ref"]
         if new_ref != target and new_ref in index:
-            raise HostingCompositionError(f"replacement {kind} ref {new_ref!r} already exists")
+            raise HostingCompositionError(
+                f"replacement {kind} ref {new_ref!r} already exists"
+            )
         items[index[target]] = value
         if new_ref != target:
             ref_changes[target] = new_ref
@@ -248,7 +262,9 @@ def _validate_graph(
         if asset.get("zone") and asset["zone"] not in zone_refs
     )
     if bad_zones:
-        raise HostingCompositionError(f"assets reference unknown zones: {', '.join(bad_zones)}")
+        raise HostingCompositionError(
+            f"assets reference unknown zones: {', '.join(bad_zones)}"
+        )
     endpoints = zone_refs | asset_refs
     dangling = sorted(
         f"{flow['bom-ref']}->{endpoint}"
@@ -257,7 +273,9 @@ def _validate_graph(
         if endpoint not in endpoints
     )
     if dangling:
-        raise HostingCompositionError(f"flows reference unknown endpoints: {', '.join(dangling)}")
+        raise HostingCompositionError(
+            f"flows reference unknown endpoints: {', '.join(dangling)}"
+        )
 
 
 def compose_hosting_overlay(
@@ -268,7 +286,9 @@ def compose_hosting_overlay(
     document = copy.deepcopy(dict(base_dfd))
     blueprints = document.get("blueprints") or []
     if len(blueprints) != 1:
-        raise HostingCompositionError(f"hosting composition requires exactly one blueprint, found {len(blueprints)}")
+        raise HostingCompositionError(
+            f"hosting composition requires exactly one blueprint, found {len(blueprints)}"
+        )
     blueprint = blueprints[0]
     zones = blueprint.setdefault("zones", [])
     assets = blueprint.setdefault("assets", [])
@@ -294,5 +314,9 @@ def compose_hosting_overlay(
             ("architecture_asset_overrides", "asset_overrides"),
             ("architecture_flow_overrides", "flow_overrides"),
         ):
-            architecture.setdefault(target, {}).update(copy.deepcopy(operations[operation]))
-    return ComposedHostingSources(dfd=document, architecture=architecture, overlay=overlay)
+            architecture.setdefault(target, {}).update(
+                copy.deepcopy(operations[operation])
+            )
+    return ComposedHostingSources(
+        dfd=document, architecture=architecture, overlay=overlay
+    )
