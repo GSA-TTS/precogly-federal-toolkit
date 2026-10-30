@@ -3,6 +3,62 @@
 Reusable Precogly/CycloneDX scaffolding, packs, scripts, and guides for federal
 system security plans. Extracted from the TTSE Petrified Forest SSPP repository.
 
+## Navigation
+
+| Start here                                                                       | For                                                           |
+| -------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| [docs/threat-model-authoring-guide.md](docs/threat-model-authoring-guide.md)     | Authoring, exporting, and using pack libraries                |
+| [docs/pipeline-diagrams.md](docs/pipeline-diagrams.md)                           | Vault-projection flow diagrams                                |
+| [docs/redaction-guide.md](docs/redaction-guide.md)                               | What the redaction gate blocks, and which placeholders to use |
+| [docs/SYNTHETIC_RECONCILIATION_PROOF.md](docs/SYNTHETIC_RECONCILIATION_PROOF.md) | The synthetic end-to-end publication/reconciliation proof     |
+| [templates/generic-crm-system/](templates/generic-crm-system/)                   | Starter CRM pack template                                     |
+| [templates/private-system-repository/](templates/private-system-repository/)     | Layout for a repository that holds real system content        |
+| [docs/skills/](docs/skills/)                                                     | Agent skill playbooks (authoring, API, countermeasure audit)  |
+| [SUBMODULE.md](SUBMODULE.md)                                                     | Converting this directory into a pinned submodule             |
+
+## The toolkit boundary, as a grammar
+
+This matters more than it looks: everything here is a **library** tool. It
+requires a private system repository to supply control data, a catalog, and
+authorized system records. The grammar makes explicit which inputs are
+system-owned, and therefore deliberately absent from this toolkit.
+
+```mermaid
+railroad-abnf-beta
+title "Toolkit pipeline - system-owned inputs are required"
+
+run = system-inputs toolkit-stage gate artifact ;
+
+; Supplied by the private system repository, never by this toolkit.
+system-inputs = control-data catalog [ sidecars ] ;
+control-data = "data/systems/<slug>/crm/*.yaml" ;
+catalog = "OSCAL catalog or component-definition JSON" ;
+sidecars = "authorized system records" ;
+
+toolkit-stage = emit [ overlay ] ;
+emit = "scripts/generate.py" ;
+overlay = "scripts/generate_ideal.py" ;
+
+; Not optional: redaction runs before any artifact is publishable.
+gate = redaction [ drift ] ;
+redaction = "scripts/validate.py" ;
+drift = "scripts/drift.py" ;
+
+artifact = cdx [ fedramp ] ;
+cdx = "build/threat-model.cdx.json" ;
+fedramp = "scripts/export_fedramp_cpo.py" / "scripts/export_fedramp_sdr.py" ;
+```
+
+Two consequences worth stating plainly:
+
+- `system-inputs` has **no default**. Running `scripts/generate.py` against
+  this toolkit alone produces nothing useful, because the toolkit intentionally
+  contains no system-specific source data.
+- `gate` is not skippable. FedRAMP export defaults are schema-oriented
+  scaffolding; a submission-ready SDR needs system-owned sidecars with real,
+  authorized values and must pass the strict validator. Placeholder values are
+  rejected by design.
+
 ## Quick-start — new generic CRM pack
 
 ```bash

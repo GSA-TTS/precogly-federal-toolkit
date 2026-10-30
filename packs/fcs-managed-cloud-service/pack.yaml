@@ -50,4 +50,4 @@ pack:
     - federal
     - all
   repository_url: https://github.com/GSA/oscal-vault
-  documentation_url: https://example.invalid/internal-documentation
+  documentation_url: '<INTERNAL_DOCUMENTATION_URL>'

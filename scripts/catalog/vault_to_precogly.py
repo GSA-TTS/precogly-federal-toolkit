@@ -33,9 +33,16 @@ from vault_reader import (
     parse_inheritance,
     split_frontmatter,
 )
+from vault_topology import build_canvas, build_topology
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
+sys.path.insert(0, os.path.join(os.path.dirname(HERE), "precogly"))
+from add_dfd_visualization import canvas_visualization  # noqa: E402
+
+sys.path.insert(0, os.path.dirname(HERE))
+import vault_core  # noqa: E402
+
 DEFAULT_VAULT = os.path.abspath(os.path.join(ROOT, "..", "oscal-vault"))
 
 CANONICAL_MERGE_KEYS = frozenset(
@@ -111,48 +118,12 @@ def merge_vault_notes(
     return _dump_vault_note(merged_front, merged_body)
 
 
-REDACTIONS: list[tuple[re.Pattern[str], str]] = [
-    (re.compile(r"https?://[^\s\"'>,)\]]+", re.IGNORECASE), "<REDACTED_URL>"),
-    (
-        re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b"),
-        "<REDACTED_EMAIL>",
-    ),
-]
-
-# IPv4 requires each octet 0-255 and negative context to avoid clobbering NIST
-# section refs like "Section 5.1.1.1". Handled separately from REDACTIONS.
-_IPV4_RE = re.compile(
-    r"(?<![\w.])"
-    r"(?:25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)"
-    r"(?:\.(?:25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}"
-    r"(?:/\d{1,2})?"
-    r"(?![\w.])"
-)
-_SECTION_CTX_RE = re.compile(r"(?i)(?:section|sections|§|para\.?|paragraph)\s+$")
-
-
-def _redact_ipv4(text: str) -> str:
-    def replace(match: re.Match[str]) -> str:
-        preceding = text[max(0, match.start() - 40) : match.start()]
-        if _SECTION_CTX_RE.search(preceding):
-            return match.group(0)
-        return "<REDACTED_IP>"
-
-    return _IPV4_RE.sub(replace, text)
-
-
-def redact(text: str | None, *, internal: bool = False) -> str:
-    """Redact PII/sensitive tokens. internal=True keeps URLs/emails (build-only CDX)."""
-    if not text:
-        return ""
-    if internal:
-        # IPs still redacted even in internal-only artifacts; URLs/emails preserved
-        return _redact_ipv4(text)
-    out = text
-    for pattern, token in REDACTIONS:
-        out = pattern.sub(token, out)
-    out = _redact_ipv4(out)
-    return out
+_redaction = vault_core.load("redaction")
+REDACTIONS = _redaction.REDACTIONS
+_IPV4_RE = _redaction.IPV4_RE
+_SECTION_CTX_RE = _redaction.SECTION_CONTEXT_RE
+_redact_ipv4 = _redaction.redact_ipv4
+redact = _redaction.redact
 
 
 class _IndentDumper(yaml.Dumper):
@@ -538,9 +509,19 @@ def _build_blueprint(
     dfd_flows,
     dfd_nodes,
     dfd_edges,
+    topo=None,
 ):
-    """Construct the CDX blueprint dict (zones, assets, flows, visualizations)."""
-    return {
+    """Construct the CDX blueprint dict (zones, assets, flows, visualizations).
+
+    With ``topo`` (see ``vault_topology.build_topology``) the typed, zoned components of the
+    SSP's Ports/Protocols/Services table are added and the canvas is drawn from them; the
+    inheritance providers stay as records but are not drawn as data flows.
+    """
+    canvas = {"nodes": dfd_nodes, "edges": dfd_edges, "notationStyle": "dfd3"}
+    topo = topo or {"zones": [], "assets": [], "dataStores": [], "flows": []}
+    if topo["assets"] or topo["dataStores"]:
+        canvas = build_canvas(component_name, topo)
+    blueprint = {
         "bom-ref": f"blueprint-{component_id}",
         "name": component_name,
         "modelTypes": ["data-flow"],
@@ -564,14 +545,17 @@ def _build_blueprint(
         + ext_assets,
         "flows": dfd_flows,
         "visualizations": [
-            {
-                "type": "precogly-dfd",
-                "name": f"{component_name} Data Flow Diagram",
-                "diagramType": "level1",
-                "data": {"nodes": dfd_nodes, "edges": dfd_edges},
-            }
+            canvas_visualization(
+                canvas, name=f"{component_name} Data Flow Diagram", ref=component_id
+            )
         ],
     }
+    if topo["assets"] or topo["dataStores"]:
+        blueprint["zones"] = blueprint["zones"] + topo["zones"]
+        blueprint["assets"] = blueprint["assets"] + topo["assets"]
+        blueprint["dataStores"] = topo["dataStores"]
+        blueprint["flows"] = blueprint["flows"] + topo["flows"]
+    return blueprint
 
 
 def _build_family_flow_edges(inheritance, component_id, dfd_edges):
@@ -856,6 +840,15 @@ def _build_threat_and_scenario(
     ]
     if status == "operational":
         return None, None
+    context = (
+        f"Control: {cid} ({redact(record.title)}) on {component_name}.\n"
+        f"Implementation status: {status}. Responsibility origination: {origination}."
+    )
+    narrative = (
+        prose.strip()
+        or "No implementation narrative is available in the source control record."
+    )
+    threat_desc.extend([context, "Source implementation context:\n" + narrative])
     threat_entry = {
         "bom-ref": t_ref,
         "name": f"CRM: {cid_display} residual risk - {component_name}",
@@ -873,7 +866,10 @@ def _build_threat_and_scenario(
                 {
                     "bom-ref": f"{s_ref}-{part.part}",
                     "name": f"{cid_display} residual risk ({part.part})",
-                    "threat": t_ref,
+                    "description": context
+                    + "\n\nSource statement context:\n"
+                    + redact(interpolate_parameters(part.prose, record.parameters)),
+                    "threats": [t_ref],
                     "affectedAssets": [asset_ref],
                     "inherentSeverity": "high",
                     "residualSeverity": risk,
@@ -887,7 +883,8 @@ def _build_threat_and_scenario(
     scenario_entry: dict = {
         "bom-ref": s_ref,
         "name": f"{cid_display} residual risk",
-        "threat": t_ref,
+        "description": context + "\n\nSource implementation context:\n" + narrative,
+        "threats": [t_ref],
         "affectedAssets": [asset_ref],
         "inherentSeverity": "high",
         "residualSeverity": risk,
@@ -1009,6 +1006,7 @@ def emit_cdx(
         dfd_nodes,
         dfd_edges,
     )
+    topo = build_topology(component_id, component_name, topology) if topology else None
     blueprint = _build_blueprint(
         component_id,
         component_name,
@@ -1019,6 +1017,7 @@ def emit_cdx(
         dfd_flows,
         dfd_nodes,
         dfd_edges,
+        topo,
     )
     threats: list[dict] = []
     scenarios: list[dict] = []

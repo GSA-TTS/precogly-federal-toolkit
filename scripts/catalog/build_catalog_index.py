@@ -106,7 +106,9 @@ def harvest_system_metadata(vault_root: str, slug: str) -> dict:
                 "data_sensitivity": fm.get("fips_199") or fm.get("impact_level"),
                 "impact_level": fm.get("impact_level"),
                 "organization": _wiki_target(fm.get("organization")),
-                "last_updated": str(fm.get("last_updated") or ""),
+                # This is the source system record's review date, not the date
+                # this repository projected artifacts from that record.
+                "source_last_updated": str(fm.get("last_updated") or ""),
                 "tags": list(fm.get("tags") or []),
             }
     return {}
@@ -221,7 +223,10 @@ def build_catalog(systems_root: str, vault_root: str) -> dict:
                 ),
                 "impact_level": meta.get("impact_level") or own.get("impact_level"),
                 "organization": meta.get("organization"),
-                "last_updated": meta.get("last_updated"),
+                # Keep the upstream review date distinct from catalog
+                # regeneration time so consumers do not treat a fresh build as
+                # stale source material.
+                "source_last_updated": meta.get("source_last_updated"),
                 "tags": meta.get("tags") or [],
                 "source_doc": own.get("source_doc"),
                 "artifacts": {
@@ -251,7 +256,7 @@ def build_catalog(systems_root: str, vault_root: str) -> dict:
         "catalog": {
             "version": "1.0",
             "generated_by": "scripts/catalog/build_catalog_index.py",
-            "generated_at": datetime.now(UTC).isoformat(),
+            "catalog_generated_at": datetime.now(UTC).isoformat(),
             # Stable submodule path; never serialize an absolute checkout path
             # or a worktree-relative traversal into a committed catalog.
             "vault_root": "vendor/oscal-vault",

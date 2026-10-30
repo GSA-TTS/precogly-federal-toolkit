@@ -56,14 +56,20 @@ def render(catalog: dict) -> str:
     lines: list[str] = [HEADER, ""]
     lines.append(f"- **Systems imported:** {len(systems)}")
     lines.append(f"- **Systems skipped:** {len(skipped)}")
-    lines.append(f"- **Generated at:** {catalog['catalog'].get('generated_at', '-')}")
+    lines.append(
+        f"- **Catalog regenerated:** {catalog['catalog'].get('catalog_generated_at', '-')}"
+    )
+    lines.append(
+        "- **Source last updated:** The review date declared by each upstream system record; "
+        "it does not indicate when this catalog was regenerated."
+    )
     lines.append("")
     lines.append("## Systems")
     lines.append("")
     lines.append(
-        "| Slug | Name | Sensitivity | Owner | ISSO | AO | Status | Threats | Controls | Inh. | Providers | Artifacts |"
+        "| Slug | Name | Sensitivity | Source updated | Owner | ISSO | AO | Status | Threats | Controls | Inh. | Providers | Artifacts |"
     )
-    lines.append("|---|---|---|---|---|---|---|---:|---:|---:|---|---|")
+    lines.append("|---|---|---|---|---|---|---|---|---:|---:|---:|---|---|")
 
     for s in sorted(systems, key=lambda e: e["slug"]):
         stats = s.get("stats") or {}
@@ -85,10 +91,11 @@ def render(catalog: dict) -> str:
         prov_cell = ", ".join(unique_providers) if unique_providers else "-"
         inh_count = len(edges)
         lines.append(
-            "| {slug} | {name} | {fips} | {owner} | {isso} | {ao} | {status} | {threats} | {controls} | {inh} | {prov} | {art} |".format(
+            "| {slug} | {name} | {fips} | {source_updated} | {owner} | {isso} | {ao} | {status} | {threats} | {controls} | {inh} | {prov} | {art} |".format(
                 slug=s["slug"],
                 name=_fmt(s.get("name")),
                 fips=_fmt(s.get("data_sensitivity")),
+                source_updated=_fmt(s.get("source_last_updated")),
                 owner=_fmt(s.get("owner")),
                 isso=_fmt(s.get("isso")),
                 ao=_fmt(s.get("ao")),

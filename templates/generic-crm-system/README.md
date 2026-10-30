@@ -1,5 +1,9 @@
 # Generic CRM System Threat Modeling Template
 
+[← Repository README](../../README.md) · [Documentation index](../../docs/index.md) ·
+[Threat model authoring guide](../../docs/threat-model-authoring-guide.md) ·
+[Private system repository template](../private-system-repository/README.md)
+
 This directory contains a **generic, reusable, and automated template** for turning NIST 800-53 OSCAL Component Definitions (like those maintained in `gsa-pages`) into Precogly-native assets.
 
 Rather than hard-coding single-system pipelines, this directory establishes a complete working blueprint to model **any Customer Responsibility (CRM)** framework as a Precogly library pack and generate a corresponding visual diagram.
