@@ -50,3 +50,16 @@ jobs:
               sys.exit(1)
           print(f'OK: scanned {sum(1 for f in root.rglob("*") if f.is_file() and f.suffix in EXTS)} files — no private markers')
           EOF
+
+  cold-start:
+    name: Template cold-start
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v9.0.0
+      - name: Copy template and run synthetic pipeline
+        run: make -C templates/generic-crm-system cold-start

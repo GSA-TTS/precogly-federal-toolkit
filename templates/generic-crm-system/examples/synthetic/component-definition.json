@@ -1,0 +1,7 @@
+{"component-definition": {"uuid": "00000000-0000-4000-8000-000000000002", "metadata": {"title": "Synthetic Platform CRM", "version": "fixture", "oscal-version": "1.1.2", "last-modified": "2026-01-01T00:00:00Z"},
+ "components": [{"uuid": "00000000-0000-4000-8000-000000000003", "type": "service", "title": "Synthetic Platform", "description": "Fixture platform used only for the cold-start test.",
+  "control-implementations": [{"uuid": "00000000-0000-4000-8000-000000000004", "source": "catalog.json", "description": "Customer responsibilities.",
+   "implemented-requirements": [
+    {"uuid": "00000000-0000-4000-8000-000000000005", "control-id": "ac-2", "description": "Customers manage their own application accounts."},
+    {"uuid": "00000000-0000-4000-8000-000000000006", "control-id": "sc-8.1", "description": "Customers enable TLS for application traffic.",
+     "statements": [{"statement-id": "sc-8.1_smt", "uuid": "00000000-0000-4000-8000-000000000007", "description": "Use the platform-managed TLS endpoint."}]}]}]}]}}
