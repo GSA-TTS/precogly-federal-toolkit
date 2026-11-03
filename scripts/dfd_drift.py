@@ -66,12 +66,60 @@ def first_blueprint(doc: dict[str, Any]) -> dict[str, Any]:
 
 
 def _item_ref(section: str, item: dict[str, Any]) -> str | None:
+    # A boundary is identified by the zones it separates; Precogly assigns its
+    # own boundary-N refs on import, so a bom-ref is not a stable identity.
+    if section == "boundaries" and item.get("zones"):
+        return "zones:" + ",".join(sorted(str(zone) for zone in item["zones"]))
+    # Cross-model reference nodes get a fresh ref on every Precogly import.
+    if section == "assets" and any(
+        isinstance(ext, dict) and ext.get("type") == "threat-model"
+        for ext in item.get("externalReferences") or []
+    ):
+        return f"related-model:{item.get('name')}"
     ref = item.get("bom-ref")
     if ref:
         return str(ref)
-    if section == "boundaries" and item.get("zones"):
-        return "zones:" + ",".join(sorted(str(zone) for zone in item["zones"]))
     return None
+
+
+def normalize_tmbom_shape(doc: dict[str, Any]) -> dict[str, Any]:
+    """Project legacy and Precogly TM-BOM shapes onto one comparable form.
+
+    Precogly import moves ``type: data-store`` assets into ``dataStores`` and
+    stores zone trust levels as ``precogly:trust-level`` properties. Applying
+    the same projection to both sides keeps those import-shape changes from
+    being reported as editor drift.
+    """
+    for blueprint in doc.get("blueprints") or []:
+        if not isinstance(blueprint, dict):
+            continue
+        for zone in blueprint.get("zones") or []:
+            if not isinstance(zone, dict) or "trustLevel" in zone:
+                continue
+            for prop in zone.get("properties") or []:
+                if isinstance(prop, dict) and prop.get("name") == "precogly:trust-level":
+                    value = prop.get("value")
+                    try:
+                        zone["trustLevel"] = int(value)
+                    except (TypeError, ValueError):
+                        zone["trustLevel"] = value
+                    break
+        assets = blueprint.get("assets") or []
+        stores = [a for a in assets if isinstance(a, dict) and a.get("type") == "data-store"]
+        if stores:
+            blueprint["assets"] = [a for a in assets if a not in stores]
+            blueprint["dataStores"] = [
+                {k: v for k, v in store.items() if k != "type"} for store in stores
+            ] + list(blueprint.get("dataStores") or [])
+    return doc
+
+
+def _rehydrated(doc: dict[str, Any], redaction_path: Path | None) -> tuple[dict[str, Any], dict[str, Any]]:
+    return rehydrate_dfd(
+        normalize_tmbom_shape(copy.deepcopy(doc)),
+        redaction_path=redaction_path,
+        merge_types=set(DEFAULT_MERGE_TYPES),
+    )
 
 
 def _index(
@@ -142,6 +190,9 @@ def _diff_section(
     for ref in sorted(set(base) & set(export)):
         changed = {}
         for field in SECTION_FIELDS[section]:
+            # Precogly derives display names for unnamed flows and boundaries.
+            if section in ("flows", "boundaries") and field == "name" and not base[ref].get(field):
+                continue
             if base[ref].get(field) != export[ref].get(field):
                 changed[field] = {
                     "base": base[ref].get(field),
@@ -172,7 +223,12 @@ def _endpoint_findings(export_bp: dict[str, Any]) -> list[dict[str, Any]]:
         for item in export_bp.get("zones", [])
         if item.get("bom-ref")
     }
-    endpoints = asset_refs | zone_refs
+    store_refs = {
+        item.get("bom-ref")
+        for item in export_bp.get("dataStores", []) or []
+        if item.get("bom-ref")
+    }
+    endpoints = asset_refs | zone_refs | store_refs
     for flow in export_bp.get("flows", []) or []:
         ref = flow.get("bom-ref", "<missing bom-ref>")
         for field in ("source", "destination"):
@@ -200,12 +256,10 @@ def build_report(
 ) -> dict[str, Any]:
     base = load_json(base_path)
     raw_export = load_json(export_path)
-    export, normalization = rehydrate_dfd(
-        copy.deepcopy(raw_export),
-        redaction_path=redaction_path,
-        merge_types=set(DEFAULT_MERGE_TYPES),
-    )
+    export, normalization = _rehydrated(raw_export, redaction_path)
+    normalized_base, _ = _rehydrated(base, redaction_path)
     base_bp = first_blueprint(base)
+    normalized_base_bp = first_blueprint(normalized_base)
     export_bp = first_blueprint(export)
     raw_export_bp = first_blueprint(raw_export)
 
@@ -224,7 +278,7 @@ def build_report(
         findings.extend(
             _diff_section(
                 section,
-                base_bp.get(section, []) or [],
+                normalized_base_bp.get(section, []) or [],
                 export_bp.get(section, []) or [],
             )
         )
