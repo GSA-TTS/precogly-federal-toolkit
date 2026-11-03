@@ -31,14 +31,21 @@ def slugify(text: str) -> str:
     return s or "unknown"
 
 
-def _target_slug(target: str, known_slugs: set[str]) -> str:
+def _target_slug(
+    target: str, known_slugs: set[str], source_slug: str = ""
+) -> str:
     """Map an inheritance provider name onto a system slug when possible."""
     candidate = slugify(target)
-    if candidate in known_slugs:
+    if candidate in known_slugs and candidate != source_slug:
         return candidate
-    for slug in known_slugs:
-        if candidate and candidate in slug:
-            return slug
+    if len(candidate) >= 4:
+        ordered = sorted(
+            known_slugs,
+            key=lambda s: ("-hosting-" in s or "-composite-" in s, s),
+        )
+        for slug in ordered:
+            if slug != source_slug and (candidate in slug or slug in candidate):
+                return slug
     return f"external:{candidate}"
 
 
@@ -105,7 +112,7 @@ def build_portfolio_cdx(catalog: dict) -> dict:
             target = rel.get("target")
             if not target:
                 continue
-            deps_targets.append(_target_slug(target, known_slugs))
+            deps_targets.append(_target_slug(target, known_slugs, source_slug=slug))
 
         if deps_targets:
             dependencies.append(

@@ -37,6 +37,34 @@ def _criticality(fips: str | None) -> str:
     return mapping.get((fips or "").lower(), "medium")
 
 
+def _resolve_target_slug(
+    target: str, source_slug: str, known_slugs: set[str] | list[str]
+) -> str | None:
+    """Resolve a relationship target to a catalog system slug deterministically.
+
+    Prefers an exact slug match, never resolves a system to itself, requires at
+    least 4 characters before attempting substring matching (so short agency
+    acronyms like ``GSA`` or ``OMA`` stay external unless they match a slug
+    exactly), and orders primary system slugs ahead of ``-hosting-`` /
+    ``-composite-`` variants.
+    """
+    simplified = target.lower().replace(".", "-").replace(" ", "-")
+    ordered = sorted(
+        known_slugs,
+        key=lambda s: ("-hosting-" in s or "-composite-" in s, s),
+    )
+    if simplified in known_slugs and simplified != source_slug:
+        return simplified
+    if len(simplified) < 4:
+        return None
+    for candidate in ordered:
+        if candidate == source_slug:
+            continue
+        if simplified in candidate or candidate in simplified:
+            return candidate
+    return None
+
+
 def build_manifest(catalog: dict) -> dict:
     systems = catalog["catalog"]["systems"]
     known_slugs = {s["slug"] for s in systems}
@@ -81,13 +109,7 @@ def build_manifest(catalog: dict) -> dict:
             target = rel.get("target")
             if not target:
                 continue
-            # Match the same slug-resolution rules the portfolio CDX uses.
-            slug_target = None
-            simplified = target.lower().replace(".", "-").replace(" ", "-")
-            for candidate in known_slugs:
-                if simplified in candidate or candidate in simplified:
-                    slug_target = candidate
-                    break
+            slug_target = _resolve_target_slug(target, slug, known_slugs)
             relationships.append(
                 {
                     "type": rel.get("type", "depends_on"),

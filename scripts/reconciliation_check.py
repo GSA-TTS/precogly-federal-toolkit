@@ -19,7 +19,35 @@ from scripts.validate_reconciliation_evidence import validate_evidence  # noqa: 
 from scripts.validate_reconciliation_proposals import validate_proposal  # noqa: E402
 
 
-def validate_repository(repository: Path) -> list[str]:
+def _resolve_tooling_root(
+    repository: Path, core: Path | None = None
+) -> Path | None:
+    if core is not None:
+        resolved = core.resolve()
+        return (
+            resolved
+            if (resolved / "compliance/lib/reconciliation.py").is_file()
+            else None
+        )
+    candidates = (
+        repository / "vendor/oscal-vault-core",
+        repository / "vendor/oscal-vault",
+        REPO / "vendor/oscal-vault-core",
+        VAULT,
+    )
+    return next(
+        (
+            root
+            for root in candidates
+            if (root / "compliance/lib/reconciliation.py").is_file()
+        ),
+        None,
+    )
+
+
+def validate_repository(
+    repository: Path, core: Path | None = None
+) -> list[str]:
     """Validate system-owned artifacts while loading schemas from this toolkit."""
     repository = repository.resolve()
     systems_dir = repository / "data" / "systems"
@@ -39,10 +67,15 @@ def validate_repository(repository: Path) -> list[str]:
             errors.extend(validate_evidence(evidence, repository=repository))
         automation_overlay = system_dir / "reconciliation" / "automation-overlay.yaml"
         if automation_overlay.is_file():
-            tooling_path = VAULT / "compliance/lib/reconciliation.py"
-            if tooling_path.is_file():
-                if str(VAULT) not in sys.path:
-                    sys.path.append(str(VAULT))
+            tooling_root = _resolve_tooling_root(repository, core=core)
+            if tooling_root is None:
+                errors.append(
+                    f"{automation_overlay}: missing compliance/lib/reconciliation.py "
+                    "(initialize vendor/oscal-vault-core or pass --core)"
+                )
+            else:
+                if str(tooling_root) not in sys.path:
+                    sys.path.append(str(tooling_root))
                 import yaml
                 from compliance.lib.reconciliation import validate_overlay
 
@@ -57,11 +90,12 @@ def validate_repository(repository: Path) -> list[str]:
     return errors
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repository", default=".", type=Path)
-    args = parser.parse_args()
-    errors = validate_repository(args.repository.resolve())
+    parser.add_argument("--core", type=Path, help="Path to oscal-vault-core checkout")
+    args = parser.parse_args(argv)
+    errors = validate_repository(args.repository.resolve(), core=args.core)
     if errors:
         print("\n".join(errors), file=sys.stderr)
         return 1
