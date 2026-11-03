@@ -100,6 +100,19 @@ def validate_cdx(system: str, cdx_path: str) -> tuple[int, int, int]:
             fail(system, f"asset {a['bom-ref']} has no zone")
         elif z and z not in zset:
             fail(system, f"asset {a['bom-ref']} references missing zone {z}")
+    for s in bp.get("dataStores", []) or []:
+        sz = s.get("zone")
+        if sz and sz not in zset:
+            fail(system, f"dataStore {s.get('bom-ref')} references missing zone {sz}")
+    populated_zones = {
+        a.get("zone") for a in assets if a.get("zone")
+    } | {
+        s.get("zone") for s in (bp.get("dataStores", []) or []) if s.get("zone")
+    }
+    for z in zones:
+        zref = z.get("bom-ref")
+        if zref and zref not in populated_zones:
+            fail(system, f"zone {zref} is empty")
 
     threats = d.get("threats", {}).get("threats", [])
     scenarios = d.get("threats", {}).get("scenarios", [])
