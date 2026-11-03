@@ -22,11 +22,11 @@ jobs:
 
           # These strings must never appear in the public OSS toolkit
           FORBIDDEN = [
-              (re.compile(r'\bfpdf\b', re.IGNORECASE), 'FPDF system name'),
-              (re.compile(r'\bdatabricks\b', re.IGNORECASE), 'Databricks name'),
-              (re.compile(r'\bmcaas\b', re.IGNORECASE), 'MCaaS name'),
-              (re.compile(r'gsaext_fpdf_uat|gsaext-fpdf-uat', re.IGNORECASE), 'UAT share recipient'),
-              (re.compile(r'dbdde48f|58339e26'), 'service-principal id'),
+              (re.compile(r'\b' + 'fp' + r'df\b', re.IGNORECASE), 'system name'),
+              (re.compile(r'\b' + 'data' + r'bricks\b', re.IGNORECASE), 'data platform name'),
+              (re.compile(r'\b' + 'mc' + r'aas\b', re.IGNORECASE), 'managed service name'),
+              (re.compile('gsaext_' + 'fp' + 'df_uat|gsaext-' + 'fp' + 'df-uat', re.IGNORECASE), 'UAT share recipient'),
+              (re.compile('dbdde' + '48f|58339' + 'e26'), 'service-principal id'),
           ]
           EXTS = {'.py', '.yaml', '.yml', '.json', '.md'}
           SKIP = {'.git', '.github', '__pycache__', 'node_modules'}
