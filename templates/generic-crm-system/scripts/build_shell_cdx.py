@@ -187,12 +187,18 @@ def main() -> None:
 
     # Repository Root (two levels up from templates/generic-crm-system/)
     REPO_ROOT = os.path.abspath(os.path.join(ROOT, "..", ".."))
-    outputs = [
-        args.out,
-        os.path.join(REPO_ROOT, "build", "generic-crm-shell.cdx.json"),
-        os.path.join(REPO_ROOT, "build", "cdx.json"),
-        os.path.join(REPO_ROOT, "cdx.json"),
-    ]
+    outputs = [args.out]
+    # Mirror into the host repository only when running in place; a copied
+    # template (the quick-start) must not write outside its own directory.
+    in_place = os.path.realpath(ROOT) == os.path.realpath(
+        os.path.join(REPO_ROOT, "templates", "generic-crm-system")
+    )
+    if in_place:
+        outputs += [
+            os.path.join(REPO_ROOT, "build", "generic-crm-shell.cdx.json"),
+            os.path.join(REPO_ROOT, "build", "cdx.json"),
+            os.path.join(REPO_ROOT, "cdx.json"),
+        ]
 
     for out_path in outputs:
         os.makedirs(os.path.dirname(out_path), exist_ok=True)
@@ -200,7 +206,7 @@ def main() -> None:
             json.dump(cdx, f, indent=2, ensure_ascii=False)
             f.write("\n")
         print(
-            f"Wrote {len(cdx_threats)} threats into shell DFD at {os.path.relpath(out_path, REPO_ROOT)}",
+            f"Wrote {len(cdx_threats)} threats into shell DFD at {os.path.relpath(out_path, REPO_ROOT if in_place else ROOT)}",
             file=sys.stderr,
         )
 

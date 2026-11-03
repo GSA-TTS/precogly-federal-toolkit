@@ -76,6 +76,16 @@ make shell-cdx   # Generates the integrated visual CycloneDX shell
 make validate    # Asserts enums, linkages, and runs the privacy filter
 ```
 
+### Cold-start check
+
+`make cold-start` copies this template to a temporary directory, clears the
+generated packs, runs `make all` against the synthetic fixtures in
+`examples/synthetic/` (a three-control catalog subset and a one-component
+definition), and checks that both packs and the shell CycloneDX file were
+written. It never modifies this directory. CI runs it on every pull request;
+it finishes in a few seconds, so the "under one hour bootstrap" goal is
+measured rather than assumed.
+
 ---
 
 ## Mapping Logic & ID Normalization

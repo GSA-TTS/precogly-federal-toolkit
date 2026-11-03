@@ -63,6 +63,12 @@ FORBIDDEN = [
     ),
 ]
 
+# The pinned public OWASP schema reference in owasp-export.yaml is the one
+# permitted URL; it names a published schema, not a system endpoint.
+PUBLIC_SCHEMA_URI = re.compile(
+    r"^schema_uri: https://raw\.githubusercontent\.com/OWASP/[^\s]+$", re.MULTILINE
+)
+
 
 def load_yaml(path: str) -> dict | list:
     with open(path, encoding="utf-8") as f:
@@ -228,7 +234,7 @@ def validate_redaction_gate() -> None:
                 continue
             path = os.path.join(root, f)
             with open(path, encoding="utf-8") as file_stream:
-                content = file_stream.read()
+                content = PUBLIC_SCHEMA_URI.sub("", file_stream.read())
             for pattern, label in FORBIDDEN:
                 m = pattern.search(content)
                 if m:
