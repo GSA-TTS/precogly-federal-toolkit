@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gsa-tts.github.io/precogly-federal-toolkit/schemas/c4-enrichment.schema.json",
+  "title": "C4 Topology Enrichment",
+  "description": "Reviewed human/diagram enrichment merged into a PPS-derived Topology before rendering CycloneDX and C4 views (#511, #512, #515).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "system", "components", "relationships"],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "system": {
+      "type": "string",
+      "minLength": 1
+    },
+    "resolve_via": {
+      "type": "boolean"
+    },
+    "components": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "status", "source"],
+        "properties": {
+          "key": { "type": "string", "minLength": 1 },
+          "name": { "type": "string", "minLength": 1 },
+          "kind": {
+            "type": "string",
+            "enum": ["human", "datastore", "external", "platform-process", "process"]
+          },
+          "boundary": {
+            "type": "string",
+            "enum": ["users", "external", "platform", "app"]
+          },
+          "technology": { "type": "string" },
+          "store_type": { "type": "string" },
+          "subsystem": { "type": "string", "minLength": 1 },
+          "status": {
+            "type": "string",
+            "enum": ["verified", "assumed", "conflict"]
+          },
+          "source": { "type": "string", "minLength": 1 },
+          "note": { "type": "string" }
+        }
+      }
+    },
+    "relationships": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["source", "destination", "label", "status", "source_ref"],
+        "properties": {
+          "source": { "type": "string", "minLength": 1 },
+          "destination": { "type": "string", "minLength": 1 },
+          "label": { "type": "string", "minLength": 1 },
+          "purpose": { "type": "string" },
+          "protocol": { "type": "string" },
+          "port": { "type": ["integer", "string"] },
+          "encrypted": { "type": "boolean" },
+          "boundary_crossing": { "type": "boolean" },
+          "sensitivity": { "type": "string" },
+          "subsystem": { "type": "string", "minLength": 1 },
+          "status": {
+            "type": "string",
+            "enum": ["verified", "assumed", "conflict"]
+          },
+          "source_ref": { "type": "string", "minLength": 1 },
+          "note": { "type": "string" }
+        }
+      }
+    },
+    "subsystems": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["title", "components"],
+        "properties": {
+          "title": { "type": "string", "minLength": 1 },
+          "components": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    },
+    "deployment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "nodes"],
+      "properties": {
+        "title": { "type": "string", "minLength": 1 },
+        "nodes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["alias", "label", "containers", "status", "source"],
+            "properties": {
+              "alias": { "type": "string", "minLength": 1 },
+              "label": { "type": "string", "minLength": 1 },
+              "technology": { "type": "string" },
+              "containers": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "status": {
+                "type": "string",
+                "enum": ["verified", "assumed", "conflict"]
+              },
+              "source": { "type": "string", "minLength": 1 },
+              "note": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
