@@ -1,0 +1,48 @@
+template:
+  slug: gsa-azure-approved-analytics
+  name: GSA Azure Approved Analytics
+  description: Approved Azure workflow and analytics pattern for government workloads.
+  category: cloud-overlay
+  diagram_type: level1
+canvas_data:
+  nodes:
+    - id: azure-client
+      type: externalSystemActor
+      position: { x: 35, y: 240 }
+      data: { label: Approved Data Source, actorType: system }
+    - id: azure-boundary
+      type: systemScope
+      position: { x: 220, y: 40 }
+      style: { width: 880, height: 500 }
+      data: { label: Azure Government Workload Boundary }
+    - id: azure-integration-zone
+      type: trustZone
+      parentId: azure-boundary
+      position: { x: 30, y: 50 }
+      style: { width: 300, height: 390 }
+      data: { label: Integration Tier, zoneType: zoneInternal }
+    - id: azure-analytics-zone
+      type: trustZone
+      parentId: azure-boundary
+      position: { x: 380, y: 50 }
+      style: { width: 400, height: 390 }
+      data: { label: Analytics Tier, zoneType: zoneRestricted }
+    - id: azure-logic
+      type: process
+      parentId: azure-integration-zone
+      position: { x: 55, y: 130 }
+      data: { label: Azure Logic Apps, component_ref: azure-logic-apps }
+    - id: azure-synapse
+      type: datastore
+      parentId: azure-analytics-zone
+      position: { x: 45, y: 100 }
+      data: { label: Azure Synapse Analytics, component_ref: azure-synapse-analytics }
+    - id: azure-ml
+      type: process
+      parentId: azure-analytics-zone
+      position: { x: 220, y: 240 }
+      data: { label: Azure ML, component_ref: azure-ml }
+  edges:
+    - { id: client-to-logic, source: azure-client, target: azure-logic, type: dataFlow, data: { label: TLS ingestion, protocol: HTTPS, encrypted: true } }
+    - { id: logic-to-synapse, source: azure-logic, target: azure-synapse, type: dataFlow, data: { label: Encrypted data load, protocol: HTTPS, encrypted: true } }
+    - { id: synapse-to-ml, source: azure-synapse, target: azure-ml, type: dataFlow, data: { label: Approved analytics data, protocol: HTTPS, encrypted: true } }

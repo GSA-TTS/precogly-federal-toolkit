@@ -1,0 +1,59 @@
+template:
+  slug: gsa-shared-services-web-app
+  name: GSA Shared Services Web Application
+  description: GSA web application using shared identity, source control, hosting, and common controls.
+  category: federal-platform
+  diagram_type: level1
+canvas_data:
+  nodes:
+    - id: gsa-external-user
+      type: humanActor
+      position: { x: 35, y: 245 }
+      data: { label: External User, actorType: user }
+    - id: gsa-boundary
+      type: systemScope
+      position: { x: 220, y: 40 }
+      style: { width: 920, height: 500 }
+      data: { label: GSA Application Boundary }
+    - id: gsa-edge-zone
+      type: trustZone
+      parentId: gsa-boundary
+      position: { x: 25, y: 40 }
+      style: { width: 250, height: 400 }
+      data: { label: Public Service Edge, zoneType: zoneInternet }
+    - id: gsa-app-zone
+      type: trustZone
+      parentId: gsa-boundary
+      position: { x: 310, y: 40 }
+      style: { width: 250, height: 400 }
+      data: { label: Application Service, zoneType: zoneInternal }
+    - id: gsa-shared-zone
+      type: trustZone
+      parentId: gsa-boundary
+      position: { x: 595, y: 40 }
+      style: { width: 270, height: 400 }
+      data: { label: Shared Services, zoneType: zoneRestricted }
+    - id: gsa-pages
+      type: process
+      parentId: gsa-edge-zone
+      position: { x: 40, y: 120 }
+      data: { label: GSA Pages, component_ref: gsa-pages }
+    - id: gsa-login
+      type: process
+      parentId: gsa-app-zone
+      position: { x: 40, y: 120 }
+      data: { label: Login.gov, component_ref: logingov }
+    - id: gsa-common-controls
+      type: process
+      parentId: gsa-shared-zone
+      position: { x: 45, y: 75 }
+      data: { label: GSA Common Controls, component_ref: gsa-common-controls }
+    - id: gsa-github
+      type: process
+      parentId: gsa-shared-zone
+      position: { x: 45, y: 235 }
+      data: { label: GitHub Enterprise, component_ref: github-enterprise }
+  edges:
+    - { id: user-to-pages, source: gsa-external-user, target: gsa-pages, type: dataFlow, data: { label: HTTPS, protocol: HTTPS, encrypted: true } }
+    - { id: pages-to-login, source: gsa-pages, target: gsa-login, type: dataFlow, data: { label: OIDC authentication, protocol: HTTPS, encrypted: true } }
+    - { id: github-to-pages, source: gsa-github, target: gsa-pages, type: dataFlow, data: { label: Reviewed deployment, protocol: HTTPS, encrypted: true } }

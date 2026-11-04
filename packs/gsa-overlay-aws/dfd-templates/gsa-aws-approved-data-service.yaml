@@ -1,0 +1,48 @@
+template:
+  slug: gsa-aws-approved-data-service
+  name: GSA AWS Approved Data Service
+  description: Approved AWS data service pattern with encryption and containerized application processing.
+  category: cloud-overlay
+  diagram_type: level1
+canvas_data:
+  nodes:
+    - id: aws-client
+      type: externalSystemActor
+      position: { x: 35, y: 240 }
+      data: { label: Approved Client System, actorType: system }
+    - id: aws-boundary
+      type: systemScope
+      position: { x: 220, y: 40 }
+      style: { width: 880, height: 500 }
+      data: { label: Approved AWS Service Boundary }
+    - id: aws-app-zone
+      type: trustZone
+      parentId: aws-boundary
+      position: { x: 30, y: 50 }
+      style: { width: 330, height: 390 }
+      data: { label: Application Tier, zoneType: zoneInternal }
+    - id: aws-data-zone
+      type: trustZone
+      parentId: aws-boundary
+      position: { x: 405, y: 50 }
+      style: { width: 390, height: 390 }
+      data: { label: Restricted Data Tier, zoneType: zoneRestricted }
+    - id: aws-workload
+      type: process
+      parentId: aws-app-zone
+      position: { x: 75, y: 130 }
+      data: { label: ECS / Fargate Workload, component_ref: ecs-fargate }
+    - id: aws-rds
+      type: datastore
+      parentId: aws-data-zone
+      position: { x: 45, y: 90 }
+      data: { label: Amazon RDS, component_ref: rds }
+    - id: aws-kms
+      type: process
+      parentId: aws-data-zone
+      position: { x: 215, y: 230 }
+      data: { label: AWS KMS, component_ref: kms }
+  edges:
+    - { id: client-to-workload, source: aws-client, target: aws-workload, type: dataFlow, data: { label: TLS request, protocol: HTTPS, encrypted: true } }
+    - { id: workload-to-rds, source: aws-workload, target: aws-rds, type: dataFlow, data: { label: TLS database access, protocol: TLS, encrypted: true } }
+    - { id: rds-to-kms, source: aws-rds, target: aws-kms, type: dataFlow, data: { label: Encryption key use, protocol: AWS API, encrypted: true } }
