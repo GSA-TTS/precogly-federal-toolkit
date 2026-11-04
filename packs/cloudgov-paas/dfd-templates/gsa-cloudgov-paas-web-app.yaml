@@ -1,5 +1,5 @@
 template:
-  slug: cloudgov-paas-web-app
+  slug: gsa-cloudgov-paas-web-app
   name: Cloud.gov PaaS Web Application
   description: Public web application on Cloud.gov with a tenant application and managed data services.
   category: federal-platform
