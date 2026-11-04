@@ -20,13 +20,13 @@ canvas_data:
       parentId: gcp-boundary
       position: { x: 30, y: 50 }
       style: { width: 280, height: 390 }
-      data: { label: Ingestion Tier, zoneType: zoneInternal }
+      data: { label: Ingestion Tier, zoneType: trust }
     - id: gcp-processing-zone
       type: trustZone
       parentId: gcp-boundary
       position: { x: 350, y: 50 }
       style: { width: 440, height: 390 }
-      data: { label: Protected Processing Tier, zoneType: zoneRestricted }
+      data: { label: Protected Processing Tier, zoneType: trust }
     - id: gcp-fusion
       type: process
       parentId: gcp-ingestion-zone

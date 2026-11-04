@@ -20,19 +20,19 @@ canvas_data:
       parentId: cloudgov-boundary
       position: { x: 25, y: 40 }
       style: { width: 220, height: 400 }
-      data: { label: Public Edge, zoneType: zoneInternet }
+      data: { label: Public Edge, zoneType: network }
     - id: cloudgov-app-zone
       type: trustZone
       parentId: cloudgov-boundary
       position: { x: 275, y: 40 }
       style: { width: 250, height: 400 }
-      data: { label: Tenant Application, zoneType: zoneInternal }
+      data: { label: Tenant Application, zoneType: trust }
     - id: cloudgov-data-zone
       type: trustZone
       parentId: cloudgov-boundary
       position: { x: 555, y: 40 }
       style: { width: 300, height: 400 }
-      data: { label: Managed Data Services, zoneType: zoneRestricted }
+      data: { label: Managed Data Services, zoneType: trust }
     - id: cloudgov-cdn
       type: process
       parentId: cloudgov-edge

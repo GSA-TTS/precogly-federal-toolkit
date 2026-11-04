@@ -20,19 +20,19 @@ canvas_data:
       parentId: gsa-boundary
       position: { x: 25, y: 40 }
       style: { width: 250, height: 400 }
-      data: { label: Public Service Edge, zoneType: zoneInternet }
+      data: { label: Public Service Edge, zoneType: network }
     - id: gsa-app-zone
       type: trustZone
       parentId: gsa-boundary
       position: { x: 310, y: 40 }
       style: { width: 250, height: 400 }
-      data: { label: Application Service, zoneType: zoneInternal }
+      data: { label: Application Service, zoneType: trust }
     - id: gsa-shared-zone
       type: trustZone
       parentId: gsa-boundary
       position: { x: 595, y: 40 }
       style: { width: 270, height: 400 }
-      data: { label: Shared Services, zoneType: zoneRestricted }
+      data: { label: Shared Services, zoneType: trust }
     - id: gsa-pages
       type: process
       parentId: gsa-edge-zone
