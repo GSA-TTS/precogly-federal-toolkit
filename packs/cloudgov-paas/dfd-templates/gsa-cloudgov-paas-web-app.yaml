@@ -1,5 +1,5 @@
 template:
-  slug: cloudgov-paas-web-app
+  slug: gsa-cloudgov-paas-web-app
   name: Cloud.gov PaaS Web Application
   description: Public web application on Cloud.gov with a tenant application and managed data services.
   category: federal-platform
@@ -53,8 +53,14 @@ canvas_data:
       parentId: cloudgov-data-zone
       position: { x: 150, y: 240 }
       data: { label: Managed Object Storage, component_ref: cloudgov-s3 }
+    - id: cloudgov-redis
+      type: datastore
+      parentId: cloudgov-data-zone
+      position: { x: 150, y: 90 }
+      data: { label: Managed Redis Cache, component_ref: cloudgov-redis }
   edges:
     - { id: user-to-cdn, source: internet-user, target: cloudgov-cdn, type: dataFlow, data: { label: HTTPS, protocol: HTTPS, encrypted: true } }
     - { id: cdn-to-app, source: cloudgov-cdn, target: cloudgov-app, type: dataFlow, data: { label: HTTPS, protocol: HTTPS, encrypted: true } }
     - { id: app-to-rds, source: cloudgov-app, target: cloudgov-rds, type: dataFlow, data: { label: TLS database connection, protocol: TLS, encrypted: true } }
     - { id: app-to-object-store, source: cloudgov-app, target: cloudgov-object-store, type: dataFlow, data: { label: TLS object access, protocol: HTTPS, encrypted: true } }
+    - { id: app-to-redis, source: cloudgov-app, target: cloudgov-redis, type: dataFlow, data: { label: TLS cache connection, protocol: TLS, encrypted: true } }

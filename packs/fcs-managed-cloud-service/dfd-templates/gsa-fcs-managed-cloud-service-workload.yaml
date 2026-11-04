@@ -1,5 +1,5 @@
 template:
-  slug: fcs-managed-cloud-service-workload
+  slug: gsa-fcs-managed-cloud-service-workload
   name: FCS Managed Cloud Service Workload
   description: Tenant workload using inherited FCS managed cloud service, container, and data tiers.
   category: federal-platform
