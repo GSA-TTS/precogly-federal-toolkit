@@ -27,6 +27,8 @@ Reference for the Precogly Django backend deployed locally at `http://localhost:
 
 ## Authentication
 
+> **Local development only:** set `LOCAL_PRECOGLY_EMAIL` and `LOCAL_PRECOGLY_PASSWORD` for a disposable localhost Precogly instance. Do not reuse, commit, or deploy these values.
+
 All endpoints require `Authorization: Bearer <token>` except public magic-link routes.
 
 **Get a token:**
@@ -34,7 +36,7 @@ All endpoints require `Authorization: Bearer <token>` except public magic-link r
 ```bash
 TOKEN=$(curl -s -X POST http://localhost:8000/api/auth/login/ \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@precogly.dev","password":"admin123"}' \
+  -d '{"email":"$LOCAL_PRECOGLY_EMAIL","password":"$LOCAL_PRECOGLY_PASSWORD"}' \
   | python3 -c "import sys,json; print(json.load(sys.stdin)['access'])")
 ```
 
@@ -468,7 +470,7 @@ for tm in ThreatModel.objects.filter(id__gte=96).order_by("id"):
 ```bash
 TOKEN=$(curl -s -X POST http://localhost:8000/api/auth/login/ \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@precogly.dev","password":"admin123"}' \
+  -d '{"email":"$LOCAL_PRECOGLY_EMAIL","password":"$LOCAL_PRECOGLY_PASSWORD"}' \
   | python3 -c "import sys,json; print(json.load(sys.stdin)['access'])")
 
 PRECOGLY_TOKEN="$TOKEN" python3 scripts/bulk_import_to_precogly.py \

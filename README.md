@@ -1,7 +1,7 @@
 # Precogly Federal Toolkit
 
 Reusable Precogly/CycloneDX scaffolding, packs, scripts, and guides for federal
-system security plans. Extracted from the TTSE Petrified Forest SSPP repository.
+system security plans. Designed for use from a private system repository with authorized system records.
 
 ## Navigation
 
@@ -15,6 +15,7 @@ system security plans. Extracted from the TTSE Petrified Forest SSPP repository.
 | [templates/private-system-repository/](templates/private-system-repository/)     | Layout for a repository that holds real system content        |
 | [docs/skills/](docs/skills/)                                                     | Agent skill playbooks (authoring, API, countermeasure audit)  |
 | [SUBMODULE.md](SUBMODULE.md)                                                     | Converting this directory into a pinned submodule             |
+| [docs/PUBLIC_RELEASE_REVIEW.md](docs/PUBLIC_RELEASE_REVIEW.md)                   | Required owner release-concurrence checklist                  |
 
 ## The toolkit boundary, as a grammar
 

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://gsa.gov/tts/ttse-petrified-forest-sspp/schemas/cui-provenance.schema.json",
+  "$id": "urn:precogly:federal-toolkit:cui-provenance.schema.json",
   "title": "CUI provenance sidecar",
   "type": "object",
   "additionalProperties": false,
