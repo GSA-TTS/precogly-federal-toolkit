@@ -34,6 +34,7 @@ jobs:
               (re.compile('dbdde' + '48f|58339' + 'e26'), 'service-principal id'),
           ]
           EXTS = {'.py', '.yaml', '.yml', '.json', '.md'}
+          # Workflows define the scanner's own test literals; scanning them would be a self-match.
           SKIP = {'.git', '.github', '__pycache__', 'node_modules'}
 
           root = pathlib.Path('.')

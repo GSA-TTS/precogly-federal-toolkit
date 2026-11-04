@@ -134,10 +134,12 @@ Grep every priority's "Affected controls:" line, count occurrences per
 
 ### Step 6 — Live Precogly cross-check (Finding G)
 
+> **Local development only:** set `LOCAL_PRECOGLY_EMAIL` and `LOCAL_PRECOGLY_PASSWORD` for a disposable localhost Precogly instance. Do not use sample credentials against a deployed environment.
+
 ```bash
 TOKEN=$(curl -s -X POST http://localhost:8000/api/auth/login/ \
   -H 'Content-Type: application/json' \
-  -d '{"email":"admin@precogly.dev","password":"admin123"}' \
+  -d '{"email":"$LOCAL_PRECOGLY_EMAIL","password":"$LOCAL_PRECOGLY_PASSWORD"}' \
   | python3 -c "import sys,json; print(json.load(sys.stdin)['access'])")
 
 TMID=175  # Example System CRM Threat Model; verify with a search first
