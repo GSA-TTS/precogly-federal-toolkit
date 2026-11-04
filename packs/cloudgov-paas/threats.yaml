@@ -56,6 +56,18 @@ threats:
       GSA Pages CI/CD pipeline produces backdoored static assets served to
       end users.
 
+  - id: cloudgov-pages-unapproved-third-party-script
+    name: Unapproved Third-Party Script or External Asset Inclusion
+    description: |
+      A published static site loads an unvetted third-party script or external
+      asset, exposing site visitors to a client-side supply-chain compromise.
+
+  - id: cloudgov-pages-missing-security-headers
+    name: Missing or Weak Static-Site Security Headers
+    description: |
+      Static-site responses lack required transport or browser security headers,
+      enabling avoidable client-side, content-type, or downgrade risks.
+
   - id: cloudgov-crm-control-gap
     name: Cloud.gov Tenant CRM Control Not Implemented
     description: |

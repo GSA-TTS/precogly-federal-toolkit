@@ -1,0 +1,82 @@
+template:
+  slug: gsa-cloudgov-pages-static-site
+  name: Cloud.gov Pages Static Site
+  description: Reusable static-site publishing topology from reviewed source through ephemeral build staging, published object storage, Pages Proxy, and CDN.
+  category: federal-platform
+  diagram_type: level1
+canvas_data:
+  nodes:
+    - id: internet-user
+      type: humanActor
+      position: { x: 40, y: 260 }
+      data: { label: Public User, actorType: user }
+    - id: website-manager
+      type: humanActor
+      position: { x: 40, y: 60 }
+      data: { label: Website Manager, actorType: user }
+    - id: source-repository
+      type: externalSystemActor
+      position: { x: 40, y: 155 }
+      data: { label: Source Repository and CI, actorType: system }
+    - id: cloudgov-boundary
+      type: systemScope
+      position: { x: 250, y: 40 }
+      style: { width: 980, height: 500 }
+      data: { label: Cloud.gov Pages Boundary }
+    - id: cloudgov-edge
+      type: trustZone
+      parentId: cloudgov-boundary
+      position: { x: 25, y: 40 }
+      style: { width: 260, height: 400 }
+      data: { label: Public Edge, zoneType: network }
+    - id: cloudgov-build-zone
+      type: trustZone
+      parentId: cloudgov-boundary
+      position: { x: 315, y: 40 }
+      style: { width: 300, height: 400 }
+      data: { label: Pages Build and Publishing, zoneType: trust }
+    - id: cloudgov-data-zone
+      type: trustZone
+      parentId: cloudgov-boundary
+      position: { x: 645, y: 40 }
+      style: { width: 300, height: 400 }
+      data: { label: Published Static Site Storage, zoneType: trust }
+    - id: cloudgov-cdn
+      type: process
+      parentId: cloudgov-edge
+      position: { x: 35, y: 90 }
+      data: { label: Cloud.gov CDN, component_ref: cloudgov-cdn }
+    - id: cloudgov-pages-proxy
+      type: process
+      parentId: cloudgov-edge
+      position: { x: 35, y: 240 }
+      data: { label: Cloud.gov Pages Proxy, component_ref: cloudgov-pages-proxy }
+    - id: cloudgov-pages-web
+      type: process
+      parentId: cloudgov-build-zone
+      position: { x: 40, y: 90 }
+      data: { label: Pages Web and Webhook Service, component_ref: cloudgov-pages }
+    - id: cloudgov-pages-builder
+      type: process
+      parentId: cloudgov-build-zone
+      position: { x: 40, y: 240 }
+      data: { label: Ephemeral Build Container, component_ref: cloudgov-pages-builder }
+    - id: cloudgov-preview-s3
+      type: datastore
+      parentId: cloudgov-data-zone
+      position: { x: 45, y: 90 }
+      data: { label: Preview Object Storage, component_ref: cloudgov-s3 }
+    - id: cloudgov-production-s3
+      type: datastore
+      parentId: cloudgov-data-zone
+      position: { x: 45, y: 240 }
+      data: { label: Production Object Storage, component_ref: cloudgov-s3 }
+  edges:
+    - { id: manager-to-source, source: website-manager, target: source-repository, type: dataFlow, data: { label: Reviewed change, protocol: HTTPS, encrypted: true } }
+    - { id: source-to-pages-web, source: source-repository, target: cloudgov-pages-web, type: dataFlow, data: { label: Webhook and revision identifier, protocol: HTTPS, encrypted: true } }
+    - { id: pages-web-to-builder, source: cloudgov-pages-web, target: cloudgov-pages-builder, type: dataFlow, data: { label: Build job dispatch, protocol: Cloud Foundry API, encrypted: true } }
+    - { id: builder-to-preview-storage, source: cloudgov-pages-builder, target: cloudgov-preview-s3, type: dataFlow, data: { label: Preview static assets, protocol: HTTPS, encrypted: true } }
+    - { id: builder-to-production-storage, source: cloudgov-pages-builder, target: cloudgov-production-s3, type: dataFlow, data: { label: Published static assets, protocol: HTTPS, encrypted: true } }
+    - { id: user-to-cdn, source: internet-user, target: cloudgov-cdn, type: dataFlow, data: { label: HTTPS GET, protocol: HTTPS, encrypted: true } }
+    - { id: cdn-to-pages-proxy, source: cloudgov-cdn, target: cloudgov-pages-proxy, type: dataFlow, data: { label: HTTPS origin request, protocol: HTTPS, encrypted: true } }
+    - { id: pages-proxy-to-production-storage, source: cloudgov-pages-proxy, target: cloudgov-production-s3, type: dataFlow, data: { label: Static object fetch, protocol: HTTPS, encrypted: true } }
