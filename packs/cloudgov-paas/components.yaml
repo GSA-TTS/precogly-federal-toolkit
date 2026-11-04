@@ -23,6 +23,47 @@ components:
       application-layer controls: code security, dependency management,
       application-level access control, and configuration of bound services.
 
+  # ── Deployment Models ───────────────────────────────────────────────────────
+  - id: cloudgov-manifest
+    name: Cloud.gov manifest.yaml
+    category: datastore
+    type: Deployment Manifest
+    provider: tenant
+    description: |
+      Cloud Foundry deployment manifest declaring the application name, routes,
+      service bindings, environment references, and either a buildpack or an OCI
+      container image. It is tenant-managed source configuration and must not
+      contain plaintext credentials.
+
+  - id: cloudgov-buildpack
+    name: Cloud.gov Buildpack Staging
+    category: process
+    type: Buildpack Staging
+    provider: gsa
+    description: |
+      Cloud.gov staging process that applies an approved Cloud Foundry buildpack
+      to tenant application source before deployment to the tenant workload.
+
+  - id: cloudgov-container-image
+    name: Cloud.gov Container Image Reference
+    category: datastore
+    type: OCI Image Artifact
+    provider: tenant
+    description: |
+      Tenant-declared OCI image reference consumed by Cloud.gov container staging.
+      Use an immutable digest or controlled version tag and record image
+      provenance before deployment.
+
+  - id: cloudgov-container-registry
+    name: Approved Container Registry
+    category: process
+    type: OCI Registry
+    provider: external
+    description: |
+      Authorized registry serving reviewed OCI images to a Cloud.gov deployment.
+      Registry credentials, image provenance, and vulnerability remediation
+      remain tenant responsibilities.
+
   # ── Managed Service Tiers ─────────────────────────────────────────────────────
   - id: cloudgov-rds
     name: Cloud.gov RDS (Managed PostgreSQL / MySQL)

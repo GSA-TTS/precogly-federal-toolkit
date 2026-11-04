@@ -28,6 +28,20 @@ threats:
       known-vulnerable dependencies, exposing a remote code execution or
       privilege escalation surface within the PaaS container.
 
+  - id: cloudgov-container-image-provenance-gap
+    name: Unverified Container Image Provenance or Mutable Tag
+    description: |
+      A Cloud.gov container deployment references an unreviewed registry image or
+      mutable tag. The deployed bytes may differ from the reviewed artifact or
+      include unresolved image vulnerabilities.
+
+  - id: cloudgov-container-registry-credential-exposure
+    name: Container Registry Credential Exposure
+    description: |
+      Registry credentials are committed to source, manifest configuration, or
+      unscoped deployment automation, allowing an unauthorized party to pull or
+      replace deployment images.
+
   - id: cloudgov-org-space-isolation-gap
     name: Org/Space Isolation Misconfiguration
     description: |

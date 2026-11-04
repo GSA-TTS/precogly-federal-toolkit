@@ -17,6 +17,14 @@ mappings:
     countermeasures:
       - cloudgov-buildpack-currency
 
+  - threat: cloudgov-container-image-provenance-gap
+    countermeasures:
+      - cloudgov-container-image-digest
+
+  - threat: cloudgov-container-registry-credential-exposure
+    countermeasures:
+      - cloudgov-registry-credential-management
+
   - threat: cloudgov-org-space-isolation-gap
     countermeasures:
       - cloudgov-space-roles

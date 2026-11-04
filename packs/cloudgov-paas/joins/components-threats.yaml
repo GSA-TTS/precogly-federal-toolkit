@@ -12,6 +12,32 @@ mappings:
     threats:
       - threat: cloudgov-app-misconfiguration
         applies_to: component
+
+  - component: cloudgov-manifest
+    threats:
+      - threat: cloudgov-secret-in-manifest
+        applies_to: component
+      - threat: cloudgov-app-misconfiguration
+        applies_to: component
+
+  - component: cloudgov-buildpack
+    threats:
+      - threat: cloudgov-dependency-vulnerability
+        applies_to: component
+
+  - component: cloudgov-container-image
+    threats:
+      - threat: cloudgov-container-image-provenance-gap
+        applies_to: component
+      - threat: cloudgov-dependency-vulnerability
+        applies_to: component
+
+  - component: cloudgov-container-registry
+    threats:
+      - threat: cloudgov-container-image-provenance-gap
+        applies_to: component
+      - threat: cloudgov-container-registry-credential-exposure
+        applies_to: component
       - threat: cloudgov-secret-in-manifest
         applies_to: component
       - threat: cloudgov-dependency-vulnerability
