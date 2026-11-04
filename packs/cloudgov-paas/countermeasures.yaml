@@ -36,6 +36,24 @@ countermeasures:
     control_type: preventive
     cost: low
 
+  - id: cloudgov-container-image-digest
+    name: Pin and Verify Container Image Digests
+    description: |
+      Reference reviewed OCI images by immutable digest or controlled release tag.
+      Verify provenance and vulnerability scan results before deployment, and
+      require a new review when the image digest changes.
+    control_type: preventive
+    cost: low
+
+  - id: cloudgov-registry-credential-management
+    name: Scope Container Registry Credentials
+    description: |
+      Store registry credentials in an approved secret manager or CI environment,
+      use least-privilege pull scopes, and do not commit registry credentials to
+      manifest.yml or source control.
+    control_type: preventive
+    cost: low
+
   - id: cloudgov-space-roles
     name: Enforce Least-Privilege CF Space Roles
     description: |
