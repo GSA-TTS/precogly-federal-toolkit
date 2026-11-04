@@ -20,13 +20,13 @@ canvas_data:
       parentId: aws-boundary
       position: { x: 30, y: 50 }
       style: { width: 330, height: 390 }
-      data: { label: Application Tier, zoneType: zoneInternal }
+      data: { label: Application Tier, zoneType: trust }
     - id: aws-data-zone
       type: trustZone
       parentId: aws-boundary
       position: { x: 405, y: 50 }
       style: { width: 390, height: 390 }
-      data: { label: Restricted Data Tier, zoneType: zoneRestricted }
+      data: { label: Restricted Data Tier, zoneType: trust }
     - id: aws-workload
       type: process
       parentId: aws-app-zone

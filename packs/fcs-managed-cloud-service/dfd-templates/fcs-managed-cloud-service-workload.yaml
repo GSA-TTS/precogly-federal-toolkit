@@ -20,19 +20,19 @@ canvas_data:
       parentId: fcs-boundary
       position: { x: 25, y: 45 }
       style: { width: 250, height: 400 }
-      data: { label: Managed Platform, zoneType: zoneInternal }
+      data: { label: Managed Platform, zoneType: trust }
     - id: fcs-workload-zone
       type: trustZone
       parentId: fcs-boundary
       position: { x: 310, y: 45 }
       style: { width: 250, height: 400 }
-      data: { label: Tenant Workload, zoneType: zoneInternal }
+      data: { label: Tenant Workload, zoneType: trust }
     - id: fcs-data-zone
       type: trustZone
       parentId: fcs-boundary
       position: { x: 595, y: 45 }
       style: { width: 250, height: 400 }
-      data: { label: Managed Data, zoneType: zoneRestricted }
+      data: { label: Managed Data, zoneType: trust }
     - id: fcs-platform
       type: process
       parentId: fcs-platform-zone
