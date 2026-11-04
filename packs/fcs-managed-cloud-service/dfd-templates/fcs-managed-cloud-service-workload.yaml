@@ -1,0 +1,54 @@
+template:
+  slug: fcs-managed-cloud-service-workload
+  name: FCS Managed Cloud Service Workload
+  description: Tenant workload using inherited FCS managed cloud service, container, and data tiers.
+  category: federal-platform
+  diagram_type: level1
+canvas_data:
+  nodes:
+    - id: fcs-user
+      type: humanActor
+      position: { x: 35, y: 240 }
+      data: { label: Authorized User, actorType: user }
+    - id: fcs-boundary
+      type: systemScope
+      position: { x: 220, y: 40 }
+      style: { width: 900, height: 500 }
+      data: { label: FCS Managed Cloud Service Boundary }
+    - id: fcs-platform-zone
+      type: trustZone
+      parentId: fcs-boundary
+      position: { x: 25, y: 45 }
+      style: { width: 250, height: 400 }
+      data: { label: Managed Platform, zoneType: zoneInternal }
+    - id: fcs-workload-zone
+      type: trustZone
+      parentId: fcs-boundary
+      position: { x: 310, y: 45 }
+      style: { width: 250, height: 400 }
+      data: { label: Tenant Workload, zoneType: zoneInternal }
+    - id: fcs-data-zone
+      type: trustZone
+      parentId: fcs-boundary
+      position: { x: 595, y: 45 }
+      style: { width: 250, height: 400 }
+      data: { label: Managed Data, zoneType: zoneRestricted }
+    - id: fcs-platform
+      type: process
+      parentId: fcs-platform-zone
+      position: { x: 45, y: 120 }
+      data: { label: FCS Managed Cloud Service, component_ref: managed-cloud-service-platform }
+    - id: fcs-workload
+      type: process
+      parentId: fcs-workload-zone
+      position: { x: 45, y: 120 }
+      data: { label: Container Workload, component_ref: managed-cloud-service-caas }
+    - id: fcs-data
+      type: datastore
+      parentId: fcs-data-zone
+      position: { x: 45, y: 120 }
+      data: { label: Managed Data Service, component_ref: managed-cloud-service-data }
+  edges:
+    - { id: user-to-platform, source: fcs-user, target: fcs-platform, type: dataFlow, data: { label: Authenticated HTTPS, protocol: HTTPS, encrypted: true } }
+    - { id: platform-to-workload, source: fcs-platform, target: fcs-workload, type: dataFlow, data: { label: Managed ingress, protocol: HTTPS, encrypted: true } }
+    - { id: workload-to-data, source: fcs-workload, target: fcs-data, type: dataFlow, data: { label: TLS data access, protocol: TLS, encrypted: true } }

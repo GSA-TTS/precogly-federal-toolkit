@@ -102,6 +102,26 @@ the strict FedRAMP validator; placeholder values are intentionally rejected.
 | `scripts/catalog/`              | OSCAL-vault ingestion, portfolio CDX, catalog builder                       |
 | `docs/`                         | Threat-model authoring guides and agent skills                              |
 
+## DFD template catalog
+
+Every included federal library pack provides a composable context template under
+`packs/<pack>/dfd-templates/`. Import a pack into Precogly, connect it to the
+threat model, then open **Choose a Template** in the DFD editor. Templates are
+component-reference backed: Precogly resolves the inserted nodes to the
+components imported from that same pack.
+
+| Pack | Template |
+| --- | --- |
+| `cloudgov-paas` | Cloud.gov PaaS Web Application |
+| `fcs-managed-cloud-service` | FCS Managed Cloud Service Workload |
+| `gsa-fedramp` | GSA Shared Services Web Application |
+| `gsa-overlay-aws` | GSA AWS Approved Data Service |
+| `gsa-overlay-azure` | GSA Azure Approved Analytics |
+| `gsa-overlay-gcp` | GSA GCP Approved Data Pipeline |
+
+Templates model reusable topology only. They do not assert that a particular
+system uses a service or that a related control is implemented.
+
 ## Submodule usage
 
 This directory is designed to be replaced by a git submodule at the same path

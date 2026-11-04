@@ -1,0 +1,48 @@
+template:
+  slug: gsa-gcp-approved-data-pipeline
+  name: GSA GCP Approved Data Pipeline
+  description: Approved GCP ingestion, orchestration, and data-protection pattern for federal workloads.
+  category: cloud-overlay
+  diagram_type: level1
+canvas_data:
+  nodes:
+    - id: gcp-client
+      type: externalSystemActor
+      position: { x: 35, y: 240 }
+      data: { label: Approved Data Source, actorType: system }
+    - id: gcp-boundary
+      type: systemScope
+      position: { x: 220, y: 40 }
+      style: { width: 900, height: 500 }
+      data: { label: GCP Federal Workload Boundary }
+    - id: gcp-ingestion-zone
+      type: trustZone
+      parentId: gcp-boundary
+      position: { x: 30, y: 50 }
+      style: { width: 280, height: 390 }
+      data: { label: Ingestion Tier, zoneType: zoneInternal }
+    - id: gcp-processing-zone
+      type: trustZone
+      parentId: gcp-boundary
+      position: { x: 350, y: 50 }
+      style: { width: 440, height: 390 }
+      data: { label: Protected Processing Tier, zoneType: zoneRestricted }
+    - id: gcp-fusion
+      type: process
+      parentId: gcp-ingestion-zone
+      position: { x: 50, y: 120 }
+      data: { label: Cloud Data Fusion, component_ref: gcp-data-fusion }
+    - id: gcp-composer
+      type: process
+      parentId: gcp-processing-zone
+      position: { x: 45, y: 80 }
+      data: { label: Cloud Composer, component_ref: gcp-cloud-composer }
+    - id: gcp-dlp
+      type: process
+      parentId: gcp-processing-zone
+      position: { x: 230, y: 240 }
+      data: { label: Cloud DLP, component_ref: gcp-dlp }
+  edges:
+    - { id: client-to-fusion, source: gcp-client, target: gcp-fusion, type: dataFlow, data: { label: TLS ingestion, protocol: HTTPS, encrypted: true } }
+    - { id: fusion-to-composer, source: gcp-fusion, target: gcp-composer, type: dataFlow, data: { label: Orchestrated data transfer, protocol: HTTPS, encrypted: true } }
+    - { id: composer-to-dlp, source: gcp-composer, target: gcp-dlp, type: dataFlow, data: { label: Sensitive data inspection, protocol: HTTPS, encrypted: true } }
