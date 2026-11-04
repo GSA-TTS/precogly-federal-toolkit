@@ -7,9 +7,9 @@ template:
 canvas_data:
   nodes:
     - id: azure-client
-      type: externalSystemActor
+      type: systemActor
       position: { x: 35, y: 240 }
-      data: { label: Approved Data Source, actorType: system }
+      data: { label: Approved Data Source, systemType: service }
     - id: azure-boundary
       type: systemScope
       position: { x: 220, y: 40 }

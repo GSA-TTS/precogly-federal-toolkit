@@ -119,6 +119,17 @@ components:
       responsible for configuring custom domains and origin headers.
 
   # ── GSA Pages (built on Cloud.gov) ──────────────────────────────────────────
+  - id: cloudgov-pages-github-admin
+    name: GSA Pages GitHub Administration & CI Governance
+    category: process
+    type: Repository Governance & CI
+    provider: tenant
+    description: |
+      GitHub administration and CI governance for GSA Pages repositories.
+      Administers users and teams, enforces branch protections with required
+      peer review on publication branches, and runs CodeQL and Dependabot CI
+      checks before changes trigger a GSA Pages build.
+
   - id: cloudgov-pages
     name: GSA Pages (Static Site Hosting)
     category: process

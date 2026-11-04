@@ -29,9 +29,16 @@ mappings:
     countermeasures:
       - cloudgov-space-roles
 
+  - threat: cloudgov-pages-github-governance-gap
+    countermeasures:
+      - cloudgov-pages-branch-protection
+      - cloudgov-pages-github-team-ci-governance
+      - cloudgov-pages-atu-continuous-monitoring
+
   - threat: cloudgov-pages-supply-chain
     countermeasures:
       - cloudgov-pages-branch-protection
+      - cloudgov-pages-github-team-ci-governance
 
   - threat: cloudgov-pages-unapproved-third-party-script
     countermeasures:

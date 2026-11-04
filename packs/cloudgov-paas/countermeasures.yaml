@@ -74,11 +74,20 @@ countermeasures:
     cost: low
 
   - id: cloudgov-pages-branch-protection
-    name: GSA Pages Branch Protection and Required Reviews
+    name: GSA Pages Branch Protection and Required Peer Review
     description: |
       Enforce branch protection on the GSA Pages publication branch:
-      require at least one approving review, require status checks to pass,
+      require at least one approving peer review, require status checks to pass,
       and disable force pushes. Pin GitHub Actions to commit SHA.
+    control_type: preventive
+    cost: low
+
+  - id: cloudgov-pages-github-team-ci-governance
+    name: Enforce GitHub Users/Teams Access and CodeQL/Dependabot CI
+    description: |
+      Administer repository access through least-privilege GitHub users and
+      teams, review membership regularly, and require CodeQL static analysis
+      and Dependabot dependency scanning CI checks before merge.
     control_type: preventive
     cost: low
 
