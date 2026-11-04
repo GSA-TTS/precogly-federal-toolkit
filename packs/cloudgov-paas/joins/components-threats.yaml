@@ -76,8 +76,21 @@ mappings:
       - threat: cloudgov-dependency-vulnerability
         applies_to: flow
 
+  - component: cloudgov-pages-github-admin
+    threats:
+      - threat: cloudgov-pages-github-governance-gap
+        applies_to: component
+      - threat: cloudgov-pages-supply-chain
+        applies_to: component
+      - threat: cloudgov-dependency-vulnerability
+        applies_to: component
+      - threat: cloudgov-crm-control-gap
+        applies_to: component
+
   - component: cloudgov-pages
     threats:
+      - threat: cloudgov-pages-github-governance-gap
+        applies_to: component
       - threat: cloudgov-pages-supply-chain
         applies_to: component
       - threat: cloudgov-crm-control-gap

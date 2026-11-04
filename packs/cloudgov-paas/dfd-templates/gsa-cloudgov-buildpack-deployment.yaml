@@ -11,7 +11,7 @@ canvas_data:
     type: humanActor
     position:
       x: 40
-      y: 250
+      y: 280
     data:
       label: Public User
       actorType: user
@@ -119,13 +119,13 @@ canvas_data:
       label: Deployment Staging
       zoneType: trust
   - id: source-repository
-    type: externalSystemActor
+    type: systemActor
     position:
       x: 35
-      y: 90
+      y: 70
     data:
       label: Source Repository
-      actorType: system
+      systemType: service
   - id: cloudgov-manifest
     type: datastore
     parentId: cloudgov-deployment-zone

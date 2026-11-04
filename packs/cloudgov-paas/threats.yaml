@@ -49,6 +49,13 @@ threats:
       (e.g., developers in another org) to deploy apps, view environment
       variables, or access services within the tenant's space.
 
+  - id: cloudgov-pages-github-governance-gap
+    name: GitHub Team Access, Branch Protection, or CI Gate Bypass
+    description: |
+      Over-privileged GitHub user or team access, disabled branch protection,
+      missing peer review, or bypassed CodeQL and Dependabot CI checks allow
+      unreviewed or vulnerable changes to reach the GSA Pages publication branch.
+
   - id: cloudgov-pages-supply-chain
     name: GSA Pages Build Pipeline Compromise
     description: |
