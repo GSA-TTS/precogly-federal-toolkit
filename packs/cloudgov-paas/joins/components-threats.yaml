@@ -12,6 +12,12 @@ mappings:
     threats:
       - threat: cloudgov-app-misconfiguration
         applies_to: component
+      - threat: cloudgov-secret-in-manifest
+        applies_to: component
+      - threat: cloudgov-dependency-vulnerability
+        applies_to: component
+      - threat: cloudgov-org-space-isolation-gap
+        applies_to: component
 
   - component: cloudgov-manifest
     threats:
@@ -37,12 +43,6 @@ mappings:
       - threat: cloudgov-container-image-provenance-gap
         applies_to: component
       - threat: cloudgov-container-registry-credential-exposure
-        applies_to: component
-      - threat: cloudgov-secret-in-manifest
-        applies_to: component
-      - threat: cloudgov-dependency-vulnerability
-        applies_to: component
-      - threat: cloudgov-org-space-isolation-gap
         applies_to: component
 
   - component: cloudgov-rds
@@ -84,3 +84,17 @@ mappings:
         applies_to: component
       - threat: cloudgov-non-inheritable-control
         applies_to: component
+
+  - component: cloudgov-pages-builder
+    threats:
+      - threat: cloudgov-pages-supply-chain
+        applies_to: component
+      - threat: cloudgov-dependency-vulnerability
+        applies_to: component
+
+  - component: cloudgov-pages-proxy
+    threats:
+      - threat: cloudgov-pages-missing-security-headers
+        applies_to: component
+      - threat: cloudgov-pages-unapproved-third-party-script
+        applies_to: flow

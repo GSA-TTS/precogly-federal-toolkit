@@ -130,3 +130,23 @@ components:
       GitHub. FedRAMP Moderate authorized. Tenant (website manager) is
       responsible for content, GitHub branch protection, and contributor access
       management per GSA Pages CRM.
+
+  - id: cloudgov-pages-builder
+    name: GSA Pages Ephemeral Build Container
+    category: process
+    type: Static Site Builder
+    provider: gsa
+    description: |
+      Isolated, ephemeral Cloud.gov Pages build container that checks out a
+      reviewed source revision, runs the static-site generator, and publishes
+      compiled static assets to managed object storage.
+
+  - id: cloudgov-pages-proxy
+    name: Cloud.gov Pages Proxy
+    category: process
+    type: Reverse Proxy / Header Enforcement
+    provider: gsa
+    description: |
+      Cloud.gov Pages reverse proxy fronting published static-site storage.
+      Enforces encrypted access and applies configured security response-header
+      policy before serving static content.

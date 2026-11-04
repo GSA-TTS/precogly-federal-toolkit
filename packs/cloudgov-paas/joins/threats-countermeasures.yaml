@@ -33,6 +33,16 @@ mappings:
     countermeasures:
       - cloudgov-pages-branch-protection
 
+  - threat: cloudgov-pages-unapproved-third-party-script
+    countermeasures:
+      - cloudgov-pages-branch-protection
+      - cloudgov-pages-atu-continuous-monitoring
+
+  - threat: cloudgov-pages-missing-security-headers
+    countermeasures:
+      - cloudgov-pages-security-headers
+      - cloudgov-pages-atu-continuous-monitoring
+
   - threat: cloudgov-crm-control-gap
     countermeasures:
       - cloudgov-crm-review

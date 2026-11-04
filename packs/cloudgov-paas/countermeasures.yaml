@@ -82,6 +82,24 @@ countermeasures:
     control_type: preventive
     cost: low
 
+  - id: cloudgov-pages-security-headers
+    name: Enforce Pages Proxy Security Headers
+    description: |
+      Route public static-site traffic through the Cloud.gov CDN and Pages Proxy
+      with encrypted transport, HSTS, Content-Security-Policy, and appropriate
+      content-type protections.
+    control_type: preventive
+    cost: low
+
+  - id: cloudgov-pages-atu-continuous-monitoring
+    name: Automated Static-Site Continuous Monitoring
+    description: |
+      Run scheduled checks for branch protection, collaborator access,
+      dependency scanning, transport posture, security headers, and approved
+      third-party asset usage.
+    control_type: detective
+    cost: low
+
   - id: cloudgov-log-drain
     name: Configure Cloud.gov Log Draining to SIEM
     description: |
