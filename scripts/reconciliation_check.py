@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import sys
 from pathlib import Path
 
@@ -19,9 +20,20 @@ from scripts.validate_reconciliation_evidence import validate_evidence  # noqa: 
 from scripts.validate_reconciliation_proposals import validate_proposal  # noqa: E402
 
 
-def _resolve_tooling_root(
-    repository: Path, core: Path | None = None
-) -> Path | None:
+def _load_validate_overlay(tooling_root: Path):
+    # `compliance` is a namespace package split across vendor/oscal-vault and
+    # vendor/oscal-vault-core; a cached `compliance.lib` from the former hides
+    # the latter, so load the module by path instead of by package name.
+    path = tooling_root / "compliance/lib/reconciliation.py"
+    spec = importlib.util.spec_from_file_location("_sspp_core_reconciliation", path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"cannot load {path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.validate_overlay
+
+
+def _resolve_tooling_root(repository: Path, core: Path | None = None) -> Path | None:
     if core is not None:
         resolved = core.resolve()
         return (
@@ -45,9 +57,7 @@ def _resolve_tooling_root(
     )
 
 
-def validate_repository(
-    repository: Path, core: Path | None = None
-) -> list[str]:
+def validate_repository(repository: Path, core: Path | None = None) -> list[str]:
     """Validate system-owned artifacts while loading schemas from this toolkit."""
     repository = repository.resolve()
     systems_dir = repository / "data" / "systems"
@@ -74,11 +84,9 @@ def validate_repository(
                     "(initialize vendor/oscal-vault-core or pass --core)"
                 )
             else:
-                if str(tooling_root) not in sys.path:
-                    sys.path.append(str(tooling_root))
                 import yaml
-                from compliance.lib.reconciliation import validate_overlay
 
+                validate_overlay = _load_validate_overlay(tooling_root)
                 data = (
                     yaml.safe_load(automation_overlay.read_text(encoding="utf-8")) or {}
                 )
