@@ -5,7 +5,7 @@ name: precogly-api
 description: 'Precogly Django REST API reference: all endpoints, data models, authentication, and CycloneDX 2.0 import/export adapter. Use when querying Precogly programmatically, writing scripts that call the API, importing/exporting CDX artifacts, or understanding the database model for threat models, countermeasures, components, and DFDs.'
 status: stable
 tier: 1
-last_updated: '2026-08-13'
+last_updated: '2026-11-05'
 keywords: ['precogly', 'api', 'cyclonedx', 'threat-model', 'django', 'rest', 'data-model', 'dfd', 'countermeasure', 'import', 'export']
 related_files:
   - 'scripts/bulk_import_to_precogly.py'
@@ -27,16 +27,16 @@ Reference for the Precogly Django backend deployed locally at `http://localhost:
 
 ## Authentication
 
-> **Local development only:** set `LOCAL_PRECOGLY_EMAIL` and `LOCAL_PRECOGLY_PASSWORD` for a disposable localhost Precogly instance. Do not reuse, commit, or deploy these values.
-
 All endpoints require `Authorization: Bearer <token>` except public magic-link routes.
 
 **Get a token:**
 
+> **Local development only:** set `LOCAL_PRECOGLY_EMAIL` and `LOCAL_PRECOGLY_PASSWORD` for a disposable localhost Precogly instance. Do not reuse, commit, or deploy these values.
+
 ```bash
 TOKEN=$(curl -s -X POST http://localhost:8000/api/auth/login/ \
   -H "Content-Type: application/json" \
-  -d '{"email":"$LOCAL_PRECOGLY_EMAIL","password":"$LOCAL_PRECOGLY_PASSWORD"}' \
+  -d "{\"email\":\"$LOCAL_PRECOGLY_EMAIL\",\"password\":\"$LOCAL_PRECOGLY_PASSWORD\"}" \
   | python3 -c "import sys,json; print(json.load(sys.stdin)['access'])")
 ```
 
@@ -470,14 +470,14 @@ for tm in ThreatModel.objects.filter(id__gte=96).order_by("id"):
 ```bash
 TOKEN=$(curl -s -X POST http://localhost:8000/api/auth/login/ \
   -H "Content-Type: application/json" \
-  -d '{"email":"$LOCAL_PRECOGLY_EMAIL","password":"$LOCAL_PRECOGLY_PASSWORD"}' \
+  -d "{\"email\":\"$LOCAL_PRECOGLY_EMAIL\",\"password\":\"$LOCAL_PRECOGLY_PASSWORD\"}" \
   | python3 -c "import sys,json; print(json.load(sys.stdin)['access'])")
 
 PRECOGLY_TOKEN="$TOKEN" python3 scripts/bulk_import_to_precogly.py \
   --api-url http://localhost:8000
 ```
 
-Systems named in `KNOWN_IMPORTS` dict (currently `example-system`, `login-gov-2017`) are **skipped** — import those manually:
+Systems named in `KNOWN_IMPORTS` dict (see the script; by default it names the long-lived systems already imported, e.g. `example-system`, `login-gov-2017`) are **skipped** — import those manually:
 
 ```bash
 curl -s -X POST http://localhost:8000/api/threat-models/import/cyclonedx/ \

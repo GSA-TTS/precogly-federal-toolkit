@@ -7,23 +7,23 @@ authorization to publish.
 ## Required owner decisions
 
 - [ ] A designated content owner has approved the reusable platform
-  descriptions, component mappings, threats, and countermeasures in `packs/`.
+      descriptions, component mappings, threats, and countermeasures in `packs/`.
 - [ ] The reviewer confirmed that no pack claim is copied from a nonpublic SSP,
-  CRM, ATO package, internal playbook, or system-specific evidence artifact.
+      CRM, ATO package, internal playbook, or system-specific evidence artifact.
 - [ ] Draft-pack maturity labels and non-authoritative guidance wording remain
-  accurate for the intended audience.
+      accurate for the intended audience.
 - [ ] A steward has approved licensing, repository governance, and the intended
-  public support model.
+      public support model.
 
 ## Required technical evidence
 
 - [ ] CI redaction/private-marker gate passes.
 - [ ] Template cold-start check passes.
 - [ ] Gitleaks or an equivalent secret scan passes for the proposed release
-  commit and Git history.
+      commit and Git history.
 - [ ] The release review confirms there are no tracked source documents,
-  generated system artifacts, internal URLs, credentials, account identifiers,
-  or personal information.
+      generated system artifacts, internal URLs, credentials, account identifiers,
+      or personal information.
 
 ## Release receipt
 
