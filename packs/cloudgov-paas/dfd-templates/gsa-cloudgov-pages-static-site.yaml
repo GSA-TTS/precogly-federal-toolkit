@@ -86,7 +86,13 @@ canvas_data:
       data: { label: Production Object Storage, component_ref: cloudgov-s3 }
   edges:
     - { id: manager-to-github-admin, source: website-manager, target: github-admin, type: dataFlow, data: { label: Administer users, teams, and branch protection, protocol: HTTPS, encrypted: true } }
-    - { id: github-admin-to-source, source: github-admin, target: source-repository, type: dataFlow, data: { label: Peer review, branch protection, and CodeQL/Dependabot CI gates, protocol: HTTPS, encrypted: true } }
+    - {
+        id: github-admin-to-source,
+        source: github-admin,
+        target: source-repository,
+        type: dataFlow,
+        data: { label: Peer review, branch protection, and CodeQL/Dependabot CI gates, protocol: HTTPS, encrypted: true },
+      }
     - { id: source-to-pages-web, source: source-repository, target: cloudgov-pages-web, type: dataFlow, data: { label: Webhook and revision identifier, protocol: HTTPS, encrypted: true } }
     - { id: pages-web-to-builder, source: cloudgov-pages-web, target: cloudgov-pages-builder, type: dataFlow, data: { label: Build job dispatch, protocol: Cloud Foundry API, encrypted: true } }
     - { id: builder-to-preview-storage, source: cloudgov-pages-builder, target: cloudgov-preview-s3, type: dataFlow, data: { label: Preview static assets, protocol: HTTPS, encrypted: true } }

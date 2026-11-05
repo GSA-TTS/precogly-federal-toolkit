@@ -5,13 +5,13 @@ name: countermeasure-audit
 description: "Devil's-advocate audit playbook for Example System-style CRM remediation plans. Cross-checks plan documents against countermeasures.yaml, generated CycloneDX, and live Precogly state to flag extraneous controls, silently omitted controls, status misalignment, cross-priority double-billing, PT-* dual-thread traps, and CDX property defects. Use when reviewing any docs/IMPLEMENTATION_PLAN_*.md that proposes remediation for tracked NIST controls."
 status: stable
 tier: 1
-last_updated: '2026-08-13'
+last_updated: '2026-11-05'
 keywords: ['audit', 'countermeasure', 'crm', 'gap-analysis', 'precogly', 'cyclonedx', 'residual-action', 'devils-advocate']
 related_files:
-  - 'docs/IMPLEMENTATION_PLAN_example-system_remediation_countermeasures.md'
+  - 'docs/plans/archived/IMPLEMENTATION_PLAN_example-system_remediation_countermeasures.md'
   - 'docs/AUDIT_IMPLEMENTATION_PLAN_example-system_remediation_countermeasures.md'
-  - 'data/countermeasures/countermeasures.yaml'
-  - 'data/model/evidence.yaml'
+  - 'data/systems/example-system/countermeasures.yaml'
+  - 'data/systems/example-system/model/evidence.yaml'
   - 'build/example-system-crm-threat-model.cdx.json'
   - 'skills/precogly-api/SKILL.md'
   - 'skills/sspp-threat-modeling/SKILL.md'
@@ -28,7 +28,7 @@ captures the concrete cross-check procedure used to produce
 
 - Reviewing a remediation / countermeasure implementation plan before it goes
   to ISSO/ISSM/AO.
-- Reconciling a CDX artifact in `tmp/` against `data/countermeasures/countermeasures.yaml`.
+- Reconciling a CDX artifact in `tmp/` against `data/systems/example-system/countermeasures.yaml`.
 - Confirming that a plan's promotion of `gap → proposed implemented` actually
   matches the artifact and the live Precogly state.
 - Preparing an ADR that consolidates control-family closure procedures.
@@ -95,7 +95,7 @@ build one Python list `plan_ids = [...]`.
 ```bash
 python3 - <<'PY'
 import yaml
-with open('data/countermeasures/countermeasures.yaml') as f: d = yaml.safe_load(f)
+with open('data/systems/example-system/countermeasures.yaml') as f: d = yaml.safe_load(f)
 yaml_ids = {c['control_id'] for c in d['countermeasures']}
 plan_ids = {...}  # from Step 2
 print('A - in plan, not in YAML:', sorted(plan_ids - yaml_ids))
@@ -118,7 +118,7 @@ implemented control.
 ```bash
 python3 - <<'PY'
 import yaml
-with open('data/countermeasures/countermeasures.yaml') as f: d = yaml.safe_load(f)
+with open('data/systems/example-system/countermeasures.yaml') as f: d = yaml.safe_load(f)
 cms = {c['control_id']: c for c in d['countermeasures']}
 plan_ids = {...}
 for cid in sorted(plan_ids & set(cms)):
@@ -139,7 +139,7 @@ Grep every priority's "Affected controls:" line, count occurrences per
 ```bash
 TOKEN=$(curl -s -X POST http://localhost:8000/api/auth/login/ \
   -H 'Content-Type: application/json' \
-  -d '{"email":"$LOCAL_PRECOGLY_EMAIL","password":"$LOCAL_PRECOGLY_PASSWORD"}' \
+  -d "{\"email\":\"$LOCAL_PRECOGLY_EMAIL\",\"password\":\"$LOCAL_PRECOGLY_PASSWORD\"}" \
   | python3 -c "import sys,json; print(json.load(sys.stdin)['access'])")
 
 TMID=175  # Example System CRM Threat Model; verify with a search first
