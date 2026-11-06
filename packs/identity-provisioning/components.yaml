@@ -1,0 +1,101 @@
+components:
+  # ── Directory and identity provider ──────────────────────────────────────────
+  - id: directory-idp
+    name: Enterprise Directory and Identity Provider
+    category: process
+    type: Identity Provider
+    provider: generic
+    description: |
+      Enterprise identity provider and directory (for example Microsoft Entra ID,
+      backed by Active Directory). Authenticates users, enforces multi-factor
+      authentication and conditional access, and issues the assertions the
+      platform trusts for sign-in. Federated sign-in itself is modelled by the
+      owning system; this component covers the directory as the source of
+      identities and group membership.
+
+  - id: directory-groups
+    name: Directory Groups and Role Assignments
+    category: datastore
+    type: Group and Role Directory
+    provider: generic
+    description: |
+      Security groups and role assignments held in the directory. Group
+      membership is the authoritative input to platform authorization: a change
+      here changes who can reach what once it is provisioned.
+
+  # ── Provisioning ─────────────────────────────────────────────────────────────
+  - id: scim-provisioner
+    name: SCIM Provisioning Service
+    category: process
+    type: Identity Provisioning
+    provider: generic
+    description: |
+      SCIM 2.0 provisioning that pushes users, groups and group membership from
+      the directory into the platform on a schedule or on change, and removes
+      them when they leave scope. Authenticates to the platform with a
+      provisioning credential and maps directory groups to platform groups.
+    service:
+      prerequisites:
+        - directory-idp
+        - directory-groups
+        - platform-authorization-catalog
+
+  # ── Platform authorization ───────────────────────────────────────────────────
+  - id: platform-authorization-catalog
+    name: Platform Authorization Catalog
+    category: datastore
+    type: Authorization Store
+    provider: generic
+    description: |
+      The platform's own enforcement point for data and resource access: groups,
+      roles and grants (for example catalog, schema and table privileges, and
+      attribute-based policies). Evaluates every request against current
+      grants. The source of truth for who may do what at request time.
+
+  # ── GitOps infrastructure as code ────────────────────────────────────────────
+  - id: iac-source-repository
+    name: Infrastructure-as-Code Source Repository
+    category: datastore
+    type: Source Repository
+    provider: generic
+    description: |
+      Version-controlled repository holding the declarative definitions of
+      platform resources and authorization grants. A protected default branch
+      with required review is the intended gate for any grant change.
+
+  - id: gitops-iac-pipeline
+    name: GitOps Infrastructure-as-Code Pipeline (OpenTofu or Terraform)
+    category: process
+    type: CI/CD Pipeline
+    provider: generic
+    description: |
+      Pipeline that plans and applies the declarative definitions (OpenTofu or
+      Terraform) after a reviewed merge, reconciling the platform's grants to
+      the repository. Runs under a deploy identity and reads and writes the
+      state store.
+    service:
+      provisioning:
+        method: declarative-config
+      prerequisites:
+        - iac-source-repository
+        - iac-state-store
+        - platform-authorization-catalog
+
+  - id: iac-state-store
+    name: Infrastructure-as-Code State Store
+    category: datastore
+    type: State Store
+    provider: generic
+    description: |
+      Remote state recording the resources the pipeline manages. State can
+      contain sensitive attribute values and is a prerequisite for correct
+      plans, so its confidentiality, integrity and locking matter.
+
+  - id: pipeline-deploy-identity
+    name: Pipeline Deploy Service Identity
+    category: external_system_actor
+    type: Machine Identity
+    provider: generic
+    description: |
+      Non-interactive identity the pipeline uses to apply changes to the
+      platform. Its scope determines the blast radius of a pipeline compromise.

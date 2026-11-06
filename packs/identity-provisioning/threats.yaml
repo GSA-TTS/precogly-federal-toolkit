@@ -1,0 +1,72 @@
+threats:
+  # ── Directory ────────────────────────────────────────────────────────────────
+  - id: directory-group-membership-tampering
+    name: Unauthorized Change to Privileged Directory Group Membership
+    description: |
+      An attacker, or an administrator acting outside process, adds an account
+      to a directory group that is mapped to a privileged platform role. Once
+      provisioned, the change grants platform access without any change to the
+      platform or its code.
+
+  - id: directory-privileged-admin-compromise
+    name: Directory Administrator Account Compromise
+    description: |
+      Compromise of an account that can administer the directory, its
+      conditional-access policy or its group definitions lets an attacker create
+      identities, weaken authentication requirements, or alter group membership
+      that downstream systems trust.
+
+  # ── Provisioning ─────────────────────────────────────────────────────────────
+  - id: scim-credential-overscope
+    name: Over-Privileged or Long-Lived Provisioning Credential
+    description: |
+      The credential the provisioning service uses against the platform can
+      create users, groups and role assignments. If it is broadly scoped,
+      long-lived or stored insecurely, its compromise lets an attacker mint
+      accounts and grant themselves access directly in the platform.
+
+  - id: scim-sync-failure-orphaned-access
+    name: Provisioning Sync Failure Leaves Orphaned Access
+    description: |
+      A failed, delayed or partial synchronization leaves departed or demoted
+      users, or removed groups, still active in the platform. Access persists
+      after the directory says it should be gone, and nothing alerts on the gap.
+
+  - id: group-role-mapping-overgrant
+    name: Directory Group Mapped to Broader Role Than Intended
+    description: |
+      A mapping from a directory group to a platform group or role grants more
+      than the group's purpose requires, for example administrative rights, or
+      the ability to both manage grants and read data. Membership of an ordinary
+      group then carries unintended privilege.
+
+  # ── GitOps and infrastructure as code ────────────────────────────────────────
+  - id: iac-unreviewed-grant-change
+    name: Authorization Grant Changed Without Review
+    description: |
+      A change to platform grants reaches production without the intended
+      peer review, either through a weak branch policy, a bypassed pipeline, or
+      an administrator applying changes directly. The repository no longer
+      reflects who can access what.
+
+  - id: authorization-drift-out-of-band
+    name: Out-of-Band Authorization Change Drifts From Code
+    description: |
+      Grants are altered directly in the platform, or by an automatic
+      process, so live authorization diverges from the repository and the
+      directory. Drift is invisible until someone compares them, and an
+      attacker's added grant can persist.
+
+  - id: iac-state-exposure
+    name: Infrastructure-as-Code State Disclosure or Tampering
+    description: |
+      State files are readable or writable by more principals than the
+      pipeline. Disclosure leaks sensitive attribute values; tampering can make
+      the pipeline plan unintended changes or hide existing resources.
+
+  - id: deploy-identity-overscope
+    name: Single Deploy Identity With Broad Rights Across Environments
+    description: |
+      One pipeline identity can apply changes to every environment and to
+      production grants. Compromising the pipeline, or one branch or workflow,
+      then compromises authorization everywhere.

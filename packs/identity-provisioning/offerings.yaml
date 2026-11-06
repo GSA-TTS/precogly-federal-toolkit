@@ -1,0 +1,103 @@
+# Candidate service offerings for this pack, in the Open Service Broker API
+# shape (offering -> plans) and the OSCAL core mapping documented in
+# oscal-vault-core (docs/osbapi-backstage-interop/capabilities-as-osbapi-offerings.md).
+#
+# These are CANDIDATE capabilities. They describe what an offering of this kind
+# could provide and what a consumer would still own. They do not say that any
+# system uses them, and they carry no implementation status: status belongs to
+# the consuming system's SSP (by-component export, inherited, satisfied).
+offerings:
+  - id: directory-identity
+    name: Directory and Identity Provider
+    description: |
+      An enterprise directory and identity provider that authenticates users and
+      holds the groups and role assignments the platform trusts.
+    implementation_model: saas
+    plans:
+      - id: standard
+        name: Standard
+        description: Managed directory with multi-factor authentication and group management.
+        incorporates:
+          - directory-idp
+          - directory-groups
+        provides:
+          - control: ia-2
+            origination: shared
+            provider_does: Authenticates users and enforces multi-factor authentication at the identity provider.
+            consumer_must: Require sign-in through the identity provider for every interactive access path and decide which factors are acceptable for privileged roles.
+          - control: ia-5
+            origination: shared
+            provider_does: Manages authenticators and credential policy for directory identities.
+            consumer_must: Apply the credential policy to any authenticator the consumer manages outside the directory, such as service credentials.
+          - control: ac-2
+            origination: shared
+            provider_does: Provides the account and group records and the audit trail of changes to them.
+            consumer_must: Define account types, approve privileged group membership, and review membership on a schedule.
+          - control: ac-2.3
+            origination: shared
+            provider_does: Disables directory accounts that are deactivated or reach a configured inactivity limit.
+            consumer_must: Confirm disablement reaches the platform within the required time and remove platform-local accounts that bypass the directory.
+
+  - id: group-provisioning
+    name: SCIM Group and Role Provisioning
+    description: |
+      SCIM 2.0 provisioning that carries users, groups and group membership from
+      the directory into a platform's authorization catalog.
+    implementation_model: paas
+    plans:
+      - id: standard
+        name: Standard
+        description: Scheduled and on-change synchronization of users and groups into the platform.
+        incorporates:
+          - scim-provisioner
+          - directory-groups
+        provides:
+          - control: ac-2.1
+            origination: shared
+            provider_does: Creates, updates and removes platform accounts and groups automatically from directory changes.
+            consumer_must: Define which directory groups are in scope and keep the group-to-role mapping reviewed.
+          - control: ac-2.3
+            origination: shared
+            provider_does: Propagates directory deactivation to the platform on the next synchronization.
+            consumer_must: Monitor synchronization health and test that removal propagates and sessions end.
+          - control: ac-6
+            origination: customer-configured
+            provider_does: Supports mapping directory groups to platform groups of differing privilege.
+            consumer_must: Map each group to the least privilege its purpose needs and keep grant management separate from data access.
+          - control: au-12
+            origination: shared
+            provider_does: Records provisioning runs and the changes they make.
+            consumer_must: Retain and review provisioning logs and alert on failed or partial runs.
+
+  - id: gitops-authorization
+    name: GitOps Authorization Management
+    description: |
+      Platform authorization grants managed as code, applied by an OpenTofu or
+      Terraform pipeline after a reviewed merge.
+    implementation_model: paas
+    plans:
+      - id: standard
+        name: Standard
+        description: Reviewed, versioned grant definitions applied by a pipeline with remote state.
+        incorporates:
+          - iac-source-repository
+          - gitops-iac-pipeline
+          - iac-state-store
+          - pipeline-deploy-identity
+        provides:
+          - control: cm-3
+            origination: customer-configured
+            provider_does: Provides review, versioning and an apply history for configuration changes.
+            consumer_must: Require peer review on the protected branch and apply grants only from it.
+          - control: cm-5
+            origination: customer-configured
+            provider_does: Restricts who may change grant definitions and who may run the pipeline.
+            consumer_must: Limit write access to the repository, the state store and the deploy identity to named roles.
+          - control: cm-2
+            origination: customer-configured
+            provider_does: Holds the declared baseline of authorization grants in version control.
+            consumer_must: Detect and resolve drift between live grants and the repository.
+          - control: ac-6
+            origination: customer-configured
+            provider_does: Allows deploy identities to be scoped per environment.
+            consumer_must: Use a separate least-privilege deploy identity for each environment.

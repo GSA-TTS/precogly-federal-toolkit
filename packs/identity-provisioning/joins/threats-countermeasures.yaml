@@ -1,0 +1,39 @@
+mappings:
+  - threat: directory-group-membership-tampering
+    countermeasures:
+      - privileged-group-change-approval
+      - privileged-group-recertification
+
+  - threat: directory-privileged-admin-compromise
+    countermeasures:
+      - directory-admin-hardening
+
+  - threat: scim-credential-overscope
+    countermeasures:
+      - scoped-rotated-provisioning-credential
+
+  - threat: scim-sync-failure-orphaned-access
+    countermeasures:
+      - provisioning-sync-monitoring
+      - verify-deprovisioning
+
+  - threat: group-role-mapping-overgrant
+    countermeasures:
+      - least-privilege-role-mapping
+      - privileged-group-recertification
+
+  - threat: iac-unreviewed-grant-change
+    countermeasures:
+      - gitops-protected-branch-review
+
+  - threat: authorization-drift-out-of-band
+    countermeasures:
+      - authorization-drift-detection
+
+  - threat: iac-state-exposure
+    countermeasures:
+      - iac-state-protection
+
+  - threat: deploy-identity-overscope
+    countermeasures:
+      - per-environment-deploy-identity

@@ -1,0 +1,33 @@
+pack:
+  schema_version: 1
+  slug: identity-provisioning
+  name: Identity and Access Provisioning (Directory, SCIM, GitOps)
+  description: |
+    Generic building blocks for identity-driven authorization on a data or
+    application platform: an enterprise directory and identity provider (for
+    example Microsoft Entra ID, backed by Active Directory), SCIM provisioning of
+    groups and roles into the platform, and a GitOps infrastructure-as-code
+    pipeline (OpenTofu or Terraform) that manages the platform's authorization
+    grants. The platform's own authorization catalog stays the enforcement point;
+    the directory is the source of group membership; the pipeline is the source
+    of grants.
+
+    The pack models reusable topology, threats and countermeasures only. It does
+    not assert that any particular system uses these components or that a
+    related control is implemented.
+  version: 1.0.0
+  author: GSA/TTS
+  maintainer: '@GSA-TTS/tts-cybersecurity'
+  pack_type: technology
+  precogly_schema_version: '2.0'
+  maturity: Draft
+  icon_map: []
+  tags:
+    - identity
+    - directory
+    - scim
+    - gitops
+    - infrastructure-as-code
+    - authorization
+    - federal
+    - all
