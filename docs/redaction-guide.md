@@ -67,8 +67,11 @@ This means:
   `data/systems/<slug>/cui.yaml` classification sidecar
   (schema: [schemas/cui-provenance.schema.json](../schemas/cui-provenance.schema.json)),
   recording the candidate `cui_category`, citing `authority`, and pointing
-  to an actual `approved_by` / `approval_ref` sign-off from an
-  ISSO/ISSM/GSA CUI Program Office reviewer — not just a redaction pass.
+  to the system owner's determination through `approved_by_role` and
+  `approval_ref` (a role-based reference, not a personal name) — not just a
+  redaction pass. Classification and transfer authorization are system-owner
+  decisions; this repository must not infer a final classification from
+  content alone.
   In the parent SSPP repository, run `make cui-contracts` to check sidecar
   schema compliance and `make cui-coverage` to list systems that have
   `.docx`-derived content but no sidecar yet. In a private system repository
@@ -220,9 +223,13 @@ Until the policy work in issue #231 is approved, apply these minimum rules:
    `make scrub-check`, CUI sidecar validation, or any system-specific
    redaction gate.
 
-This is process guidance, not a final CUI handling determination. The CUI
-Program Office, ISSO/ISSM, and system owner remain the authorities for
-classification, dissemination, decontrol, and publication decisions.
+This is process guidance, not a final CUI handling determination. Under the
+owner decision recorded 2026-11-04, the system owner determines classification
+and authorizes transfer for controlled engineering use, and no third-party gate
+is required for that use. The boundary that remains is provenance plus owner
+authorization plus redaction for repository handling, and a **separate release
+review before any public dissemination**; redaction success is never
+publication authorization.
 
 > **Control Mapping:** SC-7 (Boundary Protection), AU-3 (Content of Audit
 > Records — no sensitive data in records), SI-12 (Information Management),
