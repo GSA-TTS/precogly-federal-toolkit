@@ -1,0 +1,78 @@
+template:
+  slug: identity-provisioning-gitops
+  name: Directory, SCIM and GitOps Authorization
+  description: Directory groups provisioned into a platform's authorization catalog by SCIM, with grants managed by a GitOps infrastructure-as-code pipeline.
+  category: identity
+  diagram_type: level1
+canvas_data:
+  nodes:
+    - id: deploy-identity
+      type: systemActor
+      position: { x: 35, y: 250 }
+      data: { label: Pipeline Deploy Identity, systemType: service, component_ref: pipeline-deploy-identity }
+    - id: idp-boundary
+      type: systemScope
+      position: { x: 220, y: 40 }
+      style: { width: 960, height: 540 }
+      data: { label: Identity and Authorization Boundary }
+    - id: directory-zone
+      type: trustZone
+      parentId: idp-boundary
+      position: { x: 30, y: 50 }
+      style: { width: 280, height: 440 }
+      data: { label: Directory, zoneType: trust }
+    - id: platform-zone
+      type: trustZone
+      parentId: idp-boundary
+      position: { x: 345, y: 50 }
+      style: { width: 280, height: 440 }
+      data: { label: Platform, zoneType: trust }
+    - id: delivery-zone
+      type: trustZone
+      parentId: idp-boundary
+      position: { x: 660, y: 50 }
+      style: { width: 270, height: 440 }
+      data: { label: Delivery Pipeline, zoneType: trust }
+    - id: directory
+      type: process
+      parentId: directory-zone
+      position: { x: 45, y: 90 }
+      data: { label: Directory and Identity Provider, component_ref: directory-idp }
+    - id: groups
+      type: datastore
+      parentId: directory-zone
+      position: { x: 45, y: 260 }
+      data: { label: Directory Groups, component_ref: directory-groups }
+    - id: scim
+      type: process
+      parentId: platform-zone
+      position: { x: 45, y: 90 }
+      data: { label: SCIM Provisioning, component_ref: scim-provisioner }
+    - id: catalog
+      type: datastore
+      parentId: platform-zone
+      position: { x: 45, y: 260 }
+      data: { label: Authorization Catalog, component_ref: platform-authorization-catalog }
+    - id: repo
+      type: datastore
+      parentId: delivery-zone
+      position: { x: 40, y: 60 }
+      data: { label: IaC Source Repository, component_ref: iac-source-repository }
+    - id: pipeline
+      type: process
+      parentId: delivery-zone
+      position: { x: 40, y: 180 }
+      data: { label: GitOps Pipeline, component_ref: gitops-iac-pipeline }
+    - id: state
+      type: datastore
+      parentId: delivery-zone
+      position: { x: 40, y: 300 }
+      data: { label: IaC State Store, component_ref: iac-state-store }
+  edges:
+    - { id: deploy-identity-to-pipeline, source: deploy-identity, target: pipeline, type: dataFlow, data: { label: Assumed by pipeline, protocol: HTTPS, encrypted: true } }
+    - { id: directory-to-groups, source: directory, target: groups, type: dataFlow, data: { label: Group membership, protocol: LDAP/Graph API, encrypted: true } }
+    - { id: groups-to-scim, source: groups, target: scim, type: dataFlow, data: { label: Group and membership export, protocol: HTTPS, encrypted: true } }
+    - { id: scim-to-catalog, source: scim, target: catalog, type: dataFlow, data: { label: SCIM provisioning, protocol: HTTPS, encrypted: true } }
+    - { id: repo-to-pipeline, source: repo, target: pipeline, type: dataFlow, data: { label: Reviewed grant definitions, protocol: HTTPS, encrypted: true } }
+    - { id: pipeline-to-state, source: pipeline, target: state, type: dataFlow, data: { label: State read and write, protocol: HTTPS, encrypted: true } }
+    - { id: pipeline-to-catalog, source: pipeline, target: catalog, type: dataFlow, data: { label: Apply grants, protocol: HTTPS, encrypted: true } }

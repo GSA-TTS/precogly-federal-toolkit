@@ -1,0 +1,104 @@
+countermeasures:
+  # ── Directory ────────────────────────────────────────────────────────────────
+  - id: privileged-group-change-approval
+    name: Require Approval and Logging for Privileged Group Changes
+    description: |
+      Changes to directory groups that map to privileged platform roles require
+      a documented approval, are performed through a controlled workflow, and
+      are logged with the approver and requester for later review.
+    control_type: preventive
+    cost: low
+
+  - id: privileged-group-recertification
+    name: Periodically Recertify Privileged Group Membership
+    description: |
+      Review membership of groups mapped to privileged roles on a defined
+      schedule, remove members who no longer need access, and keep the evidence
+      of each review.
+    control_type: detective
+    cost: low
+
+  - id: directory-admin-hardening
+    name: Harden and Monitor Directory Administrator Accounts
+    description: |
+      Restrict directory administration to dedicated accounts with
+      phishing-resistant multi-factor authentication, just-in-time elevation
+      where available, and alerting on changes to conditional-access policy and
+      group definitions.
+    control_type: preventive
+    cost: medium
+
+  # ── Provisioning ─────────────────────────────────────────────────────────────
+  - id: scoped-rotated-provisioning-credential
+    name: Scope, Rotate and Vault the Provisioning Credential
+    description: |
+      Limit the provisioning credential to the operations SCIM needs, keep it in
+      a secrets manager rather than in configuration, and rotate it on a
+      schedule and after any suspected exposure.
+    control_type: preventive
+    cost: low
+
+  - id: provisioning-sync-monitoring
+    name: Monitor Provisioning Runs and Reconcile Differences
+    description: |
+      Alert on failed, delayed or partial synchronization, and regularly compare
+      the platform's accounts and groups against the directory so orphaned or
+      unexpected entries are found and removed.
+    control_type: detective
+    cost: low
+
+  - id: verify-deprovisioning
+    name: Test That Removal Propagates and Sessions End
+    description: |
+      Periodically remove a test identity from the directory and confirm the
+      platform account is disabled or removed and active sessions and tokens end
+      within the expected time.
+    control_type: detective
+    cost: low
+
+  - id: least-privilege-role-mapping
+    name: Document and Review Group-to-Role Mappings
+    description: |
+      Keep an explicit, reviewed mapping from each directory group to the
+      platform group or role it grants. Do not map ordinary groups to
+      administrative roles, and separate the ability to manage grants from the
+      ability to read data.
+    control_type: preventive
+    cost: low
+
+  # ── GitOps and infrastructure as code ────────────────────────────────────────
+  - id: gitops-protected-branch-review
+    name: Apply Grant Changes Only From a Reviewed Protected Branch
+    description: |
+      Make the repository's protected branch the only path to production grants:
+      require peer review and passing checks, block force pushes, and have the
+      pipeline apply only from that branch.
+    control_type: preventive
+    cost: low
+
+  - id: authorization-drift-detection
+    name: Detect Drift Between Live Grants and Code
+    description: |
+      Run a scheduled plan or export of live grants and compare it with the
+      repository and the directory mapping; alert on differences and resolve
+      each by reverting the change or recording it in code.
+    control_type: detective
+    cost: low
+
+  - id: iac-state-protection
+    name: Protect, Lock and Back Up Infrastructure-as-Code State
+    description: |
+      Store state remotely with encryption, locking and versioning, limit access
+      to the pipeline identity and a small set of operators, and keep secrets out
+      of state where the tooling allows.
+    control_type: preventive
+    cost: low
+
+  - id: per-environment-deploy-identity
+    name: Use Separate, Least-Privilege Deploy Identities Per Environment
+    description: |
+      Give each environment its own deploy identity scoped to that
+      environment, prefer short-lived federated credentials over stored secrets,
+      and restrict which branch or workflow may assume each identity.
+    control_type: preventive
+    cost: medium

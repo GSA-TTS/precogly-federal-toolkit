@@ -1,0 +1,52 @@
+mappings:
+  - component: directory-idp
+    threats:
+      - threat: directory-privileged-admin-compromise
+        applies_to: component
+
+  - component: directory-groups
+    threats:
+      - threat: directory-group-membership-tampering
+        applies_to: component
+      - threat: group-role-mapping-overgrant
+        applies_to: component
+
+  - component: scim-provisioner
+    threats:
+      - threat: scim-credential-overscope
+        applies_to: component
+      - threat: scim-sync-failure-orphaned-access
+        applies_to: component
+      - threat: group-role-mapping-overgrant
+        applies_to: component
+
+  - component: platform-authorization-catalog
+    threats:
+      - threat: authorization-drift-out-of-band
+        applies_to: component
+      - threat: scim-sync-failure-orphaned-access
+        applies_to: component
+
+  - component: iac-source-repository
+    threats:
+      - threat: iac-unreviewed-grant-change
+        applies_to: component
+
+  - component: gitops-iac-pipeline
+    threats:
+      - threat: iac-unreviewed-grant-change
+        applies_to: component
+      - threat: deploy-identity-overscope
+        applies_to: component
+      - threat: authorization-drift-out-of-band
+        applies_to: component
+
+  - component: iac-state-store
+    threats:
+      - threat: iac-state-exposure
+        applies_to: component
+
+  - component: pipeline-deploy-identity
+    threats:
+      - threat: deploy-identity-overscope
+        applies_to: component
