@@ -367,7 +367,11 @@ def validate_sources(paths: SystemPaths) -> tuple[list[str], list[str]]:
         errors.extend(
             _schema_errors(document, "model-dfd.schema.json", workload_source)
         )
-        forbidden = _load_forbidden(paths.redaction)
+        try:
+            forbidden = _load_forbidden(paths.redaction, paths.cui)
+        except ValueError as exc:
+            errors.append(str(exc))
+            forbidden = _load_forbidden(None)
         for source in (paths.manifest, workload_source):
             text = source.read_text(encoding="utf-8")
             for pattern, label in forbidden:
@@ -455,7 +459,11 @@ def validate_sources(paths: SystemPaths) -> tuple[list[str], list[str]]:
             for warning in overlay_arch_warnings
         )
 
-    forbidden = _load_forbidden(paths.redaction)
+    try:
+        forbidden = _load_forbidden(paths.redaction, paths.cui)
+    except ValueError as exc:
+        errors.append(str(exc))
+        forbidden = _load_forbidden(None)
     overlay_sources = tuple(item.overlay for item in overlays)
     for source in (paths.model_dfd, paths.model_architecture, *overlay_sources):
         text = source.read_text(encoding="utf-8")

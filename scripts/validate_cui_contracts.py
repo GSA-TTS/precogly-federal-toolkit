@@ -7,6 +7,7 @@ import argparse
 import json
 import re
 import sys
+import zipfile
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
@@ -16,8 +17,25 @@ import yaml
 from jsonschema import Draft202012Validator
 
 REPO = Path(__file__).resolve().parents[1]
+SCRIPTS_DIR = REPO / "scripts"
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
+
+from validate import _load_forbidden  # noqa: E402
+
 SCHEMA_PATH = REPO / "schemas" / "cui-provenance.schema.json"
 SYSTEMS_DIR = REPO / "data" / "systems"
+_BINARY_SKIP_SUFFIXES = {
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".gif",
+    ".bmp",
+    ".tiff",
+    ".svg",
+    ".pdf",
+    ".wasm",
+}
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:
@@ -152,6 +170,64 @@ def _redaction_policy_errors(system_dir: Path, category: str, path: Path) -> lis
     return errors
 
 
+def _resolve_downstream_artifact(sidecar_path: Path, artifact: str) -> Path:
+    resolved = sidecar_path.resolve()
+    if (
+        len(resolved.parts) >= 4
+        and resolved.parent.parent.name == "systems"
+        and resolved.parent.parent.parent.name == "data"
+    ):
+        return resolved.parents[3] / artifact
+    return resolved.parent / artifact
+
+
+def _extract_artifact_texts(
+    artifact_path: Path,
+) -> tuple[list[tuple[str, str]], str | None]:
+    if artifact_path.suffix.lower() in _BINARY_SKIP_SUFFIXES:
+        return [], None
+    if artifact_path.suffix.lower() == ".docx":
+        try:
+            with zipfile.ZipFile(artifact_path) as archive:
+                chunks = [
+                    (name, archive.read(name).decode("utf-8", errors="replace"))
+                    for name in sorted(archive.namelist())
+                    if name.startswith("word/") and name.endswith(".xml")
+                ]
+            return chunks, None
+        except (zipfile.BadZipFile, OSError) as exc:
+            return [], f"invalid docx archive ({exc})"
+    return [("", artifact_path.read_text(encoding="utf-8", errors="replace"))], None
+
+
+def _scan_downstream_artifacts(
+    sidecar_path: Path, artifacts: list[str], errors: list[str]
+) -> None:
+    redaction_path = sidecar_path.parent / "redaction.yaml"
+    try:
+        forbidden = _load_forbidden(
+            redaction_path if redaction_path.is_file() else None, sidecar_path
+        )
+    except (ValueError, re.error):
+        forbidden = _load_forbidden(None)
+    for artifact in artifacts:
+        artifact_path = _resolve_downstream_artifact(sidecar_path, artifact)
+        if not artifact_path.is_file():
+            continue
+        chunks, read_err = _extract_artifact_texts(artifact_path)
+        if read_err:
+            errors.append(f"{sidecar_path}: downstream artifact {artifact}: {read_err}")
+            continue
+        for subpath, text in chunks:
+            for pattern, label in forbidden:
+                match = pattern.search(text)
+                if match:
+                    loc = f"{artifact} ({subpath})" if subpath else artifact
+                    errors.append(
+                        f"{sidecar_path}: downstream artifact {loc}: contains unredacted {label}: {match.group(0)!r}"
+                    )
+
+
 def validate_sidecar(path: Path) -> list[str]:
     data = _load_yaml(path)
     errors = _schema_errors(data, path)
@@ -224,6 +300,7 @@ def validate_sidecar(path: Path) -> list[str]:
                 f"{path}: source_documents/{idx}/source_type: invalid source type"
             )
 
+    valid_artifacts: list[str] = []
     for artifact in _required_list(data, "downstream_artifacts", errors, path):
         if not isinstance(artifact, str) or len(artifact) < 3:
             errors.append(f"{path}: downstream_artifacts: invalid artifact path")
@@ -236,6 +313,9 @@ def validate_sidecar(path: Path) -> list[str]:
             errors.append(
                 f"{path}: downstream artifact must be a repo-relative path: {artifact}"
             )
+            continue
+        valid_artifacts.append(artifact)
+    _scan_downstream_artifacts(path, valid_artifacts, errors)
 
     retention = _required_mapping(data, "retention", errors, path)
     for key in ("retention_period", "decontrol_condition"):

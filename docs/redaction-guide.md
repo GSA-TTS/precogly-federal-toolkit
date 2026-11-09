@@ -3,7 +3,7 @@ title: 'CRM Threat-Model — Redaction Guide'
 description: 'Policy and mechanism for redacting recon-useful identifiers (URIs/URLs, endpoint hostnames, resource IDs, and POC identifiers) from the tracked threat-model artifacts to mitigate reconnaissance, endpoint DoS/DDoS, and spearphishing'
 status: draft
 tier: 2
-last_updated: '2026-09-22'
+last_updated: '2026-11-09'
 nist_controls: ['AC-3', 'AU-3', 'SC-7', 'SI-12', 'PT-3', 'RA-5', 'SR-3', 'PL-2']
 frameworks: ['NIST SP 800-53 Rev 5.2', 'OWASP Top 10 LLM 2025']
 audience: 'security'
@@ -145,8 +145,19 @@ and the shared helper `find_ipv4_leak` in
    fields in place.
 3. **At validation** — `scripts/validate.py` fails closed (non-zero exit) if the
    generated `build/*.cdx.json` contains any URL/URI, `*.cloud.data-platform.com`
-   host, email, internal DocOps host, known service-principal ID, or the UAT
-   share recipient. This is the regression gate.
+   host, email, internal DocOps host, CUI banner marking (`CUI//<CATEGORY>`),
+   ISVI cloud resource identifier (`arn:aws:...`, `vpc-...`, `subnet-...`,
+   `sg-...`, `i-...`), known service-principal ID, or the UAT share recipient.
+   It also consults `data/systems/<slug>/cui.yaml`: if the sidecar is `pending`
+   or classified (`cui_category != not_cui`), `redaction.yaml` must exist with a
+   non-empty `forbidden_patterns` list, and any declared `cui_marking` is added
+   to the forbidden list automatically. This is the regression gate (covered by
+   `tests/fixtures/example-system-with-leak.yaml` and
+   `tests/fixtures/example-system-with-cui-leak.yaml`).
+4. **At CUI contract validation** — `scripts/validate_cui_contracts.py` (`make
+   cui-check`) scans every existing text and `.docx` (`word/*.xml`) file listed
+   in `cui.yaml` `downstream_artifacts` against the merged universal,
+   CUI-sidecar, and per-system `redaction.yaml` patterns.
 
 `localhost` / `127.0.0.1` (Precogly local URLs in the README) are explicitly
 allowed — they are not sensitive endpoints.
@@ -170,10 +181,13 @@ The CUI sidecar records classification, approval, source document hashes,
 downstream artifacts, and retention/decontrol expectations. It is intentionally
 metadata-only: do not commit the source document itself.
 
-If `classification.cui_category` is anything other than `not_cui`, the system
-must also define a non-empty `data/systems/<slug>/redaction.yaml`
-`forbidden_patterns` list. This makes the redaction policy explicit before any
-classified source material is projected into generated artifacts.
+If `determination_status` is `pending` or `classification.cui_category` is
+anything other than `not_cui`, the system must also define a non-empty
+`data/systems/<slug>/redaction.yaml` `forbidden_patterns` list, and all existing
+files in `downstream_artifacts` (including `.docx` `word/*.xml` streams) are
+scanned against the merged redaction gate. This makes the redaction policy
+explicit before any classified source material is projected into generated
+artifacts.
 
 ## Adding a new redaction
 

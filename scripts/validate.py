@@ -59,6 +59,13 @@ FORBIDDEN = [
         "email / POC identifier",
     ),
     (re.compile(r"itplaybook\.gsa\.gov", re.IGNORECASE), "internal DocOps host"),
+    (re.compile(r"\bCUI//[A-Z][A-Z0-9_-]*\b"), "CUI banner marking"),
+    (
+        re.compile(
+            r"\b(?:arn:aws:[a-z0-9-]+:[a-z0-9-]*:\d{12}:[^\s\"']+|i-[0-9a-f]{8,17}|vpc-[0-9a-f]{8,17}|subnet-[0-9a-f]{8,17}|sg-[0-9a-f]{8,17})\b"
+        ),
+        "ISVI cloud resource identifier",
+    ),
 ]
 
 
@@ -69,22 +76,55 @@ _FLAG_MAP = {
 }
 
 
-def _load_forbidden(redaction_path):
-    """Merge universal + per-system forbidden patterns."""
+def _load_forbidden(redaction_path, cui_path=None):
+    """Merge universal + CUI-sidecar + per-system forbidden patterns."""
     patterns = list(FORBIDDEN)
-    if not redaction_path:
-        return patterns
-    with open(redaction_path, encoding="utf-8") as f:
-        cfg = yaml.safe_load(f) or {}
-    for entry in cfg.get("forbidden_patterns", []) or []:
-        pat = entry.get("pattern")
-        label = entry.get("label", "system-specific redaction")
-        if not pat:
-            continue
-        flags = 0
-        for flag_name in entry.get("flags", []) or []:
-            flags |= _FLAG_MAP.get(flag_name.upper(), 0)
-        patterns.append((re.compile(pat, flags), label))
+    if cui_path is None and redaction_path:
+        sibling_cui = os.path.join(os.path.dirname(str(redaction_path)), "cui.yaml")
+        if os.path.isfile(sibling_cui):
+            cui_path = sibling_cui
+
+    requires_redaction = False
+    if cui_path and os.path.isfile(cui_path):
+        with open(cui_path, encoding="utf-8") as f:
+            cui_cfg = yaml.safe_load(f) or {}
+        det_status = cui_cfg.get("determination_status")
+        classification = cui_cfg.get("classification") or {}
+        category = classification.get("cui_category")
+        marking = classification.get("cui_marking")
+        if isinstance(marking, str) and marking and marking != "not_cui":
+            patterns.append(
+                (re.compile(re.escape(marking)), f"CUI marking ({marking})")
+            )
+        if det_status == "pending" or (
+            isinstance(category, str) and category and category != "not_cui"
+        ):
+            requires_redaction = True
+
+    system_patterns = []
+    if redaction_path and os.path.isfile(redaction_path):
+        with open(redaction_path, encoding="utf-8") as f:
+            cfg = yaml.safe_load(f) or {}
+        for entry in cfg.get("forbidden_patterns", []) or []:
+            if not isinstance(entry, dict):
+                raise ValueError(
+                    f"{redaction_path}: forbidden_patterns entries must be mappings"
+                )
+            pat = entry.get("pattern")
+            label = entry.get("label", "system-specific redaction")
+            if not pat:
+                continue
+            flags = 0
+            for flag_name in entry.get("flags", []) or []:
+                flags |= _FLAG_MAP.get(flag_name.upper(), 0)
+            system_patterns.append((re.compile(pat, flags), label))
+
+    if requires_redaction and not system_patterns:
+        raise ValueError(
+            f"{cui_path}: classified or pending CUI sidecar requires non-empty redaction.yaml forbidden_patterns"
+        )
+
+    patterns.extend(system_patterns)
     return patterns
 
 
@@ -299,7 +339,10 @@ def main():
     if "risks" in d:
         fail("gap CDX must not contain a top-level 'risks' key (ideal-state only)")
     raw = json.dumps(d)
-    forbidden = _load_forbidden(paths.redaction)
+    try:
+        forbidden = _load_forbidden(paths.redaction, paths.cui)
+    except ValueError as exc:
+        fail(str(exc))
     for pattern, label in forbidden:
         m = pattern.search(raw)
         if m:
