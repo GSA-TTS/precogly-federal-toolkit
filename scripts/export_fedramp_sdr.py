@@ -275,7 +275,7 @@ def _control_sort_key(cid: str) -> tuple:
     return (m.group(1), int(m.group(2)), int(m.group(3) or 0))
 
 
-def build_ports_and_protocols(sdr_side: dict) -> list[dict]:
+def build_ports_and_protocols(sdr_side: dict, cdx: dict | None = None) -> list[dict]:
     raw = sdr_side.get("ports_and_protocols") or []
     out = []
     for entry in raw:
@@ -291,6 +291,46 @@ def build_ports_and_protocols(sdr_side: dict) -> list[dict]:
         if entry.get("purpose"):
             item["purpose"] = entry["purpose"]
         out.append(item)
+    if out or not cdx:
+        return out
+
+    flows = ((cdx.get("blueprints") or [{}])[0]).get("flows") or []
+    seen: set[tuple[str, str, str, str, str]] = set()
+    for flow in flows:
+        props = flow.get("properties") or []
+        if get_property(props, "vault:role") == "inheritance":
+            continue
+        protos = [
+            str(p).strip() for p in (flow.get("protocols") or []) if str(p).strip()
+        ]
+        port = (
+            get_property(props, "precogly:port")
+            or get_property(props, "owasp:port")
+            or ""
+        ).strip()
+        if not protos and not port:
+            continue
+        service_name = (flow.get("name") or flow.get("bom-ref") or "").strip()
+        purpose = (flow.get("description") or "").strip()
+        transport_protocol = ", ".join(protos)
+        encryption = (get_property(props, "owasp:encrypted") or "").strip()
+        key = (service_name, port, transport_protocol, encryption, purpose)
+        if key in seen:
+            continue
+        seen.add(key)
+        item = {}
+        if service_name:
+            item["serviceName"] = service_name
+        if port:
+            item["portNumber"] = port
+        if transport_protocol:
+            item["transportProtocol"] = transport_protocol
+        if encryption:
+            item["encryption"] = encryption
+        if purpose:
+            item["purpose"] = purpose
+        if item:
+            out.append(item)
     return out
 
 
@@ -314,7 +354,7 @@ def build_sdr(slug: str, catalog_entry: dict, sidecar: dict) -> dict:
         "securityControls": build_security_controls(cdx, parameter_values),
         "fedRampRequirements": load_frr(slug),
         "keySecurityIndicators": load_ksi(slug),
-        "portsAndProtocols": build_ports_and_protocols(sdr_side),
+        "portsAndProtocols": build_ports_and_protocols(sdr_side, cdx),
     }
 
     poam = load_open_risk_summary(slug)
