@@ -139,7 +139,10 @@ def main():
                 )
 
     raw = json.dumps(d)
-    forbidden = _load_forbidden(paths.redaction)
+    try:
+        forbidden = _load_forbidden(paths.redaction, paths.cui)
+    except ValueError as exc:
+        fail(str(exc))
     for pattern, label in forbidden:
         m = pattern.search(raw)
         if m:
