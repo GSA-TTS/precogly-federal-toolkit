@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.precogly.dev/local/architecture.schema.json",
+  "title": "SSPP architecture binding subset consumed by generation",
+  "type": "object",
+  "required": ["assets", "flow_overrides", "flow_bindings", "family_asset_map", "default_assets", "status_risk"],
+  "$defs": {
+    "propertyEntry": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "value": {}
+      },
+      "additionalProperties": true
+    },
+    "override": {
+      "type": "object",
+      "properties": {
+        "properties": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/propertyEntry" }
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "assets": { "type": "object", "additionalProperties": { "type": "string" } },
+    "zone_overrides": { "type": "object", "additionalProperties": { "$ref": "#/$defs/override" } },
+    "asset_overrides": { "type": "object", "additionalProperties": { "$ref": "#/$defs/override" } },
+    "flows": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "ref": { "type": "string" },
+          "source_asset": { "type": "string" },
+          "destination_asset": { "type": "string" },
+          "name": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "flow_overrides": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "protocols": { "type": "array", "items": { "type": "string" } },
+          "authMechanism": { "type": "string" },
+          "encrypted": { "type": "boolean" },
+          "crosses_trust_zone": { "type": "boolean" },
+          "data_classification": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "flow_bindings": { "type": "object", "additionalProperties": { "type": "array", "items": { "type": "string" } } },
+    "asset_groups": { "type": "object", "additionalProperties": { "type": "array", "items": { "type": "string" } } },
+    "family_asset_map": {
+      "type": "object",
+      "additionalProperties": { "type": "array", "items": { "type": "string" } }
+    },
+    "diagram_order": {
+      "type": "object",
+      "properties": {
+        "assets": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    },
+    "diagram_layout": { "type": "object" },
+    "default_assets": { "type": "array", "items": { "type": "string" } },
+    "status_risk": { "type": "object", "additionalProperties": { "type": "string" } },
+    "gwt_bindings": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "given": { "type": "string" },
+          "when": { "type": "string" },
+          "then": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "auth_mechanisms": {
+      "type": "object",
+      "properties": {
+        "allowed": { "type": "array", "items": { "type": "string" } },
+        "warn": { "type": "object", "additionalProperties": { "type": "string" } },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "description": { "type": "string" },
+              "nist": { "type": "array", "items": { "type": "string" } }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": true
+}

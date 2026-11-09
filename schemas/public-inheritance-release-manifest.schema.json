@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "purpose", "source_receipts", "artifacts"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "purpose": { "type": "string", "minLength": 1 },
+    "source_receipts": {
+      "type": "object", "additionalProperties": false,
+      "required": ["oscal_vault_commit", "fedramp_baselines_sha256", "ccc_revision", "ccc_sha256"],
+      "properties": {
+        "oscal_vault_commit": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+        "fedramp_baselines_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "ccc_revision": { "type": "string", "pattern": "^Rev 7( |$)" },
+        "ccc_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    "artifacts": {
+      "type": "array", "minItems": 4,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["path", "sha256"],
+        "properties": {
+          "path": { "type": "string", "minLength": 1 },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "baseline": { "enum": ["Low", "Moderate", "High"] },
+          "control_count": { "type": "integer", "minimum": 1 }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,182 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.precogly.dev/federal-toolkit/hosting-overlay.schema.json",
+  "title": "Example System Hosting Topology Overlay",
+  "description": "Typed, deterministic topology operations over one system source DFD. Control posture and evidence are deliberately out of scope for schema version 1.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "name",
+    "parent_system",
+    "slug",
+    "lifecycle",
+    "authorization_state",
+    "feasibility",
+    "operations"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "name": { "$ref": "#/$defs/slug" },
+    "parent_system": { "$ref": "#/$defs/slug" },
+    "slug": { "$ref": "#/$defs/slug" },
+    "title": { "type": "string", "minLength": 1 },
+    "lifecycle": {
+      "enum": ["as-is", "proposed-as-is", "planned"]
+    },
+    "authorization_state": {
+      "enum": ["current", "proposal", "review-blocked", "approved"]
+    },
+    "feasibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "evidence_ref"],
+      "properties": {
+        "status": { "enum": ["confirmed", "pending", "blocked"] },
+        "evidence_ref": { "type": "string", "minLength": 1 },
+        "blocking_questions": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        }
+      }
+    },
+    "operations": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "remove_flow_refs": { "$ref": "#/$defs/uniqueRefs" },
+        "remove_asset_refs": { "$ref": "#/$defs/uniqueRefs" },
+        "remove_zone_refs": { "$ref": "#/$defs/uniqueRefs" },
+        "replace_zones": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/zoneReplacement" }
+        },
+        "replace_assets": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/assetReplacement" }
+        },
+        "replace_flows": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/flowReplacement" }
+        },
+        "add_zones": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/zone" }
+        },
+        "add_assets": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/asset" }
+        },
+        "add_flows": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/flow" }
+        },
+        "architecture_zone_overrides": {
+          "type": "object",
+          "additionalProperties": { "type": "object" }
+        },
+        "architecture_asset_overrides": {
+          "type": "object",
+          "additionalProperties": { "type": "object" }
+        },
+        "architecture_flow_overrides": {
+          "type": "object",
+          "additionalProperties": { "type": "object" }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "authorization_state": { "const": "current" } },
+        "required": ["authorization_state"]
+      },
+      "then": {
+        "properties": {
+          "lifecycle": { "const": "as-is" },
+          "feasibility": {
+            "properties": { "status": { "const": "confirmed" } }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "lifecycle": { "const": "planned" } },
+        "required": ["lifecycle"]
+      },
+      "then": {
+        "not": {
+          "properties": { "authorization_state": { "const": "current" } },
+          "required": ["authorization_state"]
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$"
+    },
+    "ref": { "type": "string", "minLength": 1 },
+    "uniqueRefs": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/ref" },
+      "uniqueItems": true
+    },
+    "zone": {
+      "type": "object",
+      "required": ["bom-ref"],
+      "properties": { "bom-ref": { "$ref": "#/$defs/ref" } },
+      "additionalProperties": true
+    },
+    "asset": {
+      "type": "object",
+      "required": ["bom-ref"],
+      "properties": {
+        "bom-ref": { "$ref": "#/$defs/ref" },
+        "zone": { "$ref": "#/$defs/ref" }
+      },
+      "additionalProperties": true
+    },
+    "flow": {
+      "type": "object",
+      "required": ["bom-ref", "source", "destination"],
+      "properties": {
+        "bom-ref": { "$ref": "#/$defs/ref" },
+        "source": { "$ref": "#/$defs/ref" },
+        "destination": { "$ref": "#/$defs/ref" }
+      },
+      "additionalProperties": true
+    },
+    "zoneReplacement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["target_ref", "value"],
+      "properties": {
+        "target_ref": { "$ref": "#/$defs/ref" },
+        "value": { "$ref": "#/$defs/zone" }
+      }
+    },
+    "assetReplacement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["target_ref", "value"],
+      "properties": {
+        "target_ref": { "$ref": "#/$defs/ref" },
+        "value": { "$ref": "#/$defs/asset" }
+      }
+    },
+    "flowReplacement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["target_ref", "value"],
+      "properties": {
+        "target_ref": { "$ref": "#/$defs/ref" },
+        "value": { "$ref": "#/$defs/flow" }
+      }
+    }
+  }
+}

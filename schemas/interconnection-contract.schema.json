@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.precogly.dev/local/interconnection-contract.schema.json",
+  "title": "System interconnection contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "system", "status", "exchanges", "unresolved_decisions", "guardrails"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "system": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+    "status": { "enum": ["draft", "approved"] },
+    "exchanges": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "$ref": "#/$defs/exchange" }
+    },
+    "unresolved_decisions": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 3 },
+      "uniqueItems": true
+    },
+    "guardrails": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 3 }
+    }
+  },
+  "$defs": {
+    "statusRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required", "status"],
+      "properties": {
+        "required": { "type": "boolean" },
+        "type": { "type": "string", "minLength": 3 },
+        "status": { "type": "string", "minLength": 3 }
+      }
+    },
+    "networkRestriction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "status"],
+      "properties": {
+        "type": { "type": "string", "minLength": 3 },
+        "status": { "type": "string", "minLength": 3 }
+      }
+    },
+    "exchange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_system",
+        "destination_system",
+        "data_direction",
+        "initiating_system",
+        "architecture_flow",
+        "protocol",
+        "port",
+        "authentication",
+        "encrypted",
+        "data_classification",
+        "agreement",
+        "authorization_prerequisite",
+        "network_restriction",
+        "account_isolation",
+        "deletion_responsibility",
+        "retention",
+        "retransmission"
+      ],
+      "properties": {
+        "source_system": { "type": "string", "minLength": 3 },
+        "destination_system": { "type": "string", "minLength": 3 },
+        "data_direction": { "const": "source-to-destination" },
+        "initiating_system": { "type": "string", "minLength": 3 },
+        "architecture_flow": { "type": "string", "pattern": "^[a-z0-9][a-z0-9_]*$" },
+        "protocol": { "type": "string", "minLength": 2 },
+        "port": { "type": "string", "pattern": "^[0-9]+$" },
+        "authentication": { "type": "string", "minLength": 3 },
+        "encrypted": { "type": "boolean" },
+        "data_classification": { "type": "string", "minLength": 3 },
+        "agreement": { "$ref": "#/$defs/statusRecord" },
+        "authorization_prerequisite": { "$ref": "#/$defs/statusRecord" },
+        "network_restriction": { "$ref": "#/$defs/networkRestriction" },
+        "account_isolation": { "type": "string", "minLength": 3 },
+        "deletion_responsibility": { "type": "string", "minLength": 3 },
+        "retention": { "type": "string", "minLength": 3 },
+        "retransmission": { "type": "string", "minLength": 3 }
+      }
+    }
+  }
+}

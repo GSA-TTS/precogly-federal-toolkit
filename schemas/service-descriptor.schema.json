@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.precogly.dev/federal-toolkit/service-descriptor.schema.json",
+  "title": "Optional pack component service descriptor",
+  "description": "Operating-model facts for a pack component that is offered as a service: who does what, how it is provisioned, maintained and retired. Placed under a component's `service` key in components.yaml. Optional; Precogly ignores it on import. Structure only; values must be authored from a current, reviewed source.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "provisioning": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method"],
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": ["ticket", "self-service", "declarative-config", "default", "other"]
+        },
+        "notes": { "type": "string", "minLength": 1 }
+      }
+    },
+    "prerequisites": {
+      "description": "Ids of other components in the same pack that must be consumed first.",
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+      "uniqueItems": true
+    },
+    "provider_responsibilities": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1
+    },
+    "tenant_responsibilities": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1
+    },
+    "maintenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "cadence": { "type": "string", "minLength": 1 },
+        "notice": { "type": "string", "minLength": 1 }
+      }
+    },
+    "decommissioning": { "type": "string", "minLength": 1 },
+    "access": { "type": "string", "minLength": 1 },
+    "continuity": { "type": "string", "minLength": 1 }
+  }
+}

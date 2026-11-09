@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.precogly.dev/local/system-crm.schema.json",
+  "title": "System CRM inheritance and responsibility baseline (crm/index.yaml)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "system",
+    "reviewed_at",
+    "sources",
+    "providers",
+    "acceptance_rule",
+    "count",
+    "controls"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "system": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+    "reviewed_at": { "type": "string", "format": "date" },
+    "sources": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "type": "object" }
+    },
+    "providers": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "pattern": "^[a-z0-9][a-z0-9-]*$" },
+      "additionalProperties": { "$ref": "#/$defs/provider" }
+    },
+    "acceptance_rule": { "type": "string", "minLength": 20 },
+    "count": { "type": "integer", "minimum": 1 },
+    "controls": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/control" }
+    }
+  },
+  "$defs": {
+    "provider": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "crm_status", "authorization_id", "crm_version", "crm_source"],
+      "properties": {
+        "name": { "type": "string", "minLength": 2 },
+        "crm_status": {
+          "enum": ["not-obtained", "tenant-crm-only", "current"],
+          "description": "current requires an authorization identifier and a provider CRM reviewed in full. tenant-crm-only means only the tenant responsibility sheet is available."
+        },
+        "authorization_id": { "type": ["string", "null"], "minLength": 1 },
+        "crm_version": { "type": ["string", "null"], "minLength": 1 },
+        "crm_source": {
+          "type": ["string", "null"],
+          "pattern": "^[a-z0-9][a-z0-9-]*\\.yaml$"
+        },
+        "note": { "type": "string", "minLength": 3 }
+      }
+    },
+    "control": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "control_id",
+        "name",
+        "classification",
+        "tenant_obligation",
+        "provider_inheritance",
+        "providers",
+        "crm_sources",
+        "sspp_stated"
+      ],
+      "properties": {
+        "control_id": { "type": "string", "pattern": "^[A-Z]{2}-[0-9]+(\\([0-9A-Z]+\\))?$" },
+        "name": { "type": "string", "minLength": 2 },
+        "classification": {
+          "enum": [
+            "inherited",
+            "hybrid",
+            "system-specific",
+            "not-applicable",
+            "planned",
+            "not-implemented",
+            "unresolved"
+          ]
+        },
+        "tenant_obligation": {
+          "enum": ["confirmed-by-crm", "none-stated", "unresolved"],
+          "description": "Whether the tenant responsibility is established by a provider CRM, merely absent from the source SSPP, or unresolved."
+        },
+        "provider_inheritance": {
+          "enum": ["none", "pending-provider-evidence", "accepted"]
+        },
+        "providers": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+          "uniqueItems": true
+        },
+        "crm_sources": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+          "uniqueItems": true
+        },
+        "sspp_stated": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["inheritance_type", "providing_service", "details_below"],
+          "properties": {
+            "inheritance_type": { "type": "string" },
+            "providing_service": { "type": "string" },
+            "details_below": { "type": "boolean" }
+          }
+        },
+        "implementation_state": { "enum": ["planned", "not-implemented", "implemented"] },
+        "evidence_refs": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 3 },
+          "uniqueItems": true
+        },
+        "required_action": { "type": "string", "minLength": 10 }
+      }
+    }
+  }
+}

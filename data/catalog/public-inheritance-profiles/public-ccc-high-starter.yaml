@@ -1,0 +1,827 @@
+schema_version: 1
+profile: public-ccc-high-starter
+name: Public CCC High Inheritance Starter
+baseline: High
+source_fedramp_baselines: vendor/oscal-vault/compliance/data/fedramp_baselines.json
+oscal_vault_commit: 139fc102dff11118c04b669c1a6d3e3ae0004b5d
+fedramp_baselines_sha256: 83040a9961ca857d63673c9d4657654b9476d481a6e31f62d023f9e789b20410
+source_ccc: data/tiers/gsa-common-controls-rev7.yaml
+ccc_revision: Rev 7 draft (2026-09-03)
+ccc_sha256: 9cde2b66628c9cc36033b3241ee569e6c573c30b404c9de48b15f539f3881f71
+purpose: Public inheritance review starter derived from FedRAMP baseline membership
+  and the approved CCC designation baseline.
+not_an_ssp: true
+not_an_authorization_assertion: true
+excluded_content:
+- control narrative
+- organization-defined parameters
+- implementation statements
+- system architecture
+- personnel identities
+- evidence
+fedramp_baseline_control_count: 398
+ccc_designated_control_count: 99
+baseline_controls_without_ccc_designation:
+- AC-10
+- AC-11
+- AC-11(1)
+- AC-12
+- AC-14
+- AC-17
+- AC-17(1)
+- AC-17(2)
+- AC-17(3)
+- AC-17(4)
+- AC-17(9)
+- AC-18
+- AC-18(1)
+- AC-18(3)
+- AC-19
+- AC-19(5)
+- AC-2
+- AC-2(1)
+- AC-2(12)
+- AC-2(13)
+- AC-2(2)
+- AC-2(3)
+- AC-2(4)
+- AC-2(7)
+- AC-2(9)
+- AC-20
+- AC-20(1)
+- AC-21
+- AC-3
+- AC-3(14)
+- AC-4
+- AC-4(21)
+- AC-5
+- AC-6
+- AC-6(1)
+- AC-6(10)
+- AC-6(2)
+- AC-6(3)
+- AC-6(5)
+- AC-6(7)
+- AC-6(9)
+- AC-7
+- AC-8
+- AU-11
+- AU-12
+- AU-2
+- AU-2(3)
+- AU-3
+- AU-3(1)
+- AU-3(3)
+- AU-4
+- AU-5
+- AU-6
+- AU-6(1)
+- AU-6(3)
+- AU-6(4)
+- AU-7
+- AU-7(1)
+- AU-8
+- AU-8(1)
+- AU-9
+- AU-9(2)
+- AU-9(4)
+- CA-2(2)
+- CA-2(3)
+- CA-3
+- CA-3(3)
+- CA-9
+- CM-10
+- CM-11
+- CM-12
+- CM-12(1)
+- CM-2
+- CM-2(1)
+- CM-2(2)
+- CM-2(3)
+- CM-2(7)
+- CM-3
+- CM-3(1)
+- CM-3(2)
+- CM-3(4)
+- CM-4
+- CM-5
+- CM-5(1)
+- CM-5(2)
+- CM-5(3)
+- CM-5(5)
+- CM-6
+- CM-6(1)
+- CM-7
+- CM-7(1)
+- CM-7(2)
+- CM-7(5)
+- CM-8
+- CM-8(1)
+- CM-8(2)
+- CM-8(3)
+- CM-8(5)
+- CM-8(6)
+- CM-8(7)
+- CM-9
+- CP-10
+- CP-10(2)
+- CP-2
+- CP-2(1)
+- CP-2(2)
+- CP-2(3)
+- CP-2(8)
+- CP-3
+- CP-4
+- CP-4(1)
+- CP-6
+- CP-6(1)
+- CP-6(3)
+- CP-7
+- CP-7(1)
+- CP-7(2)
+- CP-7(3)
+- CP-8
+- CP-8(1)
+- CP-8(2)
+- CP-9
+- CP-9(1)
+- CP-9(3)
+- CP-9(8)
+- IA-11
+- IA-12
+- IA-12(2)
+- IA-12(3)
+- IA-12(5)
+- IA-2
+- IA-2(1)
+- IA-2(11)
+- IA-2(12)
+- IA-2(2)
+- IA-2(3)
+- IA-2(5)
+- IA-2(8)
+- IA-3
+- IA-4
+- IA-4(4)
+- IA-5
+- IA-5(1)
+- IA-5(11)
+- IA-5(2)
+- IA-5(3)
+- IA-5(4)
+- IA-5(6)
+- IA-5(7)
+- IA-6
+- IA-7
+- IA-8
+- IA-8(1)
+- IA-8(2)
+- IA-8(3)
+- IA-8(4)
+- IR-7(2)
+- IR-9
+- IR-9(1)
+- IR-9(2)
+- IR-9(3)
+- IR-9(4)
+- MA-2
+- MA-3
+- MA-3(1)
+- MA-3(2)
+- MA-3(3)
+- MA-4
+- MA-4(2)
+- MA-5
+- MA-5(1)
+- MA-6
+- MP-2
+- MP-3
+- MP-4
+- MP-5
+- MP-5(4)
+- MP-6
+- MP-6(2)
+- PE-10
+- PE-11
+- PE-12
+- PE-13
+- PE-13(1)
+- PE-13(2)
+- PE-13(3)
+- PE-14
+- PE-14(2)
+- PE-15
+- PE-16
+- PE-17
+- PE-2
+- PE-3
+- PE-4
+- PE-5
+- PE-6
+- PE-6(1)
+- PE-8
+- PE-8(3)
+- PE-9
+- PL-2
+- PL-2(3)
+- PS-3(3)
+- PT-7
+- RA-5
+- RA-5(1)
+- RA-5(2)
+- RA-5(3)
+- RA-5(5)
+- RA-5(6)
+- RA-5(8)
+- RA-9
+- SA-10
+- SA-11
+- SA-11(1)
+- SA-11(2)
+- SA-11(8)
+- SA-15
+- SA-15(3)
+- SA-22
+- SA-3
+- SA-3(2)
+- SA-4(1)
+- SA-4(2)
+- SA-4(8)
+- SA-4(9)
+- SA-5
+- SA-9(1)
+- SA-9(2)
+- SA-9(4)
+- SA-9(5)
+- SC-10
+- SC-12
+- SC-12(2)
+- SC-12(3)
+- SC-13
+- SC-15
+- SC-17
+- SC-19
+- SC-2
+- SC-20
+- SC-21
+- SC-22
+- SC-23
+- SC-28
+- SC-28(1)
+- SC-39
+- SC-4
+- SC-5
+- SC-6
+- SC-7
+- SC-7(10)
+- SC-7(12)
+- SC-7(13)
+- SC-7(18)
+- SC-7(24)
+- SC-7(25)
+- SC-7(3)
+- SC-7(4)
+- SC-7(5)
+- SC-7(7)
+- SC-7(8)
+- SC-8
+- SC-8(1)
+- SI-10
+- SI-11
+- SI-12
+- SI-12(1)
+- SI-12(2)
+- SI-12(3)
+- SI-16
+- SI-18
+- SI-18(4)
+- SI-19
+- SI-2
+- SI-2(2)
+- SI-2(3)
+- SI-3
+- SI-3(1)
+- SI-3(2)
+- SI-3(7)
+- SI-4
+- SI-4(1)
+- SI-4(14)
+- SI-4(16)
+- SI-4(18)
+- SI-4(2)
+- SI-4(23)
+- SI-4(4)
+- SI-4(5)
+- SI-6
+- SI-7
+- SI-7(1)
+- SI-7(7)
+- SI-8
+- SI-8(1)
+- SI-8(2)
+- SR-11(2)
+- SR-12
+control_count: 99
+controls:
+- control_id: AC-1
+  name: Access Control Policy and Procedures
+  federal_type: Common
+  contractor_type: Hybrid
+  inheritance_source: OCISO
+- control_id: AC-2(5)
+  name: Account Management | Inactivity Logout
+  federal_type: Common
+  contractor_type: Common
+  inheritance_source: OCISO
+- control_id: AC-20(2)
+  name: "Use of External Systems | Portable Storage Devices \u2013 Restricted Use"
+  federal_type: Common
+  contractor_type: Common
+  inheritance_source: OCISO
+- control_id: AC-22
+  name: Publicly Accessible Content
+  federal_type: Common
+  contractor_type: Common
+  inheritance_source: GSA IT, OGC, and CPO
+- control_id: AT-1
+  name: Awareness and Training Policy and Procedures
+  federal_type: Common
+  contractor_type: Hybrid
+  inheritance_source: OCISO
+- control_id: AT-2
+  name: Literacy Training and Awareness
+  federal_type: Common
+  contractor_type: Common
+  inheritance_source: OCISO
+- control_id: AT-2(2)
+  name: Literacy Training and Awareness | Insider Threat
+  federal_type: Common
+  contractor_type: Common
+  inheritance_source: OMA
+- control_id: AT-2(3)
+  name: Literacy Training and Awareness | Social Engineering and Mining
+  federal_type: Common
+  contractor_type: Common
+  inheritance_source: OCISO
+- control_id: AT-3
+  name: Role-Based Training
+  federal_type: Common
+  contractor_type: Common
+  inheritance_source: OCISO
+- control_id: AT-3(5)
+  name: Role-Based Training | Processing Personally Identifiable Information
+  federal_type: Common
+  contractor_type: Common
+  inheritance_source: Privacy
+- control_id: AT-4
+  name: Training Records
+  federal_type: Common
+  contractor_type: Common
+  inheritance_source: OCISO
+- control_id: AU-1
+  name: Audit and Accountability Policy and Procedures
+  federal_type: Common
+  contractor_type: Hybrid
+  inheritance_source: OCISO
+- control_id: CA-1
+  name: Assessment, Authorization, and Monitoring Policies and Procedures
+  federal_type: Common
+  contractor_type: Common
+  inheritance_source: OCISO
+- control_id: CA-2
+  name: Control Assessments
+  federal_type: Common
+  contractor_type: Hybrid
+  inheritance_source: OCISO
+- control_id: CA-2(1)
+  name: Control Assessments | Independent Assessors
+  federal_type: Common
+  contractor_type: Common
+  inheritance_source: OCISO
+- control_id: CA-5
+  name: Plan of Action and Milestones
+  federal_type: Common
+  contractor_type: Common
+  inheritance_source: OCISO
+- control_id: CA-6
+  name: Security Authorization
+  federal_type: Hybrid
+  contractor_type: Hybrid
+  inheritance_source: OCISO
+- control_id: CA-7
+  name: Continuous Monitoring
+  federal_type: Hybrid
+  contractor_type: Hybrid
+  inheritance_source: OCISO
+- control_id: CA-7(1)
+  name: Continuous Monitoring | Independent Assessment
+  federal_type: Common
+  contractor_type: Common
+  inheritance_source: OCISO
+- control_id: CA-7(4)
+  name: Continuous Monitoring | Risk Monitoring
+  federal_type: Common
+  contractor_type: Common
+  inheritance_source: OCISO
+- control_id: CA-8
+  name: Penetration Testing
+  federal_type: Hybrid
+  contractor_type: System Specific
+  inheritance_source: OCISO
+- control_id: CA-8(1)
+  name: Penetration Testing | Independent Penetration Testing Agent or Team
+  federal_type: Common
+  contractor_type: System Specific
+  inheritance_source: OCISO
+- control_id: CM-1
+  name: Configuration Management Policy and Procedures
+  federal_type: Common
+  contractor_type: Hybrid
+  inheritance_source: OCISO
+- control_id: CM-4(2)
+  name: Impact Analyses | Verification of Controls
+  federal_type: Hybrid
+  contractor_type: Hybrid
+  inheritance_source: OCISO
+- control_id: CP-1
+  name: Contingency Planning Policy and Procedures
+  federal_type: Common
+  contractor_type: Hybrid
+  inheritance_source: OCISO
+- control_id: IA-1
+  name: Identification and Authentication Policy and Procedures
+  federal_type: Common
+  contractor_type: Hybrid
+  inheritance_source: OCISO
+- control_id: IR-1
+  name: Incident Response Policy and Procedures
+  federal_type: Common
+  contractor_type: Hybrid
+  inheritance_source: OCISO
+- control_id: IR-2
+  name: Incident Response Training
+  federal_type: Hybrid
+  contractor_type: Hybrid
+  inheritance_source: OCISO
+- control_id: IR-3
+  name: Incident Response Testing
+  federal_type: Hybrid
+  contractor_type: Hybrid
+  inheritance_source: OCISO
+- control_id: IR-3(2)
+  name: Incident Response Testing | Coordination With Related Plans
+  federal_type: Common
+  contractor_type: Common
+  inheritance_source: OCISO
+- control_id: IR-4
+  name: Incident Handling
+  federal_type: Hybrid
+  contractor_type: Hybrid
+  inheritance_source: OCISO
+- control_id: IR-4(1)
+  name: Incident Handling | Automated Incident Handling Processes
+  federal_type: Common
+  contractor_type: Hybrid
+  inheritance_source: OCISO
+- control_id: IR-5
+  name: Incident Monitoring
+  federal_type: Common
+  contractor_type: Common
+  inheritance_source: OCISO
+- control_id: IR-6
+  name: Incident Reporting
+  federal_type: Common
+  contractor_type: Common
+  inheritance_source: OCISO
+- control_id: IR-6(1)
+  name: Incident Reporting | Automated Reporting
+  federal_type: Common
+  contractor_type: Hybrid
+  inheritance_source: OCISO
+- control_id: IR-6(3)
+  name: Incident Reporting | Supply Chain Coordination
+  federal_type: Common
+  contractor_type: Hybrid
+  inheritance_source: OCISO
+- control_id: IR-7
+  name: Incident Response Assistance
+  federal_type: Common
+  contractor_type: Common
+  inheritance_source: OCISO
+- control_id: IR-7(1)
+  name: Incident Response Assistance | Automation Support for Availability of Information
+    and Support
+  federal_type: Common
+  contractor_type: Hybrid
+  inheritance_source: OCISO
+- control_id: IR-8
+  name: Incident Response Plan
+  federal_type: Hybrid
+  contractor_type: Hybrid
+  inheritance_source: OCISO
+- control_id: IR-8(1)
+  name: Incident Response Plan | Breaches
+  federal_type: Common
+  contractor_type: Common
+  inheritance_source: OCISO
+- control_id: MA-1
+  name: Maintenance Policy and Procedures
+  federal_type: Common
+  contractor_type: Hybrid
+  inheritance_source: OCISO
+- control_id: MP-1
+  name: Media Protection Policy and Procedures
+  federal_type: Common
+  contractor_type: Hybrid
+  inheritance_source: OCISO
+- control_id: MP-7
+  name: Media Use
+  federal_type: Hybrid
+  contractor_type: Hybrid
+  inheritance_source: OCISO
+- control_id: PE-1
+  name: Physical and Environmental Protection Policy and Procedures
+  federal_type: Common
+  contractor_type: Hybrid
+  inheritance_source: OCISO
+- control_id: PL-1
+  name: Planning Policy and Procedures
+  federal_type: Common
+  contractor_type: Hybrid
+  inheritance_source: OCISO
+- control_id: PL-10
+  name: Baseline Selection
+  federal_type: Common
+  contractor_type: Common
+  inheritance_source: OCISO
+- control_id: PL-11
+  name: Baseline Tailoring
+  federal_type: Common
+  contractor_type: Common
+  inheritance_source: OCISO
+- control_id: PL-4
+  name: Rules of Behavior
+  federal_type: Hybrid
+  contractor_type: Hybrid
+  inheritance_source: OCISO
+- control_id: PL-4(1)
+  name: Rules of Behavior | Social Media and External Site/Application Usage Restrictions
+  federal_type: Common
+  contractor_type: Hybrid
+  inheritance_source: OCISO
+- control_id: PL-8
+  name: Security and Privacy Architectures
+  federal_type: Hybrid
+  contractor_type: Hybrid
+  inheritance_source: OCISO
+- control_id: PL-9
+  name: Central Management
+  federal_type: Common
+  contractor_type: Common
+  inheritance_source: OCISO
+- control_id: PS-1
+  name: Personnel Security Policy and Procedures
+  federal_type: Common
+  contractor_type: Hybrid
+  inheritance_source: OCISO
+- control_id: PS-2
+  name: Position Risk Designation
+  federal_type: Common
+  contractor_type: Hybrid
+  inheritance_source: OHRM
+- control_id: PS-3
+  name: Personnel Screening
+  federal_type: Common
+  contractor_type: System Specific
+  inheritance_source: OMA
+- control_id: PS-4
+  name: Personnel Termination
+  federal_type: Hybrid
+  contractor_type: Hybrid
+  inheritance_source: GSA IT
+- control_id: PS-5
+  name: Personnel Transfer
+  federal_type: Common
+  contractor_type: Common
+  inheritance_source: GSA SSO
+- control_id: PS-6
+  name: Access Agreements
+  federal_type: Hybrid
+  contractor_type: Hybrid
+  inheritance_source: OCISO
+- control_id: PS-7
+  name: External Personnel Security
+  federal_type: Common
+  contractor_type: Common
+  inheritance_source: OMA
+- control_id: PS-8
+  name: Personnel Sanctions
+  federal_type: Common
+  contractor_type: Hybrid
+  inheritance_source: GSA
+- control_id: PS-9
+  name: Position Descriptions
+  federal_type: Common
+  contractor_type: Common
+  inheritance_source: 'OCISO/
+
+    Privacy'
+- control_id: PT-1
+  name: PII Processing and Transparency Policy and Procedures
+  federal_type: Common
+  contractor_type: Hybrid
+  inheritance_source: Privacy
+- control_id: PT-2
+  name: Authority to Process Personally Identifiable Information
+  federal_type: Hybrid
+  contractor_type: Hybrid
+  inheritance_source: Privacy
+- control_id: PT-3
+  name: Personally Identifiable Information Processing Purposes
+  federal_type: Hybrid
+  contractor_type: Hybrid
+  inheritance_source: Privacy
+- control_id: PT-4
+  name: Consent
+  federal_type: Hybrid
+  contractor_type: Hybrid
+  inheritance_source: Privacy
+- control_id: PT-5
+  name: Privacy Notice
+  federal_type: Hybrid
+  contractor_type: Hybrid
+  inheritance_source: Privacy
+- control_id: PT-5(2)
+  name: Privacy Notice | Privacy Act Statements
+  federal_type: Hybrid
+  contractor_type: Hybrid
+  inheritance_source: Privacy
+- control_id: PT-6
+  name: System of Records Notice
+  federal_type: Hybrid
+  contractor_type: Hybrid
+  inheritance_source: Privacy
+- control_id: PT-6(1)
+  name: System of Records Notice | Routine Uses
+  federal_type: Hybrid
+  contractor_type: Hybrid
+  inheritance_source: Privacy
+- control_id: PT-6(2)
+  name: System of Records Notice | Exemption Rules
+  federal_type: Hybrid
+  contractor_type: Hybrid
+  inheritance_source: Privacy
+- control_id: PT-7(1)
+  name: Specific Categories of Personally Identifiable Information | Social Security
+    Numbers
+  federal_type: Hybrid
+  contractor_type: Hybrid
+  inheritance_source: Privacy
+- control_id: PT-7(2)
+  name: Specific Categories of Personally Identifiable Information | First Amendment
+    Information
+  federal_type: Hybrid
+  contractor_type: Hybrid
+  inheritance_source: Privacy
+- control_id: PT-8
+  name: Computer Matching Requirements
+  federal_type: Hybrid
+  contractor_type: Hybrid
+  inheritance_source: Privacy
+- control_id: RA-1
+  name: Risk Assessment Policy and Procedures
+  federal_type: Common
+  contractor_type: Hybrid
+  inheritance_source: OCISO
+- control_id: RA-2
+  name: Security Categorization
+  federal_type: Common
+  contractor_type: Common
+  inheritance_source: OCISO
+- control_id: RA-3
+  name: Risk Assessment
+  federal_type: Hybrid
+  contractor_type: Hybrid
+  inheritance_source: OCISO
+- control_id: RA-3(1)
+  name: Risk Assessment | Supply Chain Risk Assessment
+  federal_type: Common
+  contractor_type: System Specific
+  inheritance_source: OCISO
+- control_id: RA-5(11)
+  name: Vulnerability Monitoring and Scanning | Public Disclosure Program
+  federal_type: Common
+  contractor_type: Common
+  inheritance_source: OCISO
+- control_id: RA-7
+  name: Risk Response
+  federal_type: Common
+  contractor_type: Common
+  inheritance_source: OCISO
+- control_id: RA-8
+  name: Privacy Impact Assessments
+  federal_type: Hybrid
+  contractor_type: Hybrid
+  inheritance_source: Privacy
+- control_id: SA-1
+  name: System and Services Acquisition Policy and Procedures
+  federal_type: Common
+  contractor_type: Hybrid
+  inheritance_source: OCISO
+- control_id: SA-2
+  name: Allocation of Resources
+  federal_type: Common
+  contractor_type: Common
+  inheritance_source: GSA IT
+- control_id: SA-4
+  name: Acquisition Process
+  federal_type: Hybrid
+  contractor_type: Hybrid
+  inheritance_source: OCISO
+- control_id: SA-4(10)
+  name: Acquisition Process | Use of Approved PIV Products
+  federal_type: Common
+  contractor_type: Hybrid
+  inheritance_source: 'OCISO/
+
+    GSAM'
+- control_id: SA-8
+  name: Security and Privacy Engineering Principles
+  federal_type: Common
+  contractor_type: Common
+  inheritance_source: OCISO
+- control_id: SA-9
+  name: External System Services
+  federal_type: Hybrid
+  contractor_type: Hybrid
+  inheritance_source: OCISO
+- control_id: SC-1
+  name: System and Communications Protection Policy and Procedures
+  federal_type: Common
+  contractor_type: Hybrid
+  inheritance_source: OCISO
+- control_id: SC-18
+  name: Mobile Code
+  federal_type: Hybrid
+  contractor_type: Hybrid
+  inheritance_source: OCTO
+- control_id: SI-1
+  name: System and Information Integrity Policy and
+  federal_type: Common
+  contractor_type: Hybrid
+  inheritance_source: OCISO
+- control_id: SI-5
+  name: Security Alerts, Advisories, and Directives
+  federal_type: Common
+  contractor_type: Hybrid
+  inheritance_source: OCISO
+- control_id: SR-1
+  name: Supply Chain Risk Management Policy and Procedures
+  federal_type: Common
+  contractor_type: Hybrid
+  inheritance_source: OCISO
+- control_id: SR-10
+  name: Inspection of Systems or Components
+  federal_type: Common
+  contractor_type: System Specific
+  inheritance_source: "OCISO \nC-SCRM"
+- control_id: SR-11
+  name: Component Authenticity
+  federal_type: Hybrid
+  contractor_type: System Specific
+  inheritance_source: OCISO
+- control_id: SR-11(1)
+  name: Component Authenticity | Anti-Counterfeit Training
+  federal_type: Hybrid
+  contractor_type: System Specific
+  inheritance_source: OCISO
+- control_id: SR-2
+  name: Supply Chain Risk Management Plan
+  federal_type: Common
+  contractor_type: System Specific
+  inheritance_source: "OCISO \nC-SCRM"
+- control_id: SR-2(1)
+  name: Supply Chain Risk Management Plan | Establish SCRM Team
+  federal_type: Common
+  contractor_type: System Specific
+  inheritance_source: "OCISO \nC-SCRM"
+- control_id: SR-3
+  name: Supply Chain Controls and Processes
+  federal_type: Hybrid
+  contractor_type: System Specific
+  inheritance_source: "OCISO \nC-SCRM"
+- control_id: SR-5
+  name: Acquisition Strategies, Tools, and Methods
+  federal_type: Common
+  contractor_type: System Specific
+  inheritance_source: GSAM
+- control_id: SR-6
+  name: Supplier Assessments and Reviews
+  federal_type: Common
+  contractor_type: System Specific
+  inheritance_source: "OCISO \nC-SCRM"
+- control_id: SR-8
+  name: Notification Agreements
+  federal_type: Common
+  contractor_type: System Specific
+  inheritance_source: "OCISO \nC-SCRM"

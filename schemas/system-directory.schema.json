@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.precogly.dev/federal-toolkit/system-directory.schema.json",
+  "title": "System Directory Manifest",
+  "description": "Describes one system in data/systems/<slug>/system.yaml. Consumed by scripts/systems/loader.py; see docs/IMPLEMENTATION_PLAN_generic_sspp_submodule.md.",
+  "type": "object",
+  "required": ["schema_version", "slug", "name"],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "enum": [1]
+    },
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$",
+      "description": "URL-safe slug; must match the containing directory name."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "baseline": {
+      "type": "string",
+      "enum": ["Low", "Moderate", "High", "Li-SaaS", "Tailored"]
+    },
+    "service_model": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["IaaS", "PaaS", "SaaS", "Other"]
+      },
+      "minItems": 1
+    },
+    "inherits_from": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9-]*$"
+      },
+      "description": "Tier CRM slugs this system leverages (data/tiers/<slug>.yaml)."
+    },
+    "superseded_by": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9-]*$"
+      },
+      "minItems": 1,
+      "uniqueItems": true,
+      "description": "Replacement system slugs when this source remains for compatibility only."
+    },
+    "provides": {
+      "type": "object",
+      "description": "Which optional subtrees this system directory has. Absent keys default to false; the loader still probes legacy paths when the manifest omits them.",
+      "additionalProperties": { "type": "boolean" },
+      "properties": {
+        "crm": { "type": "boolean" },
+        "countermeasures": { "type": "boolean" },
+        "model": { "type": "boolean" },
+        "ideal_state": { "type": "boolean" },
+        "frr": { "type": "boolean" },
+        "ksi": { "type": "boolean" },
+        "seed": { "type": "boolean" },
+        "responses": { "type": "boolean" },
+        "fedramp_sidecar": { "type": "boolean" },
+        "leverage": { "type": "boolean" },
+        "redaction": { "type": "boolean" },
+        "cui": { "type": "boolean" },
+        "hosting": { "type": "boolean" }
+      }
+    },
+    "maintainer": {
+      "type": "string",
+      "description": "Informational GitHub team handle or contact; not enforced by CI."
+    }
+  }
+}
