@@ -8,7 +8,7 @@ system security plans. Designed for use from a private system repository with au
 | Start here                                                                       | For                                                           |
 | -------------------------------------------------------------------------------- | ------------------------------------------------------------- |
 | [docs/threat-model-authoring-guide.md](docs/threat-model-authoring-guide.md)     | Authoring, exporting, and using pack libraries                |
-| [docs/DATA_PIPELINE.md](docs/DATA_PIPELINE.md)                                   | Vault-projection field map and flow diagrams                                |
+| [docs/DATA_PIPELINE.md](docs/DATA_PIPELINE.md)                                   | Vault-projection field map and flow diagrams                  |
 | [docs/redaction-guide.md](docs/redaction-guide.md)                               | What the redaction gate blocks, and which placeholders to use |
 | [docs/SYNTHETIC_RECONCILIATION_PROOF.md](docs/SYNTHETIC_RECONCILIATION_PROOF.md) | The synthetic end-to-end publication/reconciliation proof     |
 | [templates/generic-crm-system/](templates/generic-crm-system/)                   | Starter CRM pack template                                     |
