@@ -1,0 +1,33 @@
+offerings:
+  - id: continuous-event-monitoring
+    name: Continuous Event Monitoring
+    description: Candidate centralized collection, monitoring, and retention capability.
+    implementation_model: paas
+    plans:
+      - id: baseline
+        name: Baseline Collection
+        description: Inventory-driven, normalized security event collection with monitored delivery.
+        incorporates: [m26-sources, m26-collection, m26-cem]
+        provides:
+          - control: au-2
+            origination: customer-configured
+            provider_does: Provides the reusable architecture pattern for collecting and monitoring events.
+            consumer_must: Select required event types, instrument sources, and retain evidence of collection coverage.
+          - control: au-8
+            origination: customer-configured
+            provider_does: Provides a normalized event-contract pattern with time-correlation expectations.
+            consumer_must: Configure and test timestamp format and source synchronization for the actual environment.
+  - id: thirf-response
+    name: THIRF and Bounded Response
+    description: Candidate investigation and authorized response-automation capability.
+    implementation_model: customer
+    plans:
+      - id: advanced
+        name: Advanced
+        description: Evidence-backed threat hunting with bounded, auditable response automation.
+        incorporates: [m26-cem, m26-thirf, m26-response]
+        provides:
+          - control: ir-4
+            origination: customer-configured
+            provider_does: Provides a reusable workflow pattern for investigation and response orchestration.
+            consumer_must: Approve playbooks, define response authority, test outcomes, and preserve incident evidence.

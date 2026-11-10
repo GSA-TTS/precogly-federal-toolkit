@@ -1,0 +1,27 @@
+mappings:
+  - component: m26-sources
+    threats:
+      - threat: m26-source-coverage-gap
+        applies_to: component
+      - threat: m26-event-quality-gap
+        applies_to: component
+  - component: m26-collection
+    threats:
+      - threat: m26-event-quality-gap
+        applies_to: component
+      - threat: m26-collection-disruption
+        applies_to: component
+  - component: m26-cem
+    threats:
+      - threat: m26-collection-disruption
+        applies_to: component
+      - threat: m26-retention-integrity-gap
+        applies_to: component
+  - component: m26-thirf
+    threats:
+      - threat: m26-thirf-readiness-gap
+        applies_to: component
+  - component: m26-response
+    threats:
+      - threat: m26-unbounded-response-automation
+        applies_to: component
