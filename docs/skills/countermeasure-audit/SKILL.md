@@ -8,8 +8,8 @@ tier: 1
 last_updated: '2026-11-05'
 keywords: ['audit', 'countermeasure', 'crm', 'gap-analysis', 'precogly', 'cyclonedx', 'residual-action', 'devils-advocate']
 related_files:
-  - 'docs/plans/archived/IMPLEMENTATION_PLAN_example-system_remediation_countermeasures.md'
-  - 'docs/AUDIT_IMPLEMENTATION_PLAN_example-system_remediation_countermeasures.md'
+  - 'docs/archive/plans/IMPLEMENTATION_PLAN_example-system_remediation_countermeasures.md'
+  - 'docs/archive/audits/AUDIT_IMPLEMENTATION_PLAN_example-system_remediation_countermeasures.md'
   - 'data/systems/example-system/countermeasures.yaml'
   - 'data/systems/example-system/model/evidence.yaml'
   - 'build/example-system-crm-threat-model.cdx.json'
@@ -22,7 +22,7 @@ related_files:
 Use this skill when a stakeholder asks you to independently review any Example System /
 CRM remediation plan (files matching `docs/IMPLEMENTATION_PLAN_*.md`). It
 captures the concrete cross-check procedure used to produce
-[docs/AUDIT_IMPLEMENTATION_PLAN_example-system_remediation_countermeasures.md](../../docs/AUDIT_IMPLEMENTATION_PLAN_example-system_remediation_countermeasures.md).
+[docs/archive/audits/AUDIT_IMPLEMENTATION_PLAN_example-system_remediation_countermeasures.md](../../docs/archive/audits/AUDIT_IMPLEMENTATION_PLAN_example-system_remediation_countermeasures.md).
 
 ## When to use
 
@@ -35,7 +35,7 @@ captures the concrete cross-check procedure used to produce
 
 ## Load first
 
-- [docs/plans/archived/IMPLEMENTATION_PLAN_example-system_remediation_countermeasures.md](../../docs/plans/archived/IMPLEMENTATION_PLAN_example-system_remediation_countermeasures.md)
+- [docs/archive/plans/IMPLEMENTATION_PLAN_example-system_remediation_countermeasures.md](../../docs/archive/plans/IMPLEMENTATION_PLAN_example-system_remediation_countermeasures.md)
 - [data/systems/example-system/countermeasures.yaml](../../data/systems/example-system/countermeasures.yaml)
 - [data/systems/example-system/model/evidence.yaml](../../data/systems/example-system/model/evidence.yaml)
 - [build/example-system-crm-threat-model.cdx.json](../../build/example-system-crm-threat-model.cdx.json)

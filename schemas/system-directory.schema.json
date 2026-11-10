@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://schemas.precogly.dev/federal-toolkit/system-directory.schema.json",
   "title": "System Directory Manifest",
-  "description": "Describes one system in data/systems/<slug>/system.yaml. Consumed by scripts/systems/loader.py; see docs/IMPLEMENTATION_PLAN_generic_sspp_submodule.md.",
+  "description": "Describes one system in data/systems/<slug>/system.yaml. Consumed by scripts/systems/loader.py; see docs/archive/plans/IMPLEMENTATION_PLAN_generic_sspp_submodule.md.",
   "type": "object",
   "required": ["schema_version", "slug", "name"],
   "additionalProperties": true,
