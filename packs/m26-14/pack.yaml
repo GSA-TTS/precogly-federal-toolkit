@@ -1,0 +1,53 @@
+pack:
+  schema_version: 1
+  slug: m26-14
+  name: M-26-14 Continuous Event Monitoring Starter
+  description: |
+    Reusable architecture and planning starter for continuous event monitoring
+    (CEM), threat hunting, investigation, response, and forensics (THIRF).
+    It is derived from public materials in the GSA-TTS M-26-14 repository and
+    represents a candidate implementation model only. It is not official OMB or
+    CISA guidance, a compliance determination, or evidence of deployed capability.
+  version: 1.0.0
+  author: GSA/TTS
+  maintainer: '@GSA-TTS/tts-cybersecurity'
+  pack_type: compliance
+  precogly_schema_version: '2.0'
+  maturity: Draft
+  icon_map:
+    - component: m26-sources
+      icon: logs
+    - component: m26-collection
+      icon: pipeline
+    - component: m26-cem
+      icon: dashboard
+    - component: m26-thirf
+      icon: search
+    - component: m26-response
+      icon: shield
+  tags: [federal, logging, cem, thirf, incident-response, observability, draft]
+  repository_url: https://github.com/GSA-TTS/M-26-14
+  documentation_url: https://github.com/GSA-TTS/M-26-14
+frameworks:
+  - slug: m26-14
+    name: M-26-14 Capability Starter
+    version: '1.0'
+    issuer: OMB
+    description: Candidate maturity capability structure derived from public implementation-reference material.
+    requirements:
+      - section_code: L1-COVERAGE
+        description: Inventory critical log sources and establish baseline event coverage.
+      - section_code: L1-NORMALIZATION
+        description: Produce consistent, parseable, time-correlated event records.
+      - section_code: L2-COLLECTION
+        description: Centrally collect protected events with monitored delivery.
+      - section_code: L2-RETENTION
+        description: Define searchable and retrievable retention with integrity safeguards.
+      - section_code: L2-CEM
+        description: Operate continuous event-monitoring dashboards and alerts.
+      - section_code: L3-THIRF
+        description: Maintain evidence-backed threat-hunting and investigation playbooks.
+      - section_code: L3-AUTOMATION
+        description: Test bounded response automation and preserve forensic evidence.
+      - section_code: L4-IMPROVEMENT
+        description: Use incident outcomes to improve detection, response, and capacity planning.

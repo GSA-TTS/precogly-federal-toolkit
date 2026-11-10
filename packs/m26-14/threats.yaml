@@ -1,0 +1,19 @@
+threats:
+  - id: m26-source-coverage-gap
+    name: Critical Logging Source Coverage Gap
+    description: Critical systems or event categories are absent from the source inventory, preventing reliable detection or investigation.
+  - id: m26-event-quality-gap
+    name: Event Schema or Timestamp Quality Gap
+    description: Events omit actor, action, resource, result, or reliable timestamps, preventing correlation and automated analysis.
+  - id: m26-collection-disruption
+    name: Event Collection Disruption
+    description: Collection, enrichment, or forwarding fails without timely detection, leaving a visibility gap.
+  - id: m26-retention-integrity-gap
+    name: Event Retention or Integrity Gap
+    description: Events cannot be searched, retrieved, protected, or integrity-checked for the required investigation period.
+  - id: m26-thirf-readiness-gap
+    name: THIRF Playbook and Evidence Readiness Gap
+    description: The organization lacks tested hypotheses, queries, evidence requirements, or escalation paths for priority threats.
+  - id: m26-unbounded-response-automation
+    name: Unbounded Automated Response
+    description: Automated containment changes exceed approved authority, lack auditability, or can disrupt mission systems without human review.
