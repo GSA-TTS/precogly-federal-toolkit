@@ -1,0 +1,16 @@
+threats:
+  - id: cloudflare-tenant-policy-gap
+    name: Tenant Edge or Access Policy Misconfiguration
+    description: Tenant DNS, WAF, Access, or administrator-role policy permits unauthorized access or leaves the origin insufficiently protected.
+  - id: cloudflare-federation-assurance-gap
+    name: Identity Federation or PIV/CAC Assurance Gap
+    description: Tenant SAML federation does not enforce the required authenticator assurance or fails to maintain the tenant PIV/CAC integration process.
+  - id: cloudflare-log-visibility-gap
+    name: Edge Security Event Visibility Gap
+    description: Tenant request and security logs are not retained, forwarded, or correlated sufficiently to investigate boundary events.
+  - id: cloudflare-interconnection-bypass
+    name: Unreviewed Dedicated Interconnection or Traffic Path
+    description: A direct connection or traffic-routing requirement is introduced without agency sponsorship, approved architecture, or boundary review.
+  - id: cloudflare-incident-coordination-gap
+    name: Provider-Tenant Incident Coordination Gap
+    description: A tenant does not promptly report suspected incidents or information spillage through the provider and agency incident paths.

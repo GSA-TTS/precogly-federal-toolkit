@@ -1,0 +1,23 @@
+offerings:
+  - id: edge-boundary-services
+    name: Edge Boundary Services
+    description: Candidate edge protection and traffic-management capability for a tenant-controlled origin.
+    implementation_model: saas
+    plans:
+      - id: tenant-configured
+        name: Tenant Configured
+        description: Tenant-configured edge service with federated access and tenant-owned policy review.
+        incorporates: [cloudflare-edge, cloudflare-access, cloudflare-logging]
+        provides:
+          - control: sc-7
+            origination: shared
+            provider_does: Provides an edge service capable of applying boundary policies.
+            consumer_must: Configure, review, and evidence tenant DNS, WAF, Access, and origin-exposure policy.
+          - control: ia-8
+            origination: shared
+            provider_does: Supports SAML 2.0 identity federation for protected applications.
+            consumer_must: Configure and govern the tenant identity provider and required MFA or PIV/CAC process.
+          - control: ir-6
+            origination: shared
+            provider_does: Provides provider incident coordination channels for the service boundary.
+            consumer_must: Report suspected tenant incidents through approved provider and agency procedures.
