@@ -1,0 +1,19 @@
+offerings:
+  - id: controlled-egress
+    name: Controlled Cloud.gov Egress
+    description: Candidate tenant-operated proxy pattern for narrowly scoped outbound Internet access from Cloud.gov workloads.
+    implementation_model: paas
+    plans:
+      - id: separated-proxy
+        name: Separated Proxy Space
+        description: Restricted workloads use an authenticated internal forward proxy in a distinct public-egress space.
+        incorporates: [cloudgov-restricted-space, cloudgov-egress-space, cloudgov-egress-proxy, cloudgov-egress-policy, cloudgov-network-policy]
+        provides:
+          - control: sc-7
+            origination: customer-configured
+            provider_does: Provides Cloud Foundry spaces, internal routes, and application security-group mechanisms.
+            consumer_must: Separate the public-egress proxy, configure per-client deny-by-default policy, and constrain client-to-proxy connectivity.
+          - control: ac-6
+            origination: customer-configured
+            provider_does: Provides scoped organization and space roles and service-account plans.
+            consumer_must: Grant least-privilege space roles and use distinct deployer and auditor service identities.

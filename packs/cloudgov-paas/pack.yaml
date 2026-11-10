@@ -17,7 +17,7 @@ pack:
 
     Tenant systems inherit FedRAMP High controls through the Cloud.gov boundary.
     Tenant responsibilities are documented in the Cloud.gov PaaS CRM/CIS.
-  version: 1.0.0
+  version: 1.1.0
   author: GSA/TTS
   maintainer: '@GSA-TTS/tts-cybersecurity'
   pack_type: technology
@@ -40,6 +40,8 @@ pack:
       icon: globe
     - component: cloudgov-pages
       icon: static-site
+    - component: cloudgov-egress-proxy
+      icon: network
   tags:
     - gsa
     - cloudgov
@@ -48,6 +50,7 @@ pack:
     - fedramp
     - govcloud
     - federal
+    - egress
     - all
   repository_url: https://github.com/cloud-gov/cg-site
   documentation_url: https://cloud.gov/docs/
