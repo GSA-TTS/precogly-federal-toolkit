@@ -86,22 +86,22 @@ the strict FedRAMP validator; placeholder values are intentionally rejected.
 
 ## Contents
 
-| Path                            | Purpose                                                                                                            |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `packs/`                        | Reusable Precogly technology packs (cloud.gov, FCS managed cloud service, FedRAMP overlays, identity provisioning) |
-| `templates/generic-crm-system/` | Starter system template with Makefile + data/ scaffold                                                             |
-| `scripts/generate.py`           | CRM YAML → Precogly-native CycloneDX 2.0 emitter                                                                   |
-| `scripts/generate_ideal.py`     | Promotes gap CDX to all-verified ideal-state CDX with mock evidence                                                |
-| `scripts/validate.py`           | Redaction gate + structural validator for generated CDX                                                            |
-| `scripts/validate_ideal.py`     | Validates ideal-state CDX invariants                                                                               |
-| `scripts/diff_ideal.py`         | Human-readable diff between gap and ideal CDX                                                                      |
-| `scripts/drift.py`              | CI gate: fails if generated CDX diverges from checked-in artifact                                                  |
-| `scripts/export_fedramp_cpo.py` | Generate FedRAMP CR26 CPO JSON                                                                                     |
-| `scripts/export_fedramp_sdr.py` | Generate FedRAMP CR26 SDR JSON                                                                                     |
-| `scripts/validate_fedramp.py`   | Validate CPO/SDR against CR26 schemas                                                                              |
-| `scripts/scaffold_sidecars.py`  | Scaffold FedRAMP sidecar YAML stubs for each system                                                                |
-| `scripts/catalog/`              | OSCAL-vault ingestion, portfolio CDX, catalog builder                                                              |
-| `docs/`                         | Threat-model authoring guides and agent skills                                                                     |
+| Path                            | Purpose                                                                                                                                                                                               |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packs/`                        | Reusable Precogly technology and compliance packs (cloud.gov, Cloudflare Government boundary planning, M-26-14 CEM/THIRF starter, FCS managed cloud service, FedRAMP overlays, identity provisioning) |
+| `templates/generic-crm-system/` | Starter system template with Makefile + data/ scaffold                                                                                                                                                |
+| `scripts/generate.py`           | CRM YAML → Precogly-native CycloneDX 2.0 emitter                                                                                                                                                      |
+| `scripts/generate_ideal.py`     | Promotes gap CDX to all-verified ideal-state CDX with mock evidence                                                                                                                                   |
+| `scripts/validate.py`           | Redaction gate + structural validator for generated CDX                                                                                                                                               |
+| `scripts/validate_ideal.py`     | Validates ideal-state CDX invariants                                                                                                                                                                  |
+| `scripts/diff_ideal.py`         | Human-readable diff between gap and ideal CDX                                                                                                                                                         |
+| `scripts/drift.py`              | CI gate: fails if generated CDX diverges from checked-in artifact                                                                                                                                     |
+| `scripts/export_fedramp_cpo.py` | Generate FedRAMP CR26 CPO JSON                                                                                                                                                                        |
+| `scripts/export_fedramp_sdr.py` | Generate FedRAMP CR26 SDR JSON                                                                                                                                                                        |
+| `scripts/validate_fedramp.py`   | Validate CPO/SDR against CR26 schemas                                                                                                                                                                 |
+| `scripts/scaffold_sidecars.py`  | Scaffold FedRAMP sidecar YAML stubs for each system                                                                                                                                                   |
+| `scripts/catalog/`              | OSCAL-vault ingestion, portfolio CDX, catalog builder                                                                                                                                                 |
+| `docs/`                         | Threat-model authoring guides and agent skills                                                                                                                                                        |
 
 ## DFD template catalog
 
@@ -111,15 +111,17 @@ threat model, then open **Choose a Template** in the DFD editor. Templates are
 component-reference backed: Precogly resolves the inserted nodes to the
 components imported from that same pack.
 
-| Pack                        | Template                                 |
-| --------------------------- | ---------------------------------------- |
-| `cloudgov-paas`             | Cloud.gov PaaS Web Application           |
-| `fcs-managed-cloud-service` | FCS Managed Cloud Service Workload       |
-| `gsa-fedramp`               | GSA Shared Services Web Application      |
-| `gsa-overlay-aws`           | GSA AWS Approved Data Service            |
-| `gsa-overlay-azure`         | GSA Azure Approved Analytics             |
-| `gsa-overlay-gcp`           | GSA GCP Approved Data Pipeline           |
-| `identity-provisioning`     | Directory, SCIM and GitOps Authorization |
+| Pack                        | Template                                  |
+| --------------------------- | ----------------------------------------- |
+| `cloudgov-paas`             | Cloud.gov PaaS Web Application            |
+| `fcs-managed-cloud-service` | FCS Managed Cloud Service Workload        |
+| `gsa-fedramp`               | GSA Shared Services Web Application       |
+| `gsa-overlay-aws`           | GSA AWS Approved Data Service             |
+| `gsa-overlay-azure`         | GSA Azure Approved Analytics              |
+| `gsa-overlay-gcp`           | GSA GCP Approved Data Pipeline            |
+| `identity-provisioning`     | Directory, SCIM and GitOps Authorization  |
+| `cloudflare-government`     | Cloudflare for Government Tenant Boundary |
+| `m26-14`                    | Continuous Event Monitoring and THIRF     |
 
 Templates model reusable topology only. They do not assert that a particular
 system uses a service or that a related control is implemented.
