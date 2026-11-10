@@ -1,0 +1,23 @@
+mappings:
+  - component: cloudflare-edge
+    threats:
+      - threat: cloudflare-tenant-policy-gap
+        applies_to: component
+      - threat: cloudflare-log-visibility-gap
+        applies_to: component
+  - component: cloudflare-access
+    threats:
+      - threat: cloudflare-tenant-policy-gap
+        applies_to: component
+      - threat: cloudflare-federation-assurance-gap
+        applies_to: component
+  - component: cloudflare-logging
+    threats:
+      - threat: cloudflare-log-visibility-gap
+        applies_to: component
+      - threat: cloudflare-incident-coordination-gap
+        applies_to: component
+  - component: cloudflare-interconnect
+    threats:
+      - threat: cloudflare-interconnection-bypass
+        applies_to: component

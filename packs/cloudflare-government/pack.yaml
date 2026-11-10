@@ -1,0 +1,30 @@
+pack:
+  schema_version: 1
+  slug: cloudflare-government
+  name: Cloudflare for Government Boundary Services
+  description: |
+    Reusable planning model for Cloudflare for Government boundary services:
+    edge DNS/CDN/WAF, tenant identity federation, logging, and optional dedicated
+    interconnection. Derived from the public Cloudflare for Government System
+    Security Plan v1.8 (January 2023), not a current customer responsibility
+    matrix (CRM) or authorization package. It does not establish control
+    inheritance, implementation status, or ATO sufficiency. A consumer must
+    obtain current provider and agency-approved evidence before making those claims.
+  version: 1.0.0
+  author: GSA/TTS
+  maintainer: '@GSA-TTS/tts-cybersecurity'
+  pack_type: technology
+  precogly_schema_version: '2.0'
+  maturity: Draft
+  icon_map:
+    - component: cloudflare-edge
+      icon: globe
+    - component: cloudflare-access
+      icon: shield
+    - component: cloudflare-logging
+      icon: logs
+    - component: cloudflare-interconnect
+      icon: network
+  tags: [federal, cloudflare, boundary, waf, cdn, dns, zero-trust, draft]
+  repository_url: https://github.com/cloudflare
+  documentation_url: https://www.cloudflare.com/
