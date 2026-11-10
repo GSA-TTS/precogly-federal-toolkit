@@ -213,6 +213,17 @@ artifacts.
   artifact that is not tokenized, treat it as a finding and extend the
   redaction (steps above) before merge.
 
+## Service-principal identifier pattern
+
+Beyond the known-literal rule, the `service-principal-id-pattern` betterleaks rule
+flags any UUID-shaped value assigned to a `service_principal`, `spn`, `object_id`,
+`client_id`, `tenant_id`, `subscription_id`, or `application_id` field. Unrelated
+UUIDs (for example a UUIDv5 namespace) are not flagged, and the all-zero UUID and
+`tests/`, `docs/`, `skills/` paths are exempt. The oscal-vault-core candidate scan
+adds a case-insensitive UUID-shaped `forbidden_patterns` entry in
+`data/oscal-vault-core-safety-policy.yaml`, so generated identifiers in core must
+be derived at runtime rather than committed as literals.
+
 ## Betterleaks baseline governance (draft)
 
 The `.betterleaks-baseline.json` file is an exception register for findings
