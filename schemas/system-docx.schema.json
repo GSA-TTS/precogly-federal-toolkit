@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "template", "chapters"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "template": { "type": "string", "minLength": 1 },
+    "template_replacements": {
+      "type": "object",
+      "additionalProperties": { "type": "string", "minLength": 1 }
+    },
+    "chapters": { "type": "object" },
+    "diagrams": { "type": "object" }
+  },
+  "additionalProperties": false
+}

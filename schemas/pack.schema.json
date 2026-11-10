@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.precogly.dev/federal-toolkit/pack.schema.json",
+  "title": "Precogly pack metadata",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["pack"],
+  "properties": {
+    "pack": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "schema_version",
+        "slug",
+        "name",
+        "version",
+        "description",
+        "author",
+        "maintainer",
+        "pack_type",
+        "precogly_schema_version",
+        "maturity"
+      ],
+      "properties": {
+        "schema_version": {
+          "type": "integer",
+          "const": 1
+        },
+        "slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "author": {
+          "type": "string",
+          "minLength": 1
+        },
+        "maintainer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "pack_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "precogly_schema_version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+$"
+        },
+        "maturity": {
+          "type": "string",
+          "enum": ["Draft", "Community", "Validated"]
+        },
+        "deprecated": {
+          "type": "boolean"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "repository_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "documentation_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "depends_on": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "icon_map": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["component", "icon"],
+            "properties": {
+              "component": {
+                "type": "string",
+                "minLength": 1
+              },
+              "icon": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      }
+    }
+  }
+}

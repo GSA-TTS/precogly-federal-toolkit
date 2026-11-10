@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "core_system", "options"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "core_system": { "const": "example-system-data-platform-core" },
+    "options": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["option-1", "option-2"],
+      "properties": {
+        "option-1": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["title", "feasibility_status", "supplements"],
+          "properties": {
+            "title": { "type": "string", "minLength": 1 },
+            "feasibility_status": { "const": "blocked" },
+            "supplements": {
+              "const": [
+                "example-system-public-site-gsa-pages",
+                "example-system-transfer-sftpgo-cloudgov"
+              ]
+            }
+          }
+        },
+        "option-2": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["title", "feasibility_status", "supplements"],
+          "properties": {
+            "title": { "type": "string", "minLength": 1 },
+            "feasibility_status": { "const": "confirmed" },
+            "supplements": { "const": ["example-system-transfer-managed-cloud-service"] }
+          }
+        }
+      }
+    }
+  }
+}
