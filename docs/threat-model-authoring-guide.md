@@ -2,8 +2,10 @@
 id: threat-model-authoring-guide
 type: Guide
 title: 'Threat Model Authoring, Export, and Library Workflow'
+description: 'How to edit source YAML, export and replace the Precogly DFD, and install pack libraries; the authoring workflow for the SSPP threat-model pipeline.'
 status: draft
-last_updated: '2026-08-13'
+tier: 2
+last_updated: '2026-11-10'
 keywords: ['threat modeling', 'Precogly', 'CycloneDX', 'libraries', 'OSCAL vault', 'SSPP']
 related_files:
   - README.md
@@ -70,10 +72,10 @@ In Precogly, use packs as building blocks instead of hand-copying controls:
 
 | Change                                                     | Edit                                                            | Command                                                 |
 | ---------------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------- |
-| CRM responsibility text or mappings from spreadsheets      | `data/crm/*.yaml`                                               | `make generate validate`                                |
-| Countermeasure wording, mechanism, gap, or residual action | `data/countermeasures/countermeasures.yaml`                     | `make generate validate`                                |
-| Shared evidence text reused across many controls           | `data/model/evidence.yaml`                                      | `make generate validate`                                |
-| Asset mappings, flow bindings, zones, risk scores          | `data/model/architecture.yaml`                                  | `make validate-sources generate validate`               |
+| CRM responsibility text or mappings from spreadsheets      | `data/systems/<slug>/crm/*.yaml`                                | `make generate validate`                                |
+| Countermeasure wording, mechanism, gap, or residual action | `data/systems/<slug>/countermeasures.yaml`                      | `make generate validate`                                |
+| Shared evidence text reused across many controls           | `data/systems/<slug>/model/evidence.yaml`                       | `make generate validate`                                |
+| Asset mappings, flow bindings, zones, risk scores          | `data/systems/<slug>/model/architecture.yaml`                   | `make validate-sources generate validate`               |
 | Example System DFD structure and layout                              | Edit in Precogly, then compare export before replacing baseline | `make dfd-drift DFD_EXPORT=tmp/export.cdx.json`         |
 | Pack component, threat, or countermeasure library content  | `data/packs/<pack>/`                                            | `make pack-install-all` and test in Precogly            |
 | Vault-projected system content                             | Source OSCAL vault, not generated `build/systems/` files        | `make vault-import-all VAULT_ROOT=./vendor/oscal-vault` |
@@ -112,10 +114,10 @@ Use this workflow for assets, flows, trust zones, and diagram layout:
 5. Run `make dfd-drift DFD_EXPORT=<exported-cdx.json>` and review
    `build/<system>-dfd-drift.yaml`; a non-zero exit means the export differs
    from the checked-in DFD and needs review before promotion.
-6. Save the exported DFD baseline over `data/model/base-dfd.cdx.json`.
+6. Save the exported DFD baseline over `data/systems/<slug>/model/base-dfd.cdx.json`.
 7. Run `make scrub-dfd SYSTEM=<slug>` to remove editor-injected authors and
    redact configured DFD text fields.
-8. If asset, zone, or flow references changed, update `data/model/architecture.yaml`.
+8. If asset, zone, or flow references changed, update `data/systems/<slug>/model/architecture.yaml`.
 9. Run `make validate-sources reinject validate drift`.
 
 `make validate-sources` runs `make scrub-check` first and fails before generation

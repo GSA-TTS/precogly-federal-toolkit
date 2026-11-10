@@ -8,7 +8,7 @@ directory (Phase B, PR #175); the loader therefore treats
 fallback preserved is the flat ``data/systems/<slug>.yaml`` sidecar shape,
 because a handful of vault-imported systems still ship in that form.
 
-Contract described in ``docs/IMPLEMENTATION_PLAN_generic_sspp_submodule.md``.
+Contract described in ``docs/archive/plans/IMPLEMENTATION_PLAN_generic_sspp_submodule.md``.
 """
 
 from __future__ import annotations
