@@ -57,3 +57,23 @@ mappings:
   - threat: cloudgov-non-inheritable-control
     countermeasures:
       - cloudgov-crm-review
+  - threat: cloudgov-unrestricted-public-egress
+    countermeasures:
+      - cloudgov-separate-egress-space
+      - cloudgov-egress-network-policy
+  - threat: cloudgov-egress-allowlist-bypass
+    countermeasures:
+      - cloudgov-egress-deny-by-default
+      - cloudgov-egress-log-review
+  - threat: cloudgov-egress-proxy-credential-exposure
+    countermeasures:
+      - cloudgov-egress-credential-rotation
+  - threat: cloudgov-proxy-network-policy-gap
+    countermeasures:
+      - cloudgov-egress-network-policy
+  - threat: cloudgov-service-account-misuse
+    countermeasures:
+      - cloudgov-service-account-least-privilege
+  - threat: cloudgov-egress-observability-gap
+    countermeasures:
+      - cloudgov-egress-log-review

@@ -1,0 +1,61 @@
+template:
+  slug: cloudgov-controlled-egress
+  name: Cloud.gov Controlled Egress
+  description: Tenant-operated least-privilege outbound egress topology using separate spaces, an internal route, network policy, and an authenticated proxy.
+  category: federal-platform
+  diagram_type: level1
+  canvas_data:
+    nodes:
+      - id: workload-boundary
+        type: systemScope
+        position: { x: 50, y: 45 }
+        style: { width: 1080, height: 500 }
+        data: { label: Tenant Cloud.gov Organization, component_ref: cloudgov-platform }
+      - id: restricted-zone
+        type: trustZone
+        parentId: workload-boundary
+        position: { x: 25, y: 50 }
+        style: { width: 280, height: 390 }
+        data: { label: Restricted Workload Space, zoneType: trust }
+      - id: egress-zone
+        type: trustZone
+        parentId: workload-boundary
+        position: { x: 340, y: 50 }
+        style: { width: 300, height: 390 }
+        data: { label: Public-Egress Proxy Space, zoneType: network }
+      - id: external-zone
+        type: trustZone
+        parentId: workload-boundary
+        position: { x: 675, y: 50 }
+        style: { width: 330, height: 390 }
+        data: { label: Authorized External Service, zoneType: network }
+      - id: client
+        type: process
+        parentId: restricted-zone
+        position: { x: 55, y: 150 }
+        data: { label: Restricted Client Workload, component_ref: cloudgov-restricted-space }
+      - id: policy
+        type: datastore
+        parentId: restricted-zone
+        position: { x: 55, y: 270 }
+        data: { label: Reviewed Egress Policy, component_ref: cloudgov-egress-policy }
+      - id: network-policy
+        type: process
+        parentId: egress-zone
+        position: { x: 40, y: 85 }
+        data: { label: App-to-Proxy Network Policy, component_ref: cloudgov-network-policy }
+      - id: proxy
+        type: process
+        parentId: egress-zone
+        position: { x: 40, y: 225 }
+        data: { label: Authenticated Internal Egress Proxy, component_ref: cloudgov-egress-proxy }
+      - id: external-service
+        type: externalSystem
+        parentId: external-zone
+        position: { x: 80, y: 180 }
+        data: { label: Approved External API }
+    edges:
+      - { id: policy-to-proxy, source: policy, target: proxy, type: dataFlow, data: { label: Reviewed allow and deny policy, protocol: HTTPS, encrypted: true } }
+      - { id: client-to-network-policy, source: client, target: network-policy, type: dataFlow, data: { label: Authorized internal route request, protocol: HTTPS, encrypted: true } }
+      - { id: network-policy-to-proxy, source: network-policy, target: proxy, type: dataFlow, data: { label: Allowed client connection, protocol: TCP, encrypted: true } }
+      - { id: proxy-to-external, source: proxy, target: external-service, type: dataFlow, data: { label: Allowlisted outbound request, protocol: HTTPS, encrypted: true } }
