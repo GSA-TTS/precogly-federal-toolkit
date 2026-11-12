@@ -86,5 +86,23 @@ threats:
     name: Non-Inheritable Control Claimed as Inherited
     description: |
       Tenant SSPP claims inheritance for a Cloud.gov control marked
-      "can_be_inherited: No" in the Cloud.gov CIS, understating tenant
-      security responsibilities.
+       "can_be_inherited: No" in the Cloud.gov CIS, understating tenant
+       security responsibilities.
+  - id: cloudgov-unrestricted-public-egress
+    name: Unrestricted Public Egress Granted to Workloads
+    description: A client workload is placed in a public-egress space instead of using a controlled proxy, allowing arbitrary outbound Internet connections after a workload compromise.
+  - id: cloudgov-egress-allowlist-bypass
+    name: Egress Proxy Allowlist or Port Policy Bypass
+    description: Proxy policy is overly broad, evaluated incorrectly, or changed without review, allowing a client to reach an unauthorized host or port.
+  - id: cloudgov-egress-proxy-credential-exposure
+    name: Egress Proxy Credential Exposure
+    description: Client proxy credentials are committed to source, written to logs, shared across clients, or retained after a client no longer requires access.
+  - id: cloudgov-proxy-network-policy-gap
+    name: Missing Client-to-Proxy Network Isolation
+    description: An internal proxy route is reachable by unintended apps because explicit Cloud Foundry app-to-app network policy is absent or overly permissive.
+  - id: cloudgov-service-account-misuse
+    name: Over-Privileged or Stale Cloud.gov Service Account
+    description: Automation uses a broad human-like role, an expired service-key credential, or a deployer identity where a read-only auditor identity is sufficient.
+  - id: cloudgov-egress-observability-gap
+    name: Controlled Egress Activity Not Monitored
+    description: Proxy decisions and application failures are not available to the tenant monitoring process, delaying detection of denied destinations or misuse.

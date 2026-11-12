@@ -117,3 +117,33 @@ countermeasures:
       trail retention and alerting.
     control_type: detective
     cost: low
+  - id: cloudgov-separate-egress-space
+    name: Separate Public Egress from Restricted Workloads
+    description: Keep client workloads in closed-egress or trusted-local-egress spaces when feasible. Place only the controlled proxy in a separately administered public-egress space and document the required application security groups.
+    control_type: preventive
+    cost: low
+  - id: cloudgov-egress-deny-by-default
+    name: Enforce Per-Client Deny-by-Default Egress Policy
+    description: Store reviewed client-specific deny lists, allow lists, and allowed ports in version control. Evaluate explicit deny rules first, explicit allow rules second, and deny destinations that match neither.
+    control_type: preventive
+    cost: low
+  - id: cloudgov-egress-network-policy
+    name: Restrict Client-to-Proxy Network Policy
+    description: Use Cloud Foundry container-to-container network policy to allow only named client apps to reach the proxy internal route and listener; review changes with the egress-policy change record.
+    control_type: preventive
+    cost: low
+  - id: cloudgov-egress-credential-rotation
+    name: Protect and Rotate Egress Proxy Credentials
+    description: Issue distinct proxy credentials per client, deliver them through approved service bindings or secret injection, redact them from logs, and rotate or revoke them when access changes.
+    control_type: preventive
+    cost: low
+  - id: cloudgov-service-account-least-privilege
+    name: Scope and Rotate Cloud.gov Service Accounts
+    description: Use a space-deployer account only for deployment automation and a space-auditor account for read-only review. Store service keys securely and rotate them before their password-expiry interval.
+    control_type: preventive
+    cost: low
+  - id: cloudgov-egress-log-review
+    name: Monitor Proxy Decisions and Egress Failures
+    description: Forward proxy decision logs and client egress failures to the authorized monitoring path. Alert on unexpected denial spikes, policy changes, and authentication failures without logging credentials.
+    control_type: detective
+    cost: low
