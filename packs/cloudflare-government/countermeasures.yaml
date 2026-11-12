@@ -1,0 +1,26 @@
+countermeasures:
+  - id: cloudflare-review-tenant-policy
+    name: Review Tenant Edge and Access Policies
+    description: Define least-privilege tenant administrator roles; review Access applications, WAF rules, DNS changes, and origin exposure before release and periodically thereafter.
+    control_type: preventive
+    cost: low
+  - id: cloudflare-validate-federation
+    name: Validate Tenant SAML and PIV/CAC Federation
+    description: Test tenant identity-provider federation, required MFA, and any PIV/CAC integration before granting protected application access; record evidence and exceptions.
+    control_type: preventive
+    cost: medium
+  - id: cloudflare-forward-security-logs
+    name: Retain and Forward Tenant Edge Security Logs
+    description: Define a tenant log-retention, access-control, and forwarding design that sends relevant edge events to the authorized monitoring and incident-response workflow.
+    control_type: detective
+    cost: medium
+  - id: cloudflare-approve-interconnection
+    name: Approve Dedicated Interconnection Architecture
+    description: Require sponsoring-agency approval, documented traffic scope, and security review before enabling a dedicated connection or routing pattern.
+    control_type: preventive
+    cost: high
+  - id: cloudflare-exercise-incident-coordination
+    name: Exercise Provider-Tenant Incident Coordination
+    description: Document and exercise the tenant process for reporting suspected incidents and potential information spillage to the provider and agency responders.
+    control_type: corrective
+    cost: low

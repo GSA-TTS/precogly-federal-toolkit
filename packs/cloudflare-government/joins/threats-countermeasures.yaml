@@ -1,0 +1,11 @@
+mappings:
+  - threat: cloudflare-tenant-policy-gap
+    countermeasures: [cloudflare-review-tenant-policy]
+  - threat: cloudflare-federation-assurance-gap
+    countermeasures: [cloudflare-validate-federation]
+  - threat: cloudflare-log-visibility-gap
+    countermeasures: [cloudflare-forward-security-logs]
+  - threat: cloudflare-interconnection-bypass
+    countermeasures: [cloudflare-approve-interconnection]
+  - threat: cloudflare-incident-coordination-gap
+    countermeasures: [cloudflare-exercise-incident-coordination]

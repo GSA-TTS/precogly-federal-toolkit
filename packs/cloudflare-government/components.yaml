@@ -1,0 +1,42 @@
+components:
+  - id: cloudflare-edge
+    name: Cloudflare for Government Edge Services
+    category: process
+    type: Edge CDN, DNS, WAF, and DDoS Protection
+    provider: cloudflare
+    description: |
+      Edge services that can provide authoritative DNS, content delivery,
+      web-application firewall policy, TLS termination, and DDoS mitigation for
+      a tenant zone. Tenant configuration, domain ownership, rule selection, and
+      origin security remain consumer responsibilities.
+
+  - id: cloudflare-access
+    name: Cloudflare Access and Tenant Identity Federation
+    category: process
+    type: Zero Trust Access Gateway
+    provider: cloudflare
+    description: |
+      Access gateway that can federate a tenant SAML 2.0 identity provider for
+      protected applications. Consumers configure their own identity provider,
+      PIV/CAC process where required, application policy, administrator roles,
+      and lifecycle governance.
+
+  - id: cloudflare-logging
+    name: Cloudflare Tenant Request Logging
+    category: datastore
+    type: Security and Request Log Source
+    provider: cloudflare
+    description: |
+      Tenant-visible request and security-event logging capability used to support
+      troubleshooting, analytics, and security monitoring. Consumers decide which
+      logs to retain, protect, forward, and correlate with their incident process.
+
+  - id: cloudflare-interconnect
+    name: Cloudflare Dedicated Government Interconnection
+    category: process
+    type: Managed Network Interconnection
+    provider: cloudflare
+    description: |
+      Optional dedicated logical or physical connection pattern for a sponsoring
+      agency. It requires agency sponsorship and coordinated design; this pack
+      does not assert that it is provisioned for any tenant.
