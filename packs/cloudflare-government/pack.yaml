@@ -27,4 +27,4 @@ pack:
       icon: network
   tags: [federal, cloudflare, boundary, waf, cdn, dns, zero-trust, draft]
   repository_url: https://github.com/cloudflare
-  documentation_url: https://www.cloudflare.com/
+  documentation_url: https://github.com/cloudflare
