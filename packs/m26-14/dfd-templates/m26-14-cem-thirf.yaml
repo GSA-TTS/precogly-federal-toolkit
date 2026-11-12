@@ -1,0 +1,74 @@
+template:
+  slug: m26-14-cem-thirf
+  name: Continuous Event Monitoring and THIRF
+  description: Candidate five-layer CEM and THIRF architecture; adapt to the authorized system boundary before use.
+  category: security-operations
+  diagram_type: level1
+canvas_data:
+  nodes:
+    - id: system-boundary
+      type: systemScope
+      position: { x: 60, y: 45 }
+      style: { width: 1120, height: 440 }
+      data: { label: System Monitoring Boundary }
+    - id: source-zone
+      type: trustZone
+      parentId: system-boundary
+      position: { x: 20, y: 45 }
+      style: { width: 180, height: 330 }
+      data: { label: Sources, zoneType: trust }
+    - id: collection-zone
+      type: trustZone
+      parentId: system-boundary
+      position: { x: 220, y: 45 }
+      style: { width: 190, height: 330 }
+      data: { label: Collection, zoneType: trust }
+    - id: cem-zone
+      type: trustZone
+      parentId: system-boundary
+      position: { x: 430, y: 45 }
+      style: { width: 190, height: 330 }
+      data: { label: CEM, zoneType: trust }
+    - id: thirf-zone
+      type: trustZone
+      parentId: system-boundary
+      position: { x: 640, y: 45 }
+      style: { width: 190, height: 330 }
+      data: { label: THIRF, zoneType: trust }
+    - id: response-zone
+      type: trustZone
+      parentId: system-boundary
+      position: { x: 850, y: 45 }
+      style: { width: 230, height: 330 }
+      data: { label: Response and Recovery, zoneType: trust }
+    - id: sources
+      type: process
+      parentId: source-zone
+      position: { x: 25, y: 135 }
+      data: { label: Instrumented Sources, component_ref: m26-sources }
+    - id: collection
+      type: process
+      parentId: collection-zone
+      position: { x: 20, y: 135 }
+      data: { label: Collection and Enrichment, component_ref: m26-collection }
+    - id: cem
+      type: datastore
+      parentId: cem-zone
+      position: { x: 20, y: 135 }
+      data: { label: CEM Store and Alerts, component_ref: m26-cem }
+    - id: thirf
+      type: process
+      parentId: thirf-zone
+      position: { x: 20, y: 135 }
+      data: { label: THIRF Workspace, component_ref: m26-thirf }
+    - id: response
+      type: process
+      parentId: response-zone
+      position: { x: 25, y: 135 }
+      data: { label: Bounded Response Automation, component_ref: m26-response }
+  edges:
+    - { id: sources-to-collection, source: sources, target: collection, type: dataFlow, data: { label: Structured events, protocol: TLS, encrypted: true } }
+    - { id: collection-to-cem, source: collection, target: cem, type: dataFlow, data: { label: Validated and enriched events, protocol: TLS, encrypted: true } }
+    - { id: cem-to-thirf, source: cem, target: thirf, type: dataFlow, data: { label: Alerts and searchable evidence, protocol: HTTPS, encrypted: true } }
+    - { id: thirf-to-response, source: thirf, target: response, type: dataFlow, data: { label: Approved response request, protocol: HTTPS, encrypted: true } }
+    - { id: response-to-cem, source: response, target: cem, type: dataFlow, data: { label: Auditable response outcome, protocol: HTTPS, encrypted: true } }

@@ -1,0 +1,31 @@
+components:
+  - id: m26-sources
+    name: Logging Sources and Instrumentation
+    category: process
+    type: Event Source Inventory
+    provider: tenant
+    description: Application, identity, network, DNS, cloud API, database, and platform sources that produce security-relevant events.
+  - id: m26-collection
+    name: Collection and Enrichment Pipeline
+    category: process
+    type: Secure Event Collection
+    provider: tenant
+    description: Pipeline that validates, normalizes, enriches, and forwards events to a centralized destination with observable delivery.
+  - id: m26-cem
+    name: Continuous Event Monitoring Service
+    category: datastore
+    type: Centralized Event Store and Monitoring
+    provider: tenant
+    description: Central searchable event store, dashboards, alerting, retention controls, and controlled export process.
+  - id: m26-thirf
+    name: THIRF Investigation Workspace
+    category: process
+    type: Threat Hunting and Forensics
+    provider: tenant
+    description: Investigation workspace containing approved hunt hypotheses, queries, evidence references, and analyst review workflow.
+  - id: m26-response
+    name: Response and Recovery Automation
+    category: process
+    type: Incident Response Orchestration
+    provider: tenant
+    description: Bounded response automation and recovery workflow with human authorization, auditable actions, and feedback into detection improvement.

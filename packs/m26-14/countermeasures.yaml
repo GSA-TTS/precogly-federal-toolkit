@@ -1,0 +1,31 @@
+countermeasures:
+  - id: m26-maintain-source-inventory
+    name: Maintain Critical Logging Source Inventory
+    description: Inventory critical sources, their event types, accountable owners, forwarding path, and coverage evidence; review when systems change.
+    control_type: preventive
+    cost: low
+  - id: m26-validate-event-contract
+    name: Validate Event Contract at Ingestion
+    description: Define and test minimum event fields, time format, schema version, and safe handling of sensitive fields before events enter analytics workflows.
+    control_type: preventive
+    cost: medium
+  - id: m26-monitor-collection-health
+    name: Monitor Collection Health and Delivery Latency
+    description: Alert on missing sources, delivery failures, schema rejection, and latency objectives; retain evidence of investigation and restoration.
+    control_type: detective
+    cost: medium
+  - id: m26-protect-event-retention
+    name: Protect Searchable and Retrievable Event Retention
+    description: Apply authorized access controls, encryption, retention lifecycle, backups, and integrity checks to centralized event records.
+    control_type: preventive
+    cost: medium
+  - id: m26-exercise-thirf-playbooks
+    name: Exercise Evidence-Backed THIRF Playbooks
+    description: Test priority hunt and investigation playbooks with authorized simulations; capture evidence availability, detection latency, and remediation follow-up.
+    control_type: detective
+    cost: medium
+  - id: m26-bound-response-automation
+    name: Bound and Audit Response Automation
+    description: Limit automated response actions to approved reversible operations, require escalation for higher-impact actions, and log every decision and outcome.
+    control_type: corrective
+    cost: medium
