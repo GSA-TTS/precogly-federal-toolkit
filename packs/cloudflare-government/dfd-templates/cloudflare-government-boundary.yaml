@@ -1,0 +1,61 @@
+template:
+  slug: cloudflare-government-boundary
+  name: Cloudflare for Government Tenant Boundary
+  description: Reusable edge, federation, and security-log topology. It is not an as-built tenant architecture.
+  category: federal-platform
+  diagram_type: level1
+canvas_data:
+  nodes:
+    - id: public-user
+      type: humanActor
+      position: { x: 30, y: 260 }
+      data: { label: Public or Federated User, actorType: user }
+    - id: tenant-boundary
+      type: systemScope
+      position: { x: 220, y: 45 }
+      style: { width: 900, height: 480 }
+      data: { label: Tenant Boundary }
+    - id: edge-zone
+      type: trustZone
+      parentId: tenant-boundary
+      position: { x: 25, y: 40 }
+      style: { width: 250, height: 360 }
+      data: { label: Cloudflare Edge, zoneType: network }
+    - id: tenant-zone
+      type: trustZone
+      parentId: tenant-boundary
+      position: { x: 305, y: 40 }
+      style: { width: 260, height: 360 }
+      data: { label: Tenant Application, zoneType: trust }
+    - id: monitoring-zone
+      type: trustZone
+      parentId: tenant-boundary
+      position: { x: 595, y: 40 }
+      style: { width: 260, height: 360 }
+      data: { label: Tenant Monitoring, zoneType: trust }
+    - id: edge
+      type: process
+      parentId: edge-zone
+      position: { x: 35, y: 80 }
+      data: { label: Edge CDN / DNS / WAF, component_ref: cloudflare-edge }
+    - id: access
+      type: process
+      parentId: edge-zone
+      position: { x: 35, y: 220 }
+      data: { label: Access Federation, component_ref: cloudflare-access }
+    - id: app
+      type: process
+      parentId: tenant-zone
+      position: { x: 45, y: 150 }
+      data: { label: Tenant Origin Application }
+    - id: logs
+      type: datastore
+      parentId: monitoring-zone
+      position: { x: 45, y: 150 }
+      data: { label: Edge Security Logs, component_ref: cloudflare-logging }
+  edges:
+    - { id: user-to-edge, source: public-user, target: edge, type: dataFlow, data: { label: HTTPS request, protocol: HTTPS, encrypted: true } }
+    - { id: edge-to-app, source: edge, target: app, type: dataFlow, data: { label: Protected origin request, protocol: HTTPS, encrypted: true } }
+    - { id: user-to-access, source: public-user, target: access, type: dataFlow, data: { label: Federated authentication, protocol: HTTPS, encrypted: true } }
+    - { id: access-to-app, source: access, target: app, type: dataFlow, data: { label: Authorized request, protocol: HTTPS, encrypted: true } }
+    - { id: edge-to-logs, source: edge, target: logs, type: dataFlow, data: { label: Request and security events, protocol: HTTPS, encrypted: true } }

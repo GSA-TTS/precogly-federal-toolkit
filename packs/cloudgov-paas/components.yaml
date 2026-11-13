@@ -62,7 +62,89 @@ components:
     description: |
       Authorized registry serving reviewed OCI images to a Cloud.gov deployment.
       Registry credentials, image provenance, and vulnerability remediation
-      remain tenant responsibilities.
+       remain tenant responsibilities.
+
+  # ── Controlled egress ────────────────────────────────────────────────────────
+  - id: cloudgov-restricted-space
+    name: Cloud.gov Restricted Workload Space
+    category: process
+    type: Cloud Foundry Space
+    provider: tenant
+    description: |
+      Tenant Cloud Foundry space for workload instances using the default closed
+      egress posture or trusted-local egress for brokered services. It should not
+      receive unrestricted public egress merely because one dependency needs it.
+
+  - id: cloudgov-egress-space
+    name: Cloud.gov Public-Egress Proxy Space
+    category: process
+    type: Cloud Foundry Space
+    provider: tenant
+    description: |
+      Separate tenant space for a controlled forward proxy that needs public
+      egress. Separating this space from the workload bounds the public-egress
+      application security group to the proxy rather than every client workload.
+
+  - id: cloudgov-egress-proxy
+    name: Authenticated Internal-Route Egress Proxy
+    category: process
+    type: Forward Proxy
+    provider: tenant
+    description: |
+      Tenant-operated authenticated HTTP/S forward proxy on an apps.internal
+      route. The reference pattern evaluates client-specific deny rules, then
+      allow rules, then denies unmatched destinations. It is not a cloud.gov
+      managed service and requires tenant operations, patching, and review.
+
+  - id: cloudgov-egress-policy
+    name: Per-Client Egress Allow and Deny Policy
+    category: datastore
+    type: Egress Policy Configuration
+    provider: tenant
+    description: |
+      Reviewed, version-controlled client destination and port allow/deny policy.
+      It is intentionally deny-by-default and must not contain proxy credentials.
+
+  - id: cloudgov-network-policy
+    name: Cloud Foundry App-to-Proxy Network Policy
+    category: process
+    type: Container-to-Container Network Policy
+    provider: tenant
+    description: |
+      Explicit Cloud Foundry network policy that permits only the intended client
+      application to reach the internal proxy listener. Internal routes do not by
+      themselves create least-privilege connectivity.
+
+  - id: cloudgov-route-service
+    name: Nginx Buildpack Ingress Route Service
+    category: process
+    type: Reverse Proxy Route Service
+    provider: tenant
+    description: |
+      Optional tenant-operated route service, commonly built with the nginx
+      buildpack, that filters inbound requests before the Cloud Foundry router
+      delivers them to an application. This is an ingress pattern, not a
+      replacement for controlled outbound egress.
+
+  - id: cloudgov-deploy-service-account
+    name: Cloud.gov Deployer Service Account
+    category: external_system_actor
+    type: Deployment Machine Identity
+    provider: cloud.gov
+    description: |
+      Non-human space-deployer service account for deployment automation. Its
+      credentials are obtained through a service key, require protected storage,
+      and must be rotated before password expiry. Do not use it for human login.
+
+  - id: cloudgov-audit-service-account
+    name: Cloud.gov Auditor Service Account
+    category: external_system_actor
+    type: Read-Only Audit Machine Identity
+    provider: cloud.gov
+    description: |
+      Non-human space-auditor service account for read-only configuration and
+      event review. Scope it to the minimum space and rotate its service-key
+      credentials before expiry.
 
   # ── Managed Service Tiers ─────────────────────────────────────────────────────
   - id: cloudgov-rds

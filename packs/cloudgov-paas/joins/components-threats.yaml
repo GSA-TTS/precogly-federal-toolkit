@@ -111,3 +111,39 @@ mappings:
         applies_to: component
       - threat: cloudgov-pages-unapproved-third-party-script
         applies_to: flow
+  - component: cloudgov-restricted-space
+    threats:
+      - threat: cloudgov-unrestricted-public-egress
+        applies_to: component
+      - threat: cloudgov-proxy-network-policy-gap
+        applies_to: component
+  - component: cloudgov-egress-space
+    threats:
+      - threat: cloudgov-unrestricted-public-egress
+        applies_to: component
+      - threat: cloudgov-egress-observability-gap
+        applies_to: component
+  - component: cloudgov-egress-proxy
+    threats:
+      - threat: cloudgov-egress-allowlist-bypass
+        applies_to: component
+      - threat: cloudgov-egress-proxy-credential-exposure
+        applies_to: component
+      - threat: cloudgov-egress-observability-gap
+        applies_to: component
+  - component: cloudgov-egress-policy
+    threats:
+      - threat: cloudgov-egress-allowlist-bypass
+        applies_to: component
+  - component: cloudgov-network-policy
+    threats:
+      - threat: cloudgov-proxy-network-policy-gap
+        applies_to: component
+  - component: cloudgov-deploy-service-account
+    threats:
+      - threat: cloudgov-service-account-misuse
+        applies_to: component
+  - component: cloudgov-audit-service-account
+    threats:
+      - threat: cloudgov-service-account-misuse
+        applies_to: component

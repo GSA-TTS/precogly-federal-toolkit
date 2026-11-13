@@ -1,0 +1,13 @@
+mappings:
+  - threat: m26-source-coverage-gap
+    countermeasures: [m26-maintain-source-inventory]
+  - threat: m26-event-quality-gap
+    countermeasures: [m26-validate-event-contract]
+  - threat: m26-collection-disruption
+    countermeasures: [m26-monitor-collection-health]
+  - threat: m26-retention-integrity-gap
+    countermeasures: [m26-protect-event-retention]
+  - threat: m26-thirf-readiness-gap
+    countermeasures: [m26-exercise-thirf-playbooks]
+  - threat: m26-unbounded-response-automation
+    countermeasures: [m26-bound-response-automation]
