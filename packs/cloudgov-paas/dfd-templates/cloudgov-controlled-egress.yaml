@@ -53,7 +53,7 @@ canvas_data:
       type: externalSystem
       parentId: external-zone
       position: { x: 80, y: 180 }
-      data: { label: Approved External API }
+      data: { label: Approved External API, component_ref: cloudgov-approved-external-api }
   edges:
     - { id: policy-to-proxy, source: policy, target: proxy, type: dataFlow, data: { label: Reviewed allow and deny policy, protocol: HTTPS, encrypted: true } }
     - { id: client-to-network-policy, source: client, target: network-policy, type: dataFlow, data: { label: Authorized internal route request, protocol: HTTPS, encrypted: true } }

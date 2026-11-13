@@ -9,7 +9,7 @@ canvas_data:
     - id: internet-user
       type: humanActor
       position: { x: 40, y: 250 }
-      data: { label: Public User, actorType: user }
+      data: { label: Public User, actorType: user, component_ref: cloudgov-public-user }
     - id: cloudgov-boundary
       type: systemScope
       position: { x: 240, y: 40 }

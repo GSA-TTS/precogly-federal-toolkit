@@ -9,7 +9,7 @@ canvas_data:
     - id: public-user
       type: humanActor
       position: { x: 30, y: 260 }
-      data: { label: Public or Federated User, actorType: user }
+      data: { label: Public or Federated User, actorType: user, component_ref: cloudflare-public-user }
     - id: tenant-boundary
       type: systemScope
       position: { x: 220, y: 45 }
@@ -47,7 +47,7 @@ canvas_data:
       type: process
       parentId: tenant-zone
       position: { x: 45, y: 150 }
-      data: { label: Tenant Origin Application }
+      data: { label: Tenant Origin Application, component_ref: cloudflare-tenant-origin }
     - id: logs
       type: datastore
       parentId: monitoring-zone

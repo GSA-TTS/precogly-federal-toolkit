@@ -243,3 +243,51 @@ components:
       Cloud.gov Pages reverse proxy fronting published static-site storage.
       Enforces encrypted access and applies configured security response-header
       policy before serving static content.
+
+  # ── DFD actors and consumer-defined workloads ─────────────────────────────────
+  - id: cloudgov-public-user
+    name: Public User
+    category: external_human_actor
+    type: Human User
+    provider: external
+    description: |
+      Anonymous or authenticated member of the public who reaches a tenant
+      application or published site through the Cloud.gov edge.
+
+  - id: cloudgov-website-manager
+    name: Website Manager
+    category: external_human_actor
+    type: Human User
+    provider: tenant
+    description: |
+      Tenant person who administers a Pages site: repository users and
+      teams, branch protection and publication.
+
+  - id: cloudgov-source-repository
+    name: Source Repository
+    category: external_system_actor
+    type: Source Repository
+    provider: external
+    description: |
+      Version-controlled repository that holds the tenant source and
+      deployment manifest. It sits outside the Cloud.gov boundary; the
+      tenant governs access and review.
+
+  - id: cloudgov-pages-source-repository
+    name: Source Repository and CI
+    category: external_system_actor
+    type: Source Repository and CI
+    provider: external
+    description: |
+      Repository and continuous integration for a Pages site. It sits
+      outside the Cloud.gov boundary and holds branch protection, peer
+      review and code and dependency scanning gates.
+  - id: cloudgov-approved-external-api
+    name: Approved External API
+    category: external_system_actor
+    type: External Service
+    provider: external
+    description: |
+      An outside service the tenant has approved for outbound calls through
+      the controlled egress proxy. The tenant defines it, the allowed
+      destination and port, and how it authenticates.

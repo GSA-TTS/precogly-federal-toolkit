@@ -229,3 +229,13 @@ components:
     description: |
       [GSA: DENIED — Not Approved / Not Reviewed]
       Managed Streaming for Apache Kafka. Not approved by OCISO.
+
+  # ── DFD actors and consumer-defined workloads ─────────────────────────────────
+  - id: aws-approved-client-system
+    name: Approved Client System
+    category: external_system_actor
+    type: Client System
+    provider: external
+    description: |
+      A system the consumer has approved to call the workload. The consumer
+      defines it, how it authenticates, and the data it may send.

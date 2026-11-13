@@ -15,6 +15,7 @@ canvas_data:
       data:
         label: Public User
         actorType: user
+        component_ref: cloudgov-public-user
     - id: cloudgov-boundary
       type: systemScope
       position:
@@ -126,6 +127,7 @@ canvas_data:
       data:
         label: Source Repository
         systemType: service
+        component_ref: cloudgov-source-repository
     - id: cloudgov-manifest
       type: datastore
       parentId: cloudgov-deployment-zone
