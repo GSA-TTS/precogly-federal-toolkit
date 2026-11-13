@@ -80,3 +80,14 @@ components:
       Delta Lake, and ML workflows for GSA data programs. Tenant access
       governed by managed cloud service CRM and Unity Catalog / Table ACLs.
       Inherits FedRAMP Moderate controls from FCS managed cloud service service tier.
+
+  # ── DFD actors and consumer-defined workloads ─────────────────────────────────
+  - id: fcs-authorized-user
+    name: Authorized User
+    category: external_human_actor
+    type: Human User
+    provider: tenant
+    description: |
+      Person authorized by the tenant to use a workload hosted on the
+      platform. Account types and authentication are defined by the
+      consuming system.

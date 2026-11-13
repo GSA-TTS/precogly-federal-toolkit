@@ -9,7 +9,7 @@ canvas_data:
     - id: gcp-client
       type: systemActor
       position: { x: 35, y: 240 }
-      data: { label: Approved Data Source, systemType: service }
+      data: { label: Approved Data Source, systemType: service, component_ref: gcp-approved-data-source }
     - id: gcp-boundary
       type: systemScope
       position: { x: 220, y: 40 }

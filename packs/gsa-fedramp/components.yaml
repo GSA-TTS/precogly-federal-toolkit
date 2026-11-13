@@ -103,3 +103,12 @@ components:
     description: |
       AWS Transfer Family SFTP endpoint used for secure bulk file exchange with
       agency partners. Operates within the GSA FCS boundary on GovCloud.
+
+  # ── DFD actors and consumer-defined workloads ─────────────────────────────────
+  - id: gsa-external-user
+    name: External User
+    category: external_human_actor
+    type: Human User
+    provider: external
+    description: |
+      Person outside the agency who reaches a hosted public application.

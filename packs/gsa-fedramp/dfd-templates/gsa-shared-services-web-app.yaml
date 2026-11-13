@@ -9,7 +9,7 @@ canvas_data:
     - id: gsa-external-user
       type: humanActor
       position: { x: 35, y: 245 }
-      data: { label: External User, actorType: user }
+      data: { label: External User, actorType: user, component_ref: gsa-external-user }
     - id: gsa-boundary
       type: systemScope
       position: { x: 220, y: 40 }

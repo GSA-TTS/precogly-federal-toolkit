@@ -40,3 +40,24 @@ components:
       Optional dedicated logical or physical connection pattern for a sponsoring
       agency. It requires agency sponsorship and coordinated design; this pack
       does not assert that it is provisioned for any tenant.
+
+  # ── DFD actors and consumer-defined workloads ─────────────────────────────────
+  - id: cloudflare-public-user
+    name: Public or Federated User
+    category: external_human_actor
+    type: Human User
+    provider: external
+    description: |
+      Person who reaches a protected application through the edge, either
+      anonymously or after federated sign-in. The consumer defines which
+      user populations exist and how each is authenticated.
+
+  - id: cloudflare-tenant-origin
+    name: Tenant Origin Application
+    category: process
+    type: Tenant Workload
+    provider: tenant
+    description: |
+      The consumer-operated application the edge protects. The pack does not
+      describe it; the consuming system defines it, its hosting, and how it
+      limits traffic to the edge.

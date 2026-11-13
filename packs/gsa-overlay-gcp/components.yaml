@@ -95,3 +95,13 @@ components:
       [GSA: Approved FedRAMP Moderate]
       Managed sensitive data discovery, classification, and de-identification.
       FedRAMP Authorized Moderate.
+
+  # ── DFD actors and consumer-defined workloads ─────────────────────────────────
+  - id: gcp-approved-data-source
+    name: Approved Data Source
+    category: external_system_actor
+    type: Data Source
+    provider: external
+    description: |
+      A system the consumer has approved to send data into the pipeline. The
+      consumer defines it, how it authenticates, and the data it may send.

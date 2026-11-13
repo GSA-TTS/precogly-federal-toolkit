@@ -159,3 +159,13 @@ components:
       [GSA: DENIED — Not Approved]
       Bing Entity Search, News Search, Web Search, Spell Check APIs.
       Not approved by GSA OCISO.
+
+  # ── DFD actors and consumer-defined workloads ─────────────────────────────────
+  - id: azure-approved-data-source
+    name: Approved Data Source
+    category: external_system_actor
+    type: Data Source
+    provider: external
+    description: |
+      A system the consumer has approved to send data into the workload. The
+      consumer defines it, how it authenticates, and the data it may send.
