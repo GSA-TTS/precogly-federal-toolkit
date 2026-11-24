@@ -5,6 +5,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 CLI = str(Path(sys.executable).parent / "precogly-toolkit")
 
 from precogly_toolkit.flow_refs import build_flow_alias_map, resolve_flow_bindings
@@ -50,3 +52,33 @@ def test_installed_import_does_not_need_legacy_scripts(tmp_path):
         cwd=tmp_path, capture_output=True, text=True,
     )
     assert result.returncode == 0, result.stderr
+
+
+@pytest.mark.parametrize("architecture,cdx", [
+    ("not json", "{}"),
+    ("[]", "{}"),
+    ("{}", "[]"),
+    ('{"flow_bindings": []}', "{}"),
+    ('{"flow_bindings": {"AC-1": "flow-1"}}', "{}"),
+    ("{}", '{"blueprints": ["invalid"]}'),
+])
+def test_invalid_cli_inputs_fail_without_tracebacks(tmp_path, architecture, cdx):
+    arch_path = tmp_path / "architecture.json"
+    cdx_path = tmp_path / "cdx.json"
+    arch_path.write_text(architecture)
+    cdx_path.write_text(cdx)
+    result = subprocess.run(
+        [CLI, "flow-bindings", "--architecture", str(arch_path), "--cdx", str(cdx_path)],
+        cwd=tmp_path, capture_output=True, text=True,
+    )
+    assert result.returncode == 1
+    assert "Traceback" not in result.stderr
+
+
+def test_cli_missing_file_fails_closed(tmp_path):
+    result = subprocess.run(
+        [CLI, "flow-bindings", "--architecture", "missing.json", "--cdx", "missing.json"],
+        cwd=tmp_path, capture_output=True, text=True,
+    )
+    assert result.returncode == 1
+    assert "invalid input" in result.stderr

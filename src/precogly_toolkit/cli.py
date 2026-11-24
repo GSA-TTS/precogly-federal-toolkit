@@ -23,6 +23,8 @@ def main(argv: list[str] | None = None) -> int:
         cdx = json.loads(args.cdx.read_text(encoding="utf-8"))
         if not isinstance(architecture, dict) or not isinstance(cdx, dict):
             raise ValueError("architecture and CDX must be JSON objects")
+        if not isinstance(architecture.get("flow_bindings", {}), dict):
+            raise ValueError("flow_bindings must be a JSON object")
         bindings, errors = resolve_flow_bindings(
             architecture.get("flow_bindings", {}), architecture, first_blueprint(cdx)
         )
