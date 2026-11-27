@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Forge-neutral reconciliation proposal",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "proposal_id",
+    "direction",
+    "publication_manifest",
+    "source_sha256",
+    "canonical_sha256",
+    "target_kind",
+    "status"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "proposal_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+    "direction": { "enum": ["outbound-publication", "inbound-improvement"] },
+    "publication_manifest": { "type": "string", "pattern": "^data/systems/[a-z0-9][a-z0-9-]*/publication.yaml$" },
+    "source_sha256": { "type": "string", "pattern": "^[a-fA-F0-9]{64}$" },
+    "canonical_sha256": { "type": "string", "pattern": "^[a-fA-F0-9]{64}$" },
+    "target_kind": { "enum": ["github-enterprise-pull-request", "workshop-gitlab-merge-request"] },
+    "status": { "const": "proposed" }
+  }
+}

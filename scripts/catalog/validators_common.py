@@ -65,7 +65,11 @@ def bidirectional_control_threat_errors(
             ctrl = control_by_ref.get(cref)
             if ctrl is None:
                 continue
-            if t["bom-ref"] not in (ctrl.get("mitigations") or []):
+            # CycloneDX 2.0 defines this relationship on the threat. Enforce
+            # symmetry only for legacy artifacts that still emit the retired
+            # control-side mitigations extension.
+            control_links = ctrl.get("mitigations")
+            if control_links is not None and t["bom-ref"] not in control_links:
                 errors.append(
                     f"bidirectional link broken: control {cref} does not link back to threat {t['bom-ref']}"
                 )

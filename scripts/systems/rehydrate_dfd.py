@@ -35,6 +35,18 @@ from systems.scrub_base_dfd import scrub_dfd  # noqa: E402
 DFD_SECTIONS = ("zones", "assets", "flows", "boundaries", "dataStores")
 DEFAULT_MERGE_TYPES = ("system", "component")
 
+# Fields the Precogly editor export carries that are NOT part of the tracked
+# base-DFD source of truth: top-level `threats`/`controls` are the editor's
+# own stale preview of a generated threat model (regenerated fresh by
+# scripts/generate.py from the CRM YAML sources on every `make generate`),
+# and per-blueprint `visualizations` is React Flow canvas/layout state, not
+# model data. Carrying either forward causes `scripts/validate.py` to
+# recompute scenarios against dangling/duplicate-numbered asset refs from the
+# editor's stale preview (see issue #182) and bloats the tracked DFD with
+# canvas coordinates no downstream consumer reads.
+TOP_LEVEL_STRIP_KEYS = ("threats", "controls")
+BLUEPRINT_STRIP_KEYS = ("visualizations",)
+
 
 def _rel(path: Path) -> str:
     try:
@@ -212,10 +224,15 @@ def _dedupe_assets(
     return removed
 
 
-def _dedupe_flows(blueprint: dict[str, Any], remap: dict[str, dict[str, str]]) -> int:
+def _dedupe_flows(
+    blueprint: dict[str, Any],
+    remap: dict[str, dict[str, str]],
+    conflicts: list[dict[str, Any]],
+) -> int:
     refs = remap.get("assets", {})
     seen: dict[tuple[str, str, str], str] = {}
     kept: list[Any] = []
+    kept_by_ref: dict[str, dict[str, Any]] = {}
     removed = 0
     for flow in blueprint.get("flows", []) or []:
         if not isinstance(flow, dict):
@@ -233,11 +250,45 @@ def _dedupe_flows(blueprint: dict[str, Any], remap: dict[str, dict[str, str]]) -
             str(updated_flow.get("destination") or ""),
         )
         if flow_ref and key in seen:
-            _record(remap, "flows", flow_ref, seen[key])
+            # A duplicate editor round-trip commonly splits attributes (e.g.
+            # `protocols`) unevenly across the two copies of an otherwise
+            # identical flow. Merge into the kept flow rather than silently
+            # dropping whichever attributes only the discarded copy carried.
+            canonical_ref = seen[key]
+            canonical = kept_by_ref[canonical_ref]
+            for merged_key, merged_value in updated_flow.items():
+                if merged_key == "bom-ref":
+                    continue
+                current_value = canonical.get(merged_key)
+                if merged_key not in canonical or current_value in (None, [], ""):
+                    canonical[merged_key] = merged_value
+                elif (
+                    merged_key == "protocols"
+                    and isinstance(current_value, list)
+                    and isinstance(merged_value, list)
+                ):
+                    canonical[merged_key] = list(
+                        dict.fromkeys([*current_value, *merged_value])
+                    )
+                elif (
+                    merged_value not in (None, [], "") and current_value != merged_value
+                ):
+                    conflicts.append(
+                        {
+                            "section": "flows",
+                            "canonical_ref": canonical_ref,
+                            "duplicate_ref": flow_ref,
+                            "field": merged_key,
+                            "canonical_value": current_value,
+                            "duplicate_value": merged_value,
+                        }
+                    )
+            _record(remap, "flows", flow_ref, canonical_ref)
             removed += 1
             continue
         if flow_ref:
             seen[key] = flow_ref
+            kept_by_ref[flow_ref] = updated_flow
         kept.append(updated_flow)
     blueprint["flows"] = kept
     return removed
@@ -259,6 +310,7 @@ def _dedupe_boundaries(
     seen: dict[tuple[str, tuple[Any, ...]], str] = {}
     kept: list[Any] = []
     removed = 0
+    dropped_incomplete = 0
     for boundary in blueprint.get("boundaries", []) or []:
         if not isinstance(boundary, dict):
             kept.append(boundary)
@@ -267,21 +319,42 @@ def _dedupe_boundaries(
         updated_boundary["zones"] = _remap_unique(
             updated_boundary.get("zones"), zone_refs
         )
-        boundary_ref = _ref(updated_boundary)
+        # The editor can export a malformed boundary with a `null` placeholder
+        # in its zones list where an unresolved zone reference should have
+        # been (observed alongside a complete two-zone AWS VPC/S3 Transfer
+        # Family boundary covering the same real zone). Drop entries that
+        # still contain a `null` zone after remapping rather than keep an
+        # unusable half-formed boundary.
+        zones_list = updated_boundary.get("zones") or []
+        if any(z is None for z in zones_list):
+            _record(
+                remap,
+                "boundaries",
+                _ref(updated_boundary)
+                or "zones:" + ",".join(str(z) for z in zones_list),
+                None,
+            )
+            dropped_incomplete += 1
+            continue
         key = (
             _norm(updated_boundary.get("name")),
-            tuple(sorted(updated_boundary.get("zones") or [])),
+            tuple(sorted(zones_list, key=lambda z: (z is None, z))),
         )
-        if boundary_ref and key in seen:
+        # Boundaries in Precogly editor exports have no `bom-ref`; identify
+        # them by their (name, zones) key so duplicates across editor
+        # round-trips are still collapsed instead of silently passing through.
+        boundary_ref = _ref(updated_boundary) or "zones:" + ",".join(
+            str(z) for z in key[1]
+        )
+        if key in seen:
             _record(remap, "boundaries", boundary_ref, seen[key])
             removed += 1
             continue
-        if boundary_ref:
-            seen[key] = boundary_ref
+        seen[key] = boundary_ref
         kept.append(updated_boundary)
     if kept:
         blueprint["boundaries"] = kept
-    return removed
+    return removed + dropped_incomplete
 
 
 def _dedupe_data_stores(
@@ -312,19 +385,41 @@ def _dedupe_data_stores(
     return removed
 
 
+def _strip_editor_only_fields(dfd: dict[str, Any]) -> list[str]:
+    """Remove editor-only preview/canvas fields not part of the DFD source of truth.
+
+    Returns the list of dotted-path keys actually removed, for the remap report.
+    """
+    stripped: list[str] = []
+    for key in TOP_LEVEL_STRIP_KEYS:
+        if key in dfd:
+            del dfd[key]
+            stripped.append(key)
+    for blueprint in dfd.get("blueprints") or []:
+        if not isinstance(blueprint, dict):
+            continue
+        for key in BLUEPRINT_STRIP_KEYS:
+            if key in blueprint:
+                del blueprint[key]
+                stripped.append(f"blueprints[].{key}")
+    return stripped
+
+
 def rehydrate_dfd(
     dfd: dict[str, Any], *, redaction_path: Path | None, merge_types: set[str]
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     scrubbed, scrub_findings = scrub_dfd(dfd, redaction_path=redaction_path)
+    stripped_fields = _strip_editor_only_fields(scrubbed)
     blueprint = _first_blueprint(scrubbed)
     before_counts = {
         section: len(blueprint.get(section, []) or []) for section in DFD_SECTIONS
     }
     remap: dict[str, dict[str, str]] = {}
+    conflicts: list[dict[str, Any]] = []
     removed = {
         "zones": _dedupe_zones(blueprint, remap),
         "assets": _dedupe_assets(blueprint, remap, merge_types),
-        "flows": _dedupe_flows(blueprint, remap),
+        "flows": _dedupe_flows(blueprint, remap, conflicts),
         "boundaries": _dedupe_boundaries(blueprint, remap),
         "dataStores": _dedupe_data_stores(blueprint, remap),
     }
@@ -341,13 +436,17 @@ def rehydrate_dfd(
             "removed_counts": removed,
             "remapped_refs": sum(len(values) for values in remap.values()),
             "scrubbed_fields": len(scrub_findings),
+            "stripped_editor_fields": len(stripped_fields),
             "notation_style_set": notation_changed,
+            "conflicts": len(conflicts),
         },
         "remap": {
             section: dict(sorted(values.items()))
             for section, values in sorted(remap.items())
         },
         "scrubbed": [finding.__dict__ for finding in scrub_findings],
+        "stripped": sorted(stripped_fields),
+        "conflicts": conflicts,
     }
     return rehydrated, report
 
@@ -399,6 +498,7 @@ def build_report(
         "status": "changed"
         if report["summary"]["remapped_refs"]
         or report["summary"]["scrubbed_fields"]
+        or report["summary"]["stripped_editor_fields"]
         or report["summary"]["notation_style_set"]
         or arch_changed
         else "clean",
@@ -412,6 +512,8 @@ def build_report(
         },
         "remap": report.get("remap", {}),
         "scrubbed": report.get("scrubbed", []),
+        "stripped": report.get("stripped", []),
+        "conflicts": report.get("conflicts", []),
     }
 
 
@@ -431,6 +533,11 @@ def main(argv: list[str] | None = None) -> int:
         "--merge-types",
         default=",".join(DEFAULT_MERGE_TYPES),
         help="Comma-separated asset types to merge by name, preferring system when present",
+    )
+    parser.add_argument(
+        "--strict-conflicts",
+        action="store_true",
+        help="Fail without updating source files when duplicate fields conflict",
     )
     args = parser.parse_args(argv)
 
@@ -463,6 +570,15 @@ def main(argv: list[str] | None = None) -> int:
         redaction_path=paths.redaction,
         merge_types=_merge_types(args.merge_types),
     )
+    if args.strict_conflicts and details["conflicts"]:
+        report = build_report(args.system, source, out, details, arch_changed=False)
+        write_yaml(report_path, report)
+        print(
+            f"FAIL: found {len(details['conflicts'])} conflicting duplicate field(s); "
+            f"review {_rel(report_path)}.",
+            file=sys.stderr,
+        )
+        return 1
     write_json(out, rehydrated)
 
     arch_changed = False
@@ -481,7 +597,8 @@ def main(argv: list[str] | None = None) -> int:
     print(
         f"Wrote {_rel(out)} and {_rel(report_path)}; "
         f"removed {sum(counts['removed_counts'].values())} duplicate DFD item(s), "
-        f"remapped {counts['remapped_refs']} ref(s), scrubbed {counts['scrubbed_fields']} field(s)."
+        f"remapped {counts['remapped_refs']} ref(s), scrubbed {counts['scrubbed_fields']} field(s), "
+        f"stripped {counts['stripped_editor_fields']} editor-only field(s)."
     )
     if arch_changed:
         print(f"Updated {_rel(paths.model_architecture)} through the same remap.")

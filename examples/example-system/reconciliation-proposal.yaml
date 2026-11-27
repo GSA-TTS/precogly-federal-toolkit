@@ -1,0 +1,8 @@
+schema_version: 1
+proposal_id: example-system-internal-publication
+direction: outbound-publication
+publication_manifest: data/systems/example-system/publication.yaml
+source_sha256: '0000000000000000000000000000000000000000000000000000000000000000'
+canonical_sha256: '1111111111111111111111111111111111111111111111111111111111111111'
+target_kind: github-enterprise-pull-request
+status: proposed

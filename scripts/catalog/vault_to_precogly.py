@@ -253,7 +253,13 @@ def _sort_control_key(cid: str) -> tuple[str, int, int]:
     return (m.group(1), int(m.group(2)), int(m.group(3) or 0))
 
 
-def iter_control_records(vault_root: str, system_slug: str, status_map, orig_map, validate_schema: bool = False):
+def iter_control_records(
+    vault_root: str,
+    system_slug: str,
+    status_map,
+    orig_map,
+    validate_schema: bool = False,
+):
     controls_dir = os.path.join(
         vault_root, "examples", "vault", system_slug, "Controls"
     )
@@ -262,7 +268,12 @@ def iter_control_records(vault_root: str, system_slug: str, status_map, orig_map
     for name in sorted(os.listdir(controls_dir)):
         if not name.endswith(".md"):
             continue
-        record = parse_control(os.path.join(controls_dir, name), validate_schema=validate_schema)
+        record = parse_control(
+            os.path.join(controls_dir, name),
+            validate_schema=validate_schema,
+            status_map=status_map,
+            origination_map=orig_map,
+        )
         if record is None:
             continue
         target_status, status_remark = status_map.lookup(record.implementation_status)
@@ -290,7 +301,9 @@ def _providing_system(
 
 def _load_control_type_overrides(system_slug: str) -> dict[str, str]:
     """Load optional per-system control-type override file (data/systems/<slug>-control-type-overrides.yaml)."""
-    path = os.path.join(ROOT, "data", "systems", f"{slugify(system_slug)}-control-type-overrides.yaml")
+    path = os.path.join(
+        ROOT, "data", "systems", f"{slugify(system_slug)}-control-type-overrides.yaml"
+    )
     if os.path.exists(path):
         with open(path, encoding="utf-8") as f:
             return yaml.safe_load(f) or {}
@@ -859,8 +872,11 @@ def _build_threat_and_scenario(
             scenarios_out.append(
                 {
                     "bom-ref": f"{s_ref}-{part.part}",
+                    "name": f"{cid_display} residual risk ({part.part})",
                     "threat": t_ref,
                     "affectedAssets": [asset_ref],
+                    "inherentSeverity": "high",
+                    "residualSeverity": risk,
                     "riskScore": {"level": risk},
                     "properties": [
                         {"name": "vault:statement-part", "value": part.part}
@@ -870,8 +886,11 @@ def _build_threat_and_scenario(
         return threat_entry, scenarios_out
     scenario_entry: dict = {
         "bom-ref": s_ref,
+        "name": f"{cid_display} residual risk",
         "threat": t_ref,
         "affectedAssets": [asset_ref],
+        "inherentSeverity": "high",
+        "residualSeverity": risk,
         "riskScore": {"level": risk},
     }
     return threat_entry, [scenario_entry]
@@ -1082,7 +1101,15 @@ def convert_system(
 ) -> dict:
     if merge_strategy not in {"overlay", "replace"}:
         raise ValueError(f"unsupported merge strategy: {merge_strategy}")
-    records = list(iter_control_records(vault_root, system_slug, status_map, orig_map, validate_schema=validate_schema))
+    records = list(
+        iter_control_records(
+            vault_root,
+            system_slug,
+            status_map,
+            orig_map,
+            validate_schema=validate_schema,
+        )
+    )
     inheritance_dir = os.path.join(
         vault_root, "examples", "vault", system_slug, "Inheritance"
     )

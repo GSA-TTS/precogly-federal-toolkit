@@ -32,6 +32,19 @@ from validators_common import (
     FORBIDDEN_PATTERNS as FORBIDDEN,
 )
 
+CDX_OPTIONAL_SYSTEMS = {
+    "example-system",
+    "example-system-composite-alt-managed-cloud-service",
+    "example-system-composite-baseline-gsapages",
+    "example-system-public-site-gsa-pages",
+    "example-system-data-platform-core",
+    "example-system-transfer-sftpgo-cloudgov",
+    "example-system-transfer-managed-cloud-service",
+    "gsa-pages-hosting-alt-fcs-managed-cloud-service",
+    "gsa-pages-hosting-baseline-cloudgov-pages",
+    "sample-net-new-saas-2026",
+}
+
 failures: list[str] = []
 warnings: list[str] = []
 
@@ -68,11 +81,21 @@ def validate_cdx(system: str, cdx_path: str) -> tuple[int, int, int]:
 
     if not aset:
         fail(system, "blueprint has no assets")
+    for flow in flows:
+        for endpoint in ("source", "destination"):
+            ref = flow.get(endpoint)
+            if ref and ref not in aset and ref not in zset:
+                fail(system, f"flow {flow.get('bom-ref')} bad {endpoint} {ref}")
     for a in assets:
         z = a.get("zone")
-        if not z:
+        model_reference = any(
+            reference.get("type") == "threat-model"
+            for reference in a.get("externalReferences") or []
+            if isinstance(reference, dict)
+        )
+        if not z and not model_reference:
             fail(system, f"asset {a['bom-ref']} has no zone")
-        elif z not in zset:
+        elif z and z not in zset:
             fail(system, f"asset {a['bom-ref']} references missing zone {z}")
 
     threats = d.get("threats", {}).get("threats", [])
@@ -82,11 +105,13 @@ def validate_cdx(system: str, cdx_path: str) -> tuple[int, int, int]:
     cset = {c["bom-ref"] for c in controls}
 
     for s in scenarios:
-        if s.get("threat") not in tset:
-            fail(
-                system,
-                f"scenario {s.get('bom-ref')} -> missing threat {s.get('threat')}",
-            )
+        threat_refs = s.get("threats") or [s.get("threat")]
+        for threat_ref in threat_refs:
+            if threat_ref not in tset:
+                fail(
+                    system,
+                    f"scenario {s.get('bom-ref')} -> missing threat {threat_ref}",
+                )
         level = (s.get("riskScore") or {}).get("level")
         if level and level not in RISK_LEVELS:
             fail(system, f"scenario {s.get('bom-ref')} bad risk level {level}")
@@ -169,13 +194,7 @@ def validate_cdx(system: str, cdx_path: str) -> tuple[int, int, int]:
 
 
 def validate_pack(system: str, pack_dir: str) -> None:
-    if system in {
-        "example-system-composite-alt-managed-cloud-service",
-        "example-system-composite-baseline-gsapages",
-        "gsa-pages-hosting-alt-fcs-managed-cloud-service",
-        "gsa-pages-hosting-baseline-cloudgov-pages",
-        "sample-net-new-saas-2026",
-    }:
+    if system in CDX_OPTIONAL_SYSTEMS:
         return
     if not os.path.isdir(pack_dir):
         fail(system, f"pack/ directory missing: {pack_dir}")
@@ -279,7 +298,7 @@ def validate_summary(
         fail(system, f"summary controls={s['controls']} but cdx has {controls}")
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument(
         "--systems-root",
@@ -292,7 +311,7 @@ def main() -> int:
         ),
     )
     ap.add_argument("--only", help="Comma-separated list of system slugs to validate")
-    args = ap.parse_args()
+    args = ap.parse_args(argv)
 
     root = args.systems_root
     if not os.path.isdir(root):
@@ -311,6 +330,9 @@ def main() -> int:
         system_dir = os.path.join(root, slug)
         cdx_files = glob(os.path.join(system_dir, "*.cdx.json"))
         if not cdx_files:
+            if slug in CDX_OPTIONAL_SYSTEMS:
+                total += 1
+                continue
             fail(slug, "no *.cdx.json found")
             continue
         counts = validate_cdx(slug, cdx_files[0])

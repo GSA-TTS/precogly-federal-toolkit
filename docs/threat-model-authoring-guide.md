@@ -176,6 +176,34 @@ make export-owasp
 The export writes `build/owasp-threat-model.json`. Do not edit the OWASP export
 as source; regenerate it from the CycloneDX model.
 
+## Publication Diagram Pilot
+
+The Example System publication diagrams are deterministic, offline HTML/SVG projections of
+the governed DFD and composite hosting models. They complement the editable
+Precogly canvas; they do not replace the canvas or the existing Archify figures
+used by the SSPP.
+
+```bash
+make publication-diagram
+make publication-diagram-check
+```
+
+The renderer reads `data/systems/example-system/model/base-dfd.cdx.json` and
+`data/systems/example-system/model/architecture.yaml`, then writes:
+
+- `build/diagrams/example-system-data-platform-core.html`
+- `build/diagrams/example-system-data-platform-core.svg`
+- `build/diagrams/example-system-data-platform-core.manifest.json`
+- `build/diagrams/example-system-publication-{auth-sequence,access-lanes,authorization-boundary,data-flow,it-current-state,architecture-delta}.{html,svg,manifest.json}`
+- `build/diagrams/example-system-publication-axonometric-{core,pages,managed-cloud-service}.{html,svg,manifest.json}`
+
+The manifest and figure embed source digests. Do not hand-edit these outputs:
+change the governed DFD, architecture binding, or composite hosting model, rerun
+`make publication-diagram`, and review the resulting figure together with the
+source change. The IT current-state and architecture-delta views compare the GSA
+Pages baseline with the managed cloud service Kubernetes candidate. These views have their own
+filenames and do not change the Pillow-rendered DOCX figure paths.
+
 ## Redaction and review checklist
 
 Before committing:

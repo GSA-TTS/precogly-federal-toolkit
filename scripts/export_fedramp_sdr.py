@@ -39,6 +39,7 @@ KSI_DIR = REPO_ROOT / "data" / "ksi"
 
 if str(REPO_ROOT / "scripts") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "scripts"))
+from control_identity import canonical_control_id  # noqa: E402
 from systems.loader import load_system  # noqa: E402
 
 # Open risk (POA&M) files sourced from sibling repos; base dir overridable via
@@ -62,7 +63,6 @@ STATUS_MAP = {
     "recommended": "Not Implemented",
     "rejected": "Not Implemented",
 }
-NIST_CONTROL_ID_RE = re.compile(r"^[A-Z]{2}-\d+(\(\d+\))?$")
 
 
 def load_catalog() -> dict[str, dict]:
@@ -151,7 +151,7 @@ def cdx_path_for(slug: str, catalog_entry: dict) -> Path:
     if slug == "example-system" and EXAMPLE_SYSTEM_CDX.exists():
         return EXAMPLE_SYSTEM_CDX
     artifacts = catalog_entry.get("artifacts") or {}
-    if "cdx" in artifacts:
+    if artifacts.get("cdx"):
         return REPO_ROOT / artifacts["cdx"]
     generated_crm = REPO_ROOT / "build" / f"{slug}-crm-threat-model.cdx.json"
     if generated_crm.exists():
@@ -166,10 +166,13 @@ def get_property(properties: list, name: str) -> str | None:
     return None
 
 
-def canonical_control_id(properties: list) -> str | None:
+def canonical_cdx_control_id(properties: list) -> str | None:
     val = get_property(properties, "ctrl:id")
-    if val and NIST_CONTROL_ID_RE.match(val):
-        return val
+    if val:
+        try:
+            return canonical_control_id(val)
+        except ValueError:
+            pass
     return None
 
 
@@ -202,7 +205,7 @@ def build_security_controls(cdx: dict, parameter_values: dict) -> list[dict]:
     )
     for c in cdx.get("controls") or []:
         props = c.get("properties") or []
-        cid = canonical_control_id(props)
+        cid = canonical_cdx_control_id(props)
         if not cid:
             continue
         entry = by_control[cid]

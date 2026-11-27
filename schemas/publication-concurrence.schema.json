@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Sanitized publication concurrence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "system_slug",
+    "source_sha256",
+    "canonical_sha256",
+    "canonical_artifact",
+    "cui_sidecar",
+    "redaction_status",
+    "publication_scope",
+    "concurrence",
+    "revalidate_by"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "system_slug": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+    "source_sha256": { "type": "string", "pattern": "^[a-fA-F0-9]{64}$" },
+    "canonical_sha256": { "type": "string", "pattern": "^[a-fA-F0-9]{64}$" },
+    "canonical_artifact": { "type": "string", "pattern": "^vault/[a-zA-Z0-9._/-]+\\.json$" },
+    "cui_sidecar": { "type": "string", "pattern": "^data/systems/[a-z0-9][a-z0-9-]*/cui.yaml$" },
+    "redaction_status": { "const": "passed" },
+    "publication_scope": { "enum": ["internal-community"] },
+    "concurrence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["system_owner_role", "reviewer_role", "decision_ref", "decision_date"],
+      "properties": {
+        "system_owner_role": { "type": "string", "minLength": 3 },
+        "reviewer_role": { "type": "string", "minLength": 3 },
+        "decision_ref": { "type": "string", "minLength": 3 },
+        "decision_date": { "type": "string", "format": "date" }
+      }
+    },
+    "revalidate_by": { "type": "string", "format": "date" }
+  }
+}

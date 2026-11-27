@@ -35,6 +35,23 @@ DEFAULT_VAULT = _private_vault if os.path.isdir(_private_vault) else _vendor_vau
 DEFAULT_OUT = os.path.join(ROOT, "catalog", "index.yaml")
 DEFAULT_INH_OUT = os.path.join(ROOT, "catalog", "inheritance.yaml")
 OWNERSHIP_SIDECAR = os.path.join(ROOT, "data", "catalog", "ownership.yaml")
+_BUILD_SYSTEMS_MARKER = f"{os.sep}build{os.sep}systems{os.sep}"
+
+
+def _artifact_ref(path: str) -> str:
+    """Return a stable repository-relative build artifact reference.
+
+    Catalog generation may read build artifacts from another checkout or a
+    temporary worktree. ``os.path.relpath(path, ROOT)`` would serialize that
+    machine-specific absolute path as a long ``../../..`` traversal. Every
+    catalog artifact belongs under ``build/systems/``; retain that stable suffix
+    instead of the invocation-specific filesystem prefix.
+    """
+    normalized = os.path.abspath(path)
+    marker_at = normalized.find(_BUILD_SYSTEMS_MARKER)
+    if marker_at >= 0:
+        return normalized[marker_at + 1 :].replace(os.sep, "/")
+    return os.path.relpath(normalized, ROOT).replace(os.sep, "/")
 
 
 def load_yaml(path: str) -> dict:
@@ -208,10 +225,10 @@ def build_catalog(systems_root: str, vault_root: str) -> dict:
                 "tags": meta.get("tags") or [],
                 "source_doc": own.get("source_doc"),
                 "artifacts": {
-                    "cdx": os.path.relpath(cdx_files[0], ROOT) if cdx_files else None,
-                    "pack": os.path.relpath(os.path.join(system_dir, "pack"), ROOT),
-                    "summary": os.path.relpath(
-                        os.path.join(system_dir, "import-summary.yaml"), ROOT
+                    "cdx": _artifact_ref(cdx_files[0]) if cdx_files else None,
+                    "pack": _artifact_ref(os.path.join(system_dir, "pack")),
+                    "summary": _artifact_ref(
+                        os.path.join(system_dir, "import-summary.yaml")
                     ),
                 },
                 "stats": {
@@ -235,7 +252,9 @@ def build_catalog(systems_root: str, vault_root: str) -> dict:
             "version": "1.0",
             "generated_by": "scripts/catalog/build_catalog_index.py",
             "generated_at": datetime.now(UTC).isoformat(),
-            "vault_root": idx.get("vault_root"),
+            # Stable submodule path; never serialize an absolute checkout path
+            # or a worktree-relative traversal into a committed catalog.
+            "vault_root": "vendor/oscal-vault",
             "systems": systems_out,
             "skipped": skipped.get("skipped", []),
         }
