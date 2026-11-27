@@ -49,6 +49,6 @@ canvas_data:
       position: { x: 45, y: 120 }
       data: { label: Managed Data Service, component_ref: managed-cloud-service-data }
   edges:
-    - { id: user-to-platform, source: fcs-user, target: fcs-platform, type: dataFlow, data: { label: Authenticated HTTPS, protocol: HTTPS, encrypted: true } }
-    - { id: platform-to-workload, source: fcs-platform, target: fcs-workload, type: dataFlow, data: { label: Managed ingress, protocol: HTTPS, encrypted: true } }
-    - { id: workload-to-data, source: fcs-workload, target: fcs-data, type: dataFlow, data: { label: TLS data access, protocol: TLS, encrypted: true } }
+    - { id: user-to-platform, source: fcs-user, target: fcs-platform, type: dataFlow, data: { label: Authenticated HTTPS, protocol: HTTPS, encrypted: true, port: 443, authentication: ['Anonymous'] } }
+    - { id: platform-to-workload, source: fcs-platform, target: fcs-workload, type: dataFlow, data: { label: Managed ingress, protocol: HTTPS, encrypted: true, port: 443, authentication: ['pending-consumer-decision'] } }
+    - { id: workload-to-data, source: fcs-workload, target: fcs-data, type: dataFlow, data: { label: TLS data access, protocol: TLS, encrypted: true, port: pending-consumer-decision, authentication: ['pending-consumer-decision'] } }

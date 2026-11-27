@@ -43,6 +43,6 @@ canvas_data:
       position: { x: 215, y: 230 }
       data: { label: AWS KMS, component_ref: kms }
   edges:
-    - { id: client-to-workload, source: aws-client, target: aws-workload, type: dataFlow, data: { label: TLS request, protocol: HTTPS, encrypted: true } }
-    - { id: workload-to-rds, source: aws-workload, target: aws-rds, type: dataFlow, data: { label: TLS database access, protocol: TLS, encrypted: true } }
-    - { id: rds-to-kms, source: aws-rds, target: aws-kms, type: dataFlow, data: { label: Encryption key use, protocol: AWS API, encrypted: true } }
+    - { id: client-to-workload, source: aws-client, target: aws-workload, type: dataFlow, data: { label: TLS request, protocol: HTTPS, encrypted: true, port: 443, authentication: ['pending-consumer-decision'] } }
+    - { id: workload-to-rds, source: aws-workload, target: aws-rds, type: dataFlow, data: { label: TLS database access, protocol: TLS, encrypted: true, port: pending-consumer-decision, authentication: ['pending-consumer-decision'] } }
+    - { id: rds-to-kms, source: aws-rds, target: aws-kms, type: dataFlow, data: { label: Encryption key use, protocol: AWS API, encrypted: true, port: 443, authentication: ['pending-consumer-decision'] } }

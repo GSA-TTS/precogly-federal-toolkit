@@ -43,6 +43,6 @@ canvas_data:
       position: { x: 220, y: 240 }
       data: { label: Azure ML, component_ref: azure-ml }
   edges:
-    - { id: client-to-logic, source: azure-client, target: azure-logic, type: dataFlow, data: { label: TLS ingestion, protocol: HTTPS, encrypted: true } }
-    - { id: logic-to-synapse, source: azure-logic, target: azure-synapse, type: dataFlow, data: { label: Encrypted data load, protocol: HTTPS, encrypted: true } }
-    - { id: synapse-to-ml, source: azure-synapse, target: azure-ml, type: dataFlow, data: { label: Approved analytics data, protocol: HTTPS, encrypted: true } }
+    - { id: client-to-logic, source: azure-client, target: azure-logic, type: dataFlow, data: { label: TLS ingestion, protocol: HTTPS, encrypted: true, port: 443, authentication: ['pending-consumer-decision'] } }
+    - { id: logic-to-synapse, source: azure-logic, target: azure-synapse, type: dataFlow, data: { label: Encrypted data load, protocol: HTTPS, encrypted: true, port: 443, authentication: ['pending-consumer-decision'] } }
+    - { id: synapse-to-ml, source: azure-synapse, target: azure-ml, type: dataFlow, data: { label: Approved analytics data, protocol: HTTPS, encrypted: true, port: 443, authentication: ['pending-consumer-decision'] } }

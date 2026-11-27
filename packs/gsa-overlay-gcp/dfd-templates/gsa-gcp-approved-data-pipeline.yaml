@@ -43,6 +43,6 @@ canvas_data:
       position: { x: 230, y: 240 }
       data: { label: Cloud DLP, component_ref: gcp-dlp }
   edges:
-    - { id: client-to-fusion, source: gcp-client, target: gcp-fusion, type: dataFlow, data: { label: TLS ingestion, protocol: HTTPS, encrypted: true } }
-    - { id: fusion-to-composer, source: gcp-fusion, target: gcp-composer, type: dataFlow, data: { label: Orchestrated data transfer, protocol: HTTPS, encrypted: true } }
-    - { id: composer-to-dlp, source: gcp-composer, target: gcp-dlp, type: dataFlow, data: { label: Sensitive data inspection, protocol: HTTPS, encrypted: true } }
+    - { id: client-to-fusion, source: gcp-client, target: gcp-fusion, type: dataFlow, data: { label: TLS ingestion, protocol: HTTPS, encrypted: true, port: 443, authentication: ['pending-consumer-decision'] } }
+    - { id: fusion-to-composer, source: gcp-fusion, target: gcp-composer, type: dataFlow, data: { label: Orchestrated data transfer, protocol: HTTPS, encrypted: true, port: 443, authentication: ['pending-consumer-decision'] } }
+    - { id: composer-to-dlp, source: gcp-composer, target: gcp-dlp, type: dataFlow, data: { label: Sensitive data inspection, protocol: HTTPS, encrypted: true, port: 443, authentication: ['pending-consumer-decision'] } }

@@ -40,6 +40,16 @@ REQUIRED_CONTENT = {
     "threats.yaml": "threats",
     "countermeasures.yaml": "countermeasures",
 }
+DFD_EDGE_DATA_KEYS = {
+    "authentication",
+    "data_classification",
+    "description",
+    "encrypted",
+    "label",
+    "port",
+    "protocol",
+}
+PENDING_CONSUMER_DECISION = "pending-consumer-decision"
 
 
 def load_yaml(path: Path) -> dict:
@@ -252,6 +262,56 @@ def validate_offerings(pack_dir: Path) -> list[str]:
     return errors
 
 
+def validate_dfd_templates(pack_dir: Path) -> list[str]:
+    """Validate reusable DFD edge contract fields and reject parsed stray keys."""
+    errors: list[str] = []
+    for path in sorted((pack_dir / "dfd-templates").glob("*.yaml")):
+        try:
+            edges = load_yaml(path).get("canvas_data", {}).get("edges", [])
+        except (OSError, ValueError, yaml.YAMLError) as exc:
+            errors.append(format_error(path, f"invalid YAML: {exc}"))
+            continue
+        if not isinstance(edges, list):
+            errors.append(format_error(path, "canvas_data.edges must be a list"))
+            continue
+        for index, edge in enumerate(edges):
+            if not isinstance(edge, dict):
+                errors.append(format_error(path, f"edge {index} must be a mapping"))
+                continue
+            edge_id = edge.get("id", index)
+            data = edge.get("data")
+            if not isinstance(data, dict):
+                errors.append(format_error(path, f"edge {edge_id}.data must be a mapping"))
+                continue
+            unknown = sorted(set(data) - DFD_EDGE_DATA_KEYS)
+            if unknown:
+                errors.append(
+                    format_error(
+                        path,
+                        f"edge {edge_id}: unknown data key(s): {', '.join(unknown)}",
+                    )
+                )
+            if not isinstance(data.get("port"), (int, str)) or not str(
+                data.get("port")
+            ).strip():
+                errors.append(format_error(path, f"edge {edge_id}: missing port"))
+            authentication = data.get("authentication")
+            if not isinstance(authentication, list) or not authentication or not all(
+                isinstance(item, str) and item.strip() for item in authentication
+            ):
+                errors.append(
+                    format_error(path, f"edge {edge_id}: authentication must be a non-empty list")
+                )
+            if PENDING_CONSUMER_DECISION in (authentication or []) and len(authentication) != 1:
+                errors.append(
+                    format_error(
+                        path,
+                        f"edge {edge_id}: pending authentication cannot be combined with another value",
+                    )
+                )
+    return errors
+
+
 def validate_pack(path: Path, validator: Draft202012Validator) -> list[str]:
     errors: list[str] = []
     try:
@@ -268,6 +328,7 @@ def validate_pack(path: Path, validator: Draft202012Validator) -> list[str]:
     errors.extend(validate_icon_map(path.parent, data))
     errors.extend(validate_service_descriptors(path.parent))
     errors.extend(validate_offerings(path.parent))
+    errors.extend(validate_dfd_templates(path.parent))
     return errors
 
 

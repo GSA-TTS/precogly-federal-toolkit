@@ -155,6 +155,8 @@ canvas_data:
         label: HTTPS
         protocol: HTTPS
         encrypted: true
+        port: 443
+        authentication: ['Anonymous']
     - id: cdn-to-app
       source: cloudgov-cdn
       target: cloudgov-app
@@ -163,6 +165,8 @@ canvas_data:
         label: HTTPS
         protocol: HTTPS
         encrypted: true
+        port: 443
+        authentication: ['pending-consumer-decision']
     - id: app-to-rds
       source: cloudgov-app
       target: cloudgov-rds
@@ -171,6 +175,8 @@ canvas_data:
         label: TLS database connection
         protocol: TLS
         encrypted: true
+        port: pending-consumer-decision
+        authentication: ['pending-consumer-decision']
     - id: app-to-object-store
       source: cloudgov-app
       target: cloudgov-object-store
@@ -179,6 +185,8 @@ canvas_data:
         label: TLS object access
         protocol: HTTPS
         encrypted: true
+        port: 443
+        authentication: ['pending-consumer-decision']
     - id: app-to-redis
       source: cloudgov-app
       target: cloudgov-redis
@@ -187,6 +195,8 @@ canvas_data:
         label: TLS cache connection
         protocol: TLS
         encrypted: true
+        port: pending-consumer-decision
+        authentication: ['pending-consumer-decision']
     - id: source-to-manifest
       source: source-repository
       target: cloudgov-manifest
@@ -195,6 +205,8 @@ canvas_data:
         label: Reviewed source and manifest
         protocol: Git/HTTPS
         encrypted: true
+        port: 443
+        authentication: ['pending-consumer-decision']
     - id: manifest-to-buildpack
       source: cloudgov-manifest
       target: cloudgov-buildpack
@@ -203,6 +215,8 @@ canvas_data:
         label: Buildpack declaration
         protocol: Cloud Foundry API
         encrypted: true
+        port: pending-consumer-decision
+        authentication: ['pending-consumer-decision']
     - id: buildpack-to-app
       source: cloudgov-buildpack
       target: cloudgov-app
@@ -211,3 +225,5 @@ canvas_data:
         label: Staged application
         protocol: Cloud Foundry API
         encrypted: true
+        port: pending-consumer-decision
+        authentication: ['pending-consumer-decision']
