@@ -67,8 +67,8 @@ canvas_data:
       position: { x: 25, y: 135 }
       data: { label: Bounded Response Automation, component_ref: m26-response }
   edges:
-    - { id: sources-to-collection, source: sources, target: collection, type: dataFlow, data: { label: Structured events, protocol: TLS, encrypted: true } }
-    - { id: collection-to-cem, source: collection, target: cem, type: dataFlow, data: { label: Validated and enriched events, protocol: TLS, encrypted: true } }
-    - { id: cem-to-thirf, source: cem, target: thirf, type: dataFlow, data: { label: Alerts and searchable evidence, protocol: HTTPS, encrypted: true } }
-    - { id: thirf-to-response, source: thirf, target: response, type: dataFlow, data: { label: Approved response request, protocol: HTTPS, encrypted: true } }
-    - { id: response-to-cem, source: response, target: cem, type: dataFlow, data: { label: Auditable response outcome, protocol: HTTPS, encrypted: true } }
+    - { id: sources-to-collection, source: sources, target: collection, type: dataFlow, data: { label: Structured events, protocol: TLS, encrypted: true, port: pending-consumer-decision, authentication: ['pending-consumer-decision'] } }
+    - { id: collection-to-cem, source: collection, target: cem, type: dataFlow, data: { label: Validated and enriched events, protocol: TLS, encrypted: true, port: pending-consumer-decision, authentication: ['pending-consumer-decision'] } }
+    - { id: cem-to-thirf, source: cem, target: thirf, type: dataFlow, data: { label: Alerts and searchable evidence, protocol: HTTPS, encrypted: true, port: 443, authentication: ['pending-consumer-decision'] } }
+    - { id: thirf-to-response, source: thirf, target: response, type: dataFlow, data: { label: Approved response request, protocol: HTTPS, encrypted: true, port: 443, authentication: ['pending-consumer-decision'] } }
+    - { id: response-to-cem, source: response, target: cem, type: dataFlow, data: { label: Auditable response outcome, protocol: HTTPS, encrypted: true, port: 443, authentication: ['pending-consumer-decision'] } }

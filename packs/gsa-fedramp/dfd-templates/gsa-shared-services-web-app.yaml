@@ -54,6 +54,6 @@ canvas_data:
       position: { x: 45, y: 235 }
       data: { label: GitHub Enterprise, component_ref: github-enterprise }
   edges:
-    - { id: user-to-pages, source: gsa-external-user, target: gsa-pages, type: dataFlow, data: { label: HTTPS, protocol: HTTPS, encrypted: true } }
-    - { id: pages-to-login, source: gsa-pages, target: gsa-login, type: dataFlow, data: { label: OIDC authentication, protocol: HTTPS, encrypted: true } }
-    - { id: github-to-pages, source: gsa-github, target: gsa-pages, type: dataFlow, data: { label: Reviewed deployment, protocol: HTTPS, encrypted: true } }
+    - { id: user-to-pages, source: gsa-external-user, target: gsa-pages, type: dataFlow, data: { label: HTTPS, protocol: HTTPS, encrypted: true, port: 443, authentication: ['Anonymous'] } }
+    - { id: pages-to-login, source: gsa-pages, target: gsa-login, type: dataFlow, data: { label: OIDC authentication, protocol: HTTPS, encrypted: true, port: 443, authentication: ['OIDC'] } }
+    - { id: github-to-pages, source: gsa-github, target: gsa-pages, type: dataFlow, data: { label: Reviewed deployment, protocol: HTTPS, encrypted: true, port: 443, authentication: ['Signed webhook (HMAC)'] } }

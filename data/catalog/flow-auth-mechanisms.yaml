@@ -25,10 +25,14 @@ allowed:
   - Session cookie
   - session cookie
 warn:
+  pending-consumer-decision: Reusable topology does not establish this authentication mechanism; the consuming system must resolve it before authorization evidence or deployment.
   Anonymous: Use only for intentionally public unauthenticated flows; document the compensating boundary control before release.
   Basic auth: Deprecated for new flows; prefer OIDC, SAML, PIV/CAC, mTLS, or another phishing-resistant mechanism.
   Basic auth (deprecated): Deprecated for new flows; prefer OIDC, SAML, PIV/CAC, mTLS, or another phishing-resistant mechanism.
 metadata:
+  pending-consumer-decision:
+    description: Authentication is intentionally unresolved in a reusable topology and must be specified by the consuming system.
+    nist: []
   GSAuth via cloud.gov UAA:
     description: Browser SSO through cloud.gov UAA federated to GSA SecureAuth / GSAuth.
     nist: [IA-2, IA-8]

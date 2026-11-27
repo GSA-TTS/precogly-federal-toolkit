@@ -54,8 +54,8 @@ canvas_data:
       position: { x: 45, y: 150 }
       data: { label: Edge Security Logs, component_ref: cloudflare-logging }
   edges:
-    - { id: user-to-edge, source: public-user, target: edge, type: dataFlow, data: { label: HTTPS request, protocol: HTTPS, encrypted: true } }
-    - { id: edge-to-app, source: edge, target: app, type: dataFlow, data: { label: Protected origin request, protocol: HTTPS, encrypted: true } }
-    - { id: user-to-access, source: public-user, target: access, type: dataFlow, data: { label: Federated authentication, protocol: HTTPS, encrypted: true } }
-    - { id: access-to-app, source: access, target: app, type: dataFlow, data: { label: Authorized request, protocol: HTTPS, encrypted: true } }
-    - { id: edge-to-logs, source: edge, target: logs, type: dataFlow, data: { label: Request and security events, protocol: HTTPS, encrypted: true } }
+    - { id: user-to-edge, source: public-user, target: edge, type: dataFlow, data: { label: HTTPS request, protocol: HTTPS, encrypted: true, port: 443, authentication: ['Anonymous'] } }
+    - { id: edge-to-app, source: edge, target: app, type: dataFlow, data: { label: Protected origin request, protocol: HTTPS, encrypted: true, port: 443, authentication: ['pending-consumer-decision'] } }
+    - { id: user-to-access, source: public-user, target: access, type: dataFlow, data: { label: Federated authentication, protocol: HTTPS, encrypted: true, port: 443, authentication: ['SAML 2.0'] } }
+    - { id: access-to-app, source: access, target: app, type: dataFlow, data: { label: Authorized request, protocol: HTTPS, encrypted: true, port: 443, authentication: ['Session cookie'] } }
+    - { id: edge-to-logs, source: edge, target: logs, type: dataFlow, data: { label: Request and security events, protocol: HTTPS, encrypted: true, port: 443, authentication: ['pending-consumer-decision'] } }

@@ -164,6 +164,8 @@ canvas_data:
         label: HTTPS
         protocol: HTTPS
         encrypted: true
+        port: 443
+        authentication: ['Anonymous']
     - id: cdn-to-app
       source: cloudgov-cdn
       target: cloudgov-app
@@ -172,6 +174,8 @@ canvas_data:
         label: HTTPS
         protocol: HTTPS
         encrypted: true
+        port: 443
+        authentication: ['pending-consumer-decision']
     - id: app-to-rds
       source: cloudgov-app
       target: cloudgov-rds
@@ -180,6 +184,8 @@ canvas_data:
         label: TLS database connection
         protocol: TLS
         encrypted: true
+        port: pending-consumer-decision
+        authentication: ['pending-consumer-decision']
     - id: app-to-object-store
       source: cloudgov-app
       target: cloudgov-object-store
@@ -188,6 +194,8 @@ canvas_data:
         label: TLS object access
         protocol: HTTPS
         encrypted: true
+        port: 443
+        authentication: ['pending-consumer-decision']
     - id: app-to-redis
       source: cloudgov-app
       target: cloudgov-redis
@@ -196,6 +204,8 @@ canvas_data:
         label: TLS cache connection
         protocol: TLS
         encrypted: true
+        port: pending-consumer-decision
+        authentication: ['pending-consumer-decision']
     - id: source-to-container-manifest
       source: source-repository
       target: cloudgov-manifest
@@ -204,6 +214,8 @@ canvas_data:
         label: Reviewed manifest
         protocol: Git/HTTPS
         encrypted: true
+        port: 443
+        authentication: ['pending-consumer-decision']
     - id: registry-to-image
       source: cloudgov-registry
       target: cloudgov-image
@@ -212,6 +224,8 @@ canvas_data:
         label: Reviewed OCI image
         protocol: HTTPS
         encrypted: true
+        port: 443
+        authentication: ['pending-consumer-decision']
     - id: manifest-to-app
       source: cloudgov-manifest
       target: cloudgov-app
@@ -220,6 +234,8 @@ canvas_data:
         label: Deployment declaration
         protocol: Cloud Foundry API
         encrypted: true
+        port: pending-consumer-decision
+        authentication: ['pending-consumer-decision']
     - id: image-to-app
       source: cloudgov-image
       target: cloudgov-app
@@ -228,3 +244,5 @@ canvas_data:
         label: Immutable image deployment
         protocol: Cloud Foundry API
         encrypted: true
+        port: pending-consumer-decision
+        authentication: ['pending-consumer-decision']

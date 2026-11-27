@@ -85,18 +85,18 @@ canvas_data:
       position: { x: 45, y: 240 }
       data: { label: Production Object Storage, component_ref: cloudgov-s3 }
   edges:
-    - { id: manager-to-github-admin, source: website-manager, target: github-admin, type: dataFlow, data: { label: Administer users, teams, and branch protection, protocol: HTTPS, encrypted: true } }
+    - { id: manager-to-github-admin, source: website-manager, target: github-admin, type: dataFlow, data: { label: 'Administer users, teams, and branch protection', protocol: HTTPS, encrypted: true, port: 443, authentication: ['pending-consumer-decision'] } }
     - {
         id: github-admin-to-source,
         source: github-admin,
         target: source-repository,
         type: dataFlow,
-        data: { label: Peer review, branch protection, and CodeQL/Dependabot CI gates, protocol: HTTPS, encrypted: true },
+        data: { label: 'Peer review, branch protection, and CodeQL/Dependabot CI gates', protocol: HTTPS, encrypted: true, port: 443, authentication: ['pending-consumer-decision'] },
       }
-    - { id: source-to-pages-web, source: source-repository, target: cloudgov-pages-web, type: dataFlow, data: { label: Webhook and revision identifier, protocol: HTTPS, encrypted: true } }
-    - { id: pages-web-to-builder, source: cloudgov-pages-web, target: cloudgov-pages-builder, type: dataFlow, data: { label: Build job dispatch, protocol: Cloud Foundry API, encrypted: true } }
-    - { id: builder-to-preview-storage, source: cloudgov-pages-builder, target: cloudgov-preview-s3, type: dataFlow, data: { label: Preview static assets, protocol: HTTPS, encrypted: true } }
-    - { id: builder-to-production-storage, source: cloudgov-pages-builder, target: cloudgov-production-s3, type: dataFlow, data: { label: Published static assets, protocol: HTTPS, encrypted: true } }
-    - { id: user-to-cdn, source: internet-user, target: cloudgov-cdn, type: dataFlow, data: { label: HTTPS GET, protocol: HTTPS, encrypted: true } }
-    - { id: cdn-to-pages-proxy, source: cloudgov-cdn, target: cloudgov-pages-proxy, type: dataFlow, data: { label: HTTPS origin request, protocol: HTTPS, encrypted: true } }
-    - { id: pages-proxy-to-production-storage, source: cloudgov-pages-proxy, target: cloudgov-production-s3, type: dataFlow, data: { label: Static object fetch, protocol: HTTPS, encrypted: true } }
+    - { id: source-to-pages-web, source: source-repository, target: cloudgov-pages-web, type: dataFlow, data: { label: Webhook and revision identifier, protocol: HTTPS, encrypted: true, port: 443, authentication: ['pending-consumer-decision'] } }
+    - { id: pages-web-to-builder, source: cloudgov-pages-web, target: cloudgov-pages-builder, type: dataFlow, data: { label: Build job dispatch, protocol: Cloud Foundry API, encrypted: true, port: pending-consumer-decision, authentication: ['pending-consumer-decision'] } }
+    - { id: builder-to-preview-storage, source: cloudgov-pages-builder, target: cloudgov-preview-s3, type: dataFlow, data: { label: Preview static assets, protocol: HTTPS, encrypted: true, port: 443, authentication: ['pending-consumer-decision'] } }
+    - { id: builder-to-production-storage, source: cloudgov-pages-builder, target: cloudgov-production-s3, type: dataFlow, data: { label: Published static assets, protocol: HTTPS, encrypted: true, port: 443, authentication: ['pending-consumer-decision'] } }
+    - { id: user-to-cdn, source: internet-user, target: cloudgov-cdn, type: dataFlow, data: { label: HTTPS GET, protocol: HTTPS, encrypted: true, port: 443, authentication: ['Anonymous'] } }
+    - { id: cdn-to-pages-proxy, source: cloudgov-cdn, target: cloudgov-pages-proxy, type: dataFlow, data: { label: HTTPS origin request, protocol: HTTPS, encrypted: true, port: 443, authentication: ['pending-consumer-decision'] } }
+    - { id: pages-proxy-to-production-storage, source: cloudgov-pages-proxy, target: cloudgov-production-s3, type: dataFlow, data: { label: Static object fetch, protocol: HTTPS, encrypted: true, port: 443, authentication: ['pending-consumer-decision'] } }

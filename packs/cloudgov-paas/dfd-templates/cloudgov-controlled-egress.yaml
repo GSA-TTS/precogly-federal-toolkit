@@ -55,7 +55,7 @@ canvas_data:
       position: { x: 80, y: 180 }
       data: { label: Approved External API, component_ref: cloudgov-approved-external-api }
   edges:
-    - { id: policy-to-proxy, source: policy, target: proxy, type: dataFlow, data: { label: Reviewed allow and deny policy, protocol: HTTPS, encrypted: true } }
-    - { id: client-to-network-policy, source: client, target: network-policy, type: dataFlow, data: { label: Authorized internal route request, protocol: HTTPS, encrypted: true } }
-    - { id: network-policy-to-proxy, source: network-policy, target: proxy, type: dataFlow, data: { label: Allowed client connection, protocol: TCP, encrypted: true } }
-    - { id: proxy-to-external, source: proxy, target: external-service, type: dataFlow, data: { label: Allowlisted outbound request, protocol: HTTPS, encrypted: true } }
+    - { id: policy-to-proxy, source: policy, target: proxy, type: dataFlow, data: { label: Reviewed allow and deny policy, protocol: HTTPS, encrypted: true, port: 443, authentication: ['pending-consumer-decision'] } }
+    - { id: client-to-network-policy, source: client, target: network-policy, type: dataFlow, data: { label: Authorized internal route request, protocol: HTTPS, encrypted: true, port: 443, authentication: ['pending-consumer-decision'] } }
+    - { id: network-policy-to-proxy, source: network-policy, target: proxy, type: dataFlow, data: { label: Allowed client connection, protocol: TCP, encrypted: true, port: pending-consumer-decision, authentication: ['pending-consumer-decision'] } }
+    - { id: proxy-to-external, source: proxy, target: external-service, type: dataFlow, data: { label: Allowlisted outbound request, protocol: HTTPS, encrypted: true, port: 443, authentication: ['pending-consumer-decision'] } }
